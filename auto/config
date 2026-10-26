@@ -1,0 +1,23 @@
+#!/bin/sh
+# live-build config for TetronOS. EDITION selects the variant (server|regular).
+set -e
+EDITION="${EDITION:-server}"
+
+APPEND="boot=live components username=tetron hostname=tetron locales=en_US.UTF-8 keyboard-layouts=us"
+case "$EDITION" in
+	server)  APPEND="$APPEND console=tty0 console=ttyS0,115200n8"; FW=false ;;
+	regular) APPEND="$APPEND quiet"; FW=true ;;
+	*) echo "unknown EDITION: $EDITION" >&2; exit 1 ;;
+esac
+
+lb config noauto \
+	--distribution trixie --architectures amd64 \
+	--archive-areas "main contrib non-free-firmware" \
+	--binary-images iso-hybrid --bootloaders "grub-efi,syslinux" \
+	--debian-installer none --firmware-chroot "$FW" --memtest none \
+	--debootstrap-options "--variant=minbase" \
+	--apt-indices false --apt-recommends false \
+	--iso-application TetronOS --iso-volume "TETRONOS" --iso-publisher TetronOS \
+	--bootappend-live "$APPEND" \
+	--chroot-squashfs-compression-type xz \
+	"${@}"
