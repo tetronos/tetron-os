@@ -21,5 +21,6 @@ mkdir -p "$OUTDIR"
 ISO=$(ls -1 live-image-*.iso | head -1)
 OUT="$OUTDIR/tetronos-$EDITION-$(date +%Y%m%d)-amd64.iso"
 cp "$ISO" "$OUT"
+cp binary/live/filesystem.packages "${OUT%.iso}.packages"
 ls -l "$OUT"
 chown -R "${HOST_UID:-0}:${HOST_GID:-0}" "$OUTDIR" "$WORK"

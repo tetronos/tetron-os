@@ -42,3 +42,10 @@ endif
 
 distclean:
 	rm -rf out
+
+.PHONY: debs test-debs
+debs:
+	python3 packaging/build.py
+
+test-debs: debs
+	sh packaging/tests/test-debs.sh

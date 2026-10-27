@@ -3,3 +3,7 @@ build/
 out/
 *.iso
 *.log
+packaging/out/
+packaging/cache/
+__pycache__/
+*.pyc
