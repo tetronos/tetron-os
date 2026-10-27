@@ -80,7 +80,8 @@ def check_editions() -> dict:
 def check_legacy_name() -> dict:
     hits = []
     for f in tracked():
-        if f == "reconcile.py" or f.startswith("spec/"):
+        # The spec and its libspec snapshot store name the retired word on purpose (CON-T06).
+        if f == "reconcile.py" or f.startswith("spec/") or f.startswith(".libspec/"):
             continue
         try:
             if re.search(r"tuiui", Path(f).read_text(errors="ignore"), re.I):
