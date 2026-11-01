@@ -48,4 +48,5 @@ debs:
 	python3 packaging/build.py
 
 test-debs: debs
+	python3 packaging/tests/test_build.py
 	sh packaging/tests/test-debs.sh
