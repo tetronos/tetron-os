@@ -90,7 +90,42 @@ class PackagingConsumesReleaseDebs(Requirement):
 
 
 class SuiteDebsFromReleases(Requirement):
-    """The manifest takes tetron, tetron-tui, tetron-wm, tetron-wm-desktop
-    and tetron-wm-extras from their published release debs, all at the same
-    tetron minor. tetron-wm-desktop and tetron-wm-extras are Architecture:
-    all metapackages; packaging/tests installs them without Recommends."""
+    """The manifest takes tetron, tetron-tui, tetron-wm, tetron-wm-desktop,
+    tetron-wm-extras, tetron-webui and tetron-messageboard from their
+    published release debs, all at the same tetron minor. tetron-wm-desktop
+    and tetron-wm-extras are Architecture: all metapackages; packaging/tests
+    installs them without Recommends."""
+
+
+class MetapackagesBuiltHere(Requirement):
+    """A kind = "meta" manifest entry is a metapackage built by
+    packaging/build.py from the manifest alone: Architecture all, no
+    download, Depends and Recommends taken from the entry, and no payload
+    except /usr/share/doc/<name>/copyright, which states that the package
+    has no content of its own. Its version is the tetron minor release the
+    image tracks, with a Debian revision (for example 0.15.0-1). It is
+    reproducible like every other package built here."""
+
+
+class TetronosCoreMeta(Requirement):
+    """tetronos-core is the Server edition package set: it Depends on
+    tetron, tetron-tui, tetron-wm, openssh-server and network-manager.
+    It does not pull tetron-wm-desktop, so Recommends of the desktop app
+    list never reach the Server image. kmscon, its libtsm4, the symbols
+    font and tetron-install are added when they have packages (M2, M5)."""
+
+
+class TetronosSuiteMeta(Requirement):
+    """tetronos-suite is the full suite: it Depends on tetronos-core,
+    tetron-wm-extras (which pulls tetron-wm-desktop and its app list as
+    Recommends), tetron-webui and tetron-messageboard. tetron-sync-receiver
+    and tetron-scripts are added when they publish release debs.
+    tetron-hosts and tetron-systray are not part of it."""
+
+
+class MetapackagesInstallFromRepo(Requirement):
+    """packaging/tests builds a local apt repository from packaging/out/ in
+    a fresh debian:trixie container, installs tetronos-suite from it without
+    Recommends, and checks that every package named in the Depends of
+    tetronos-core and tetronos-suite is installed. Removing tetronos-suite
+    and tetronos-core then removes no other package."""

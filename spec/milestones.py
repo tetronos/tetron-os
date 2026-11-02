@@ -9,7 +9,9 @@ class M0RepoAndBuildHost(Requirement):
 class M1Packages(Requirement):
     """Milestone M1 acceptance: Every tetron suite component and addon has a
     .deb that installs cleanly in a debian:trixie container; metapackages
-    tetronos-core, tetronos-suite and tetronos-live-config exist."""
+    tetronos-core and tetronos-suite exist. tetronos-live-config (live
+    autologin and sudo) is part of M2, because it depends on the console
+    stack that M2 settles."""
 
 
 class M2BareLiveIso(Requirement):
