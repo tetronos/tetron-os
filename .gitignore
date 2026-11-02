@@ -7,3 +7,4 @@ packaging/out/
 packaging/cache/
 __pycache__/
 *.pyc
+.libspec/cache/
