@@ -1,0 +1,62 @@
+# Single source of truth for the TetronOS .debs. See spec/packaging.py.
+# Maintainer is a placeholder until USER decides (plan open item 6).
+source_date_epoch = 1792998000
+maintainer = "TetronOS <noreply@tetron.invalid>"
+
+[[package]]
+name = "tetron"
+version = "0.14.3"
+revision = "1"
+arch = "amd64"
+section = "net"
+license = "MPL-2.0"
+homepage = "https://github.com/ErikAllanKincaid/tetron"
+description = "P2P mesh VPN powered by iroh"
+long_description = """
+tetron connects machines into a private mesh network by cryptographic
+identity. This package carries the daemon and CLI (static musl build).
+The service is installed disabled; enable it with: systemctl enable --now tetron.
+The node identity is created on the first daemon start, not at install time."""
+depends = ["iproute2"]
+smoke = "tetron --version"
+
+[package.source]
+url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.14.3/tetron-linux-x86_64-musl"
+sha256_url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.14.3/tetron-linux-x86_64-musl.sha256"
+
+[[package.files]]
+src = "asset"
+dst = "usr/bin/tetron"
+mode = "0755"
+
+[[package.files]]
+src = "files/tetron/tetron.service"
+dst = "usr/lib/systemd/system/tetron.service"
+mode = "0644"
+
+[package.scripts]
+postinst = "files/tetron/postinst"
+
+[[package]]
+name = "tetron-tui"
+version = "0.14.2"
+revision = "1"
+arch = "amd64"
+section = "net"
+license = "MPL-2.0"
+homepage = "https://github.com/ErikAllanKincaid/tetron-tui"
+description = "Interactive terminal UI for the tetron mesh VPN"
+long_description = """
+Terminal dashboard for the tetron daemon: networks, peers, transport and
+history, with mouse support. Talks to the tetron daemon over its Unix socket."""
+depends = ["libc6 (>= 2.34)", "libgcc-s1", "tetron"]
+smoke = "tetron-tui --version"
+
+[package.source]
+url = "https://github.com/ErikAllanKincaid/tetron-tui/releases/download/v0.14.2/tetron-tui-linux-x86_64"
+sha256_url = "https://github.com/ErikAllanKincaid/tetron-tui/releases/download/v0.14.2/tetron-tui-linux-x86_64.sha256"
+
+[[package.files]]
+src = "asset"
+dst = "usr/bin/tetron-tui"
+mode = "0755"

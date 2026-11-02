@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""Build the TetronOS .debs from packaging/manifest.toml. Stdlib + dpkg-deb only.
+
+Usage: build.py [--only NAME] [--out DIR] [--list-tests]
+"""
+import argparse
+import hashlib
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import tomllib
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+
+
+def die(msg: str) -> None:
+    print(f"build.py: error: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+
+def sha256_of(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def fetch(url: str, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    print(f"  download {url}")
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r, tmp.open("wb") as f:
+            shutil.copyfileobj(r, f)
+    except OSError as e:
+        die(f"cannot download {url}: {e}")
+    tmp.replace(dest)
+
+
+def expected_sha(src: dict) -> str:
+    if src.get("sha256"):
+        return src["sha256"].lower()
+    try:
+        with urllib.request.urlopen(src["sha256_url"], timeout=30) as r:
+            return r.read().decode().split()[0].lower()
+    except (OSError, IndexError) as e:
+        die(f"cannot read checksum {src['sha256_url']}: {e}")
+
+
+def get_asset(pkg: dict) -> Path:
+    src = pkg["source"]
+    name = pkg["name"]
+    dest = HERE / "cache" / f"{name}-{pkg['version']}-{Path(src['url']).name}"
+    want = expected_sha(src)
+    if dest.exists() and sha256_of(dest) != want:
+        print(f"  cached {dest.name} fails checksum, re-downloading")
+        dest.unlink()
+    if not dest.exists():
+        fetch(src["url"], dest)
+    got = sha256_of(dest)
+    if got != want:
+        dest.unlink()
+        die(f"{name}: sha256 mismatch for {src['url']}: expected {want}, got {got}")
+    return dest
+
+
+def control(pkg: dict, maintainer: str, size_kib: int) -> str:
+    desc = pkg["description"]
+    longd = "\n".join(" " + (l if l.strip() else ".") for l in pkg.get("long_description", "").strip().splitlines())
+    fields = [
+        ("Package", pkg["name"]),
+        ("Version", f"{pkg['version']}-{pkg['revision']}"),
+        ("Architecture", pkg["arch"]),
+        ("Maintainer", maintainer),
+        ("Installed-Size", str(size_kib)),
+        ("Depends", ", ".join(pkg.get("depends", []))),
+        ("Section", pkg.get("section", "misc")),
+        ("Priority", pkg.get("priority", "optional")),
+        ("Homepage", pkg.get("homepage", "")),
+    ]
+    out = "".join(f"{k}: {v}\n" for k, v in fields if v)
+    return out + f"Description: {desc}\n" + (longd + "\n" if longd else "")
+
+
+def copyright_text(pkg: dict) -> str:
+    return (f"Upstream: {pkg.get('homepage', '')}\n"
+            f"License: {pkg['license']}\n"
+            f"The full license text is in /usr/share/common-licenses/{pkg['license']}.\n")
+
+
+def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
+    name = pkg["name"]
+    print(f"{name} {pkg['version']}-{pkg['revision']}")
+    asset = get_asset(pkg)
+    with tempfile.TemporaryDirectory() as td:
+        stage = Path(td) / "stage"
+        for f in pkg["files"]:
+            src = asset if f["src"] == "asset" else HERE / f["src"]
+            if not src.exists():
+                die(f"{name}: missing file {src}")
+            dst = stage / f["dst"]
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(src, dst)
+            dst.chmod(int(f["mode"], 8))
+        doc = stage / "usr/share/doc" / name / "copyright"
+        doc.parent.mkdir(parents=True, exist_ok=True)
+        doc.write_text(copyright_text(pkg))
+        doc.chmod(0o644)
+        files = sorted(p for p in stage.rglob("*") if p.is_file())
+        size_kib = (sum(p.stat().st_size for p in files) + 1023) // 1024
+        deb = stage / "DEBIAN"
+        deb.mkdir()
+        (deb / "control").write_text(control(pkg, top["maintainer"], size_kib))
+        (deb / "md5sums").write_text("".join(
+            f"{hashlib.md5(p.read_bytes()).hexdigest()}  {p.relative_to(stage)}\n" for p in files))
+        for script, path in pkg.get("scripts", {}).items():
+            dst = deb / script
+            shutil.copyfile(HERE / path, dst)
+            dst.chmod(0o755)
+        for p in [stage, *stage.rglob("*")]:
+            os.utime(p, (epoch, epoch), follow_symlinks=False)
+            if p.is_dir():
+                p.chmod(0o755)
+        out.mkdir(parents=True, exist_ok=True)
+        target = out / f"{name}_{pkg['version']}-{pkg['revision']}_{pkg['arch']}.deb"
+        env = dict(os.environ, SOURCE_DATE_EPOCH=str(epoch))
+        r = subprocess.run(["dpkg-deb", "--root-owner-group", "-Zxz", "--build", str(stage), str(target)],
+                           env=env, capture_output=True, text=True)
+        if r.returncode:
+            die(f"{name}: dpkg-deb failed:\n{r.stderr}")
+    print(f"  -> {target} ({target.stat().st_size // 1024} KiB)")
+    return target
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--only", help="build only this package")
+    ap.add_argument("--out", default=str(HERE / "out"))
+    ap.add_argument("--list-tests", action="store_true", help="print 'name|smoke command' lines")
+    a = ap.parse_args()
+    top = tomllib.loads((HERE / "manifest.toml").read_text())
+    pkgs = [p for p in top["package"] if not a.only or p["name"] == a.only]
+    if not pkgs:
+        die(f"no such package: {a.only}")
+    if a.list_tests:
+        for p in pkgs:
+            print(f"{p['name']}|{p['version']}-{p['revision']}|{p.get('smoke', '')}")
+        return
+    epoch = int(os.environ.get("SOURCE_DATE_EPOCH", top["source_date_epoch"]))
+    for p in pkgs:
+        build_one(p, top, Path(a.out), epoch)
+
+
+if __name__ == "__main__":
+    main()
