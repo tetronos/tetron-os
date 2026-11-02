@@ -1,5 +1,6 @@
 # Single source of truth for the TetronOS .debs. See spec/packaging.py.
 # kind = "deb": the component's release .deb, verified and used unchanged.
+# kind = "meta": a metapackage built here from the entry alone (no download).
 # Other packages are built here from a release binary (none at the moment);
 # their Maintainer is the placeholder below until USER decides (plan open item 6).
 source_date_epoch = 1792998000
@@ -62,3 +63,59 @@ arch = "all"
 [package.source]
 url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm-extras_0.15.0-1_all.deb"
 sha256_url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm-extras_0.15.0-1_all.deb.sha256"
+
+[[package]]
+name = "tetron-webui"
+kind = "deb"
+version = "0.15.0"
+revision = "1"
+arch = "amd64"
+smoke = "tetron-webui --version"
+
+[package.source]
+url = "https://github.com/ErikAllanKincaid/tetron-webui/releases/download/v0.15.0/tetron-webui_0.15.0-1_amd64.deb"
+sha256_url = "https://github.com/ErikAllanKincaid/tetron-webui/releases/download/v0.15.0/tetron-webui_0.15.0-1_amd64.deb.sha256"
+
+[[package]]
+name = "tetron-messageboard"
+kind = "deb"
+version = "0.15.0"
+revision = "1"
+arch = "amd64"
+smoke = "tetron-messageboard --version"
+
+[package.source]
+url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb"
+sha256_url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb.sha256"
+
+[[package]]
+name = "tetronos-core"
+kind = "meta"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "metapackages"
+description = "TetronOS Server edition package set"
+long_description = """
+Installs the tetron mesh VPN (daemon and CLI), its terminal dashboard
+tetron-tui, the tetron-wm terminal window manager, an SSH server and
+NetworkManager. Desktop apps are not included: see tetronos-suite.
+"""
+depends = ["tetron (>= 0.15)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
+           "openssh-server", "network-manager"]
+
+[[package]]
+name = "tetronos-suite"
+kind = "meta"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "metapackages"
+description = "TetronOS with the full tetron suite"
+long_description = """
+Installs tetronos-core, tetron-wm-extras (tetron-wm-desktop and the
+terminal apps that tetron-wm features use), the tetron web dashboard
+tetron-webui and its message board addon tetron-messageboard.
+"""
+depends = ["tetronos-core (= 0.15.0-1)", "tetron-wm-extras (>= 0.15)",
+           "tetron-webui (>= 0.15)", "tetron-messageboard (>= 0.15)"]

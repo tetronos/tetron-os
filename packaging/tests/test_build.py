@@ -32,5 +32,41 @@ class DebTarget(unittest.TestCase):
         self.assertEqual(build.deb_filename(PKG), "tetron_0.15.0-1_amd64.deb")
 
 
+META = {"name": "tetronos-core", "kind": "meta", "version": "0.15.0", "revision": "1", "arch": "all",
+        "description": "TetronOS core", "depends": ["tetron (>= 0.15)", "openssh-server"],
+        "recommends": ["htop"]}
+TOP = {"maintainer": "TetronOS <noreply@tetron.invalid>"}
+
+
+class MetaControl(unittest.TestCase):
+    def test_depends_and_recommends(self):
+        c = build.control(META, TOP["maintainer"], 1)
+        self.assertIn("Depends: tetron (>= 0.15), openssh-server\n", c)
+        self.assertIn("Recommends: htop\n", c)
+        self.assertIn("Architecture: all\n", c)
+
+    def test_meta_copyright_says_no_content(self):
+        self.assertIn("no content of its own", build.copyright_text(META))
+
+
+class MetaBuild(unittest.TestCase):
+    def test_builds_without_download_and_only_ships_copyright(self):
+        import subprocess, tempfile
+        with tempfile.TemporaryDirectory() as td:
+            deb = build.build_one(META, TOP, Path(td), 1792998000)
+            self.assertEqual(deb.name, "tetronos-core_0.15.0-1_all.deb")
+            files = [l.split()[-1] for l in subprocess.run(["dpkg-deb", "-c", str(deb)], capture_output=True,
+                     text=True, check=True).stdout.splitlines() if not l.endswith("/")]
+            self.assertEqual(files, ["./usr/share/doc/tetronos-core/copyright"])
+            self.assertEqual(build.deb_fields(deb)["Architecture"], "all")
+
+    def test_reproducible(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+            da = build.build_one(META, TOP, Path(a), 1792998000).read_bytes()
+            db = build.build_one(META, TOP, Path(b), 1792998000).read_bytes()
+            self.assertEqual(da, db)
+
+
 if __name__ == "__main__":
     unittest.main()

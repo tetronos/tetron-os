@@ -79,6 +79,7 @@ def control(pkg: dict, maintainer: str, size_kib: int) -> str:
         ("Maintainer", maintainer),
         ("Installed-Size", str(size_kib)),
         ("Depends", ", ".join(pkg.get("depends", []))),
+        ("Recommends", ", ".join(pkg.get("recommends", []))),
         ("Section", pkg.get("section", "misc")),
         ("Priority", pkg.get("priority", "optional")),
         ("Homepage", pkg.get("homepage", "")),
@@ -88,6 +89,9 @@ def control(pkg: dict, maintainer: str, size_kib: int) -> str:
 
 
 def copyright_text(pkg: dict) -> str:
+    if pkg.get("kind") == "meta":
+        return ("This is a metapackage of TetronOS. It has no content of its own:\n"
+                "it only depends on other packages, each with its own copyright file.\n")
     return (f"Upstream: {pkg.get('homepage', '')}\n"
             f"License: {pkg['license']}\n"
             f"The full license text is in /usr/share/common-licenses/{pkg['license']}.\n")
@@ -130,10 +134,10 @@ def take_release_deb(pkg: dict, out: Path) -> Path:
 def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
     name = pkg["name"]
     print(f"{name} {pkg['version']}-{pkg['revision']}")
-    asset = get_asset(pkg)
+    asset = None if pkg.get("kind") == "meta" else get_asset(pkg)
     with tempfile.TemporaryDirectory() as td:
         stage = Path(td) / "stage"
-        for f in pkg["files"]:
+        for f in pkg.get("files", []):
             src = asset if f["src"] == "asset" else HERE / f["src"]
             if not src.exists():
                 die(f"{name}: missing file {src}")
