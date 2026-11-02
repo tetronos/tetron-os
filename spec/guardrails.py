@@ -9,10 +9,14 @@ class OneTree(Requirement):
 
 
 class NoGui(Requirement):
-    """No GUI components anywhere, in any edition, on the live medium or the
-    installed system: no X11, no Wayland, no display manager, no desktop
-    environment, no GUI installer. Terminal only (kmscon plus tetron-wm).
-    Unavoidable library-level dependencies are tracked in
+    """No graphical session, in any edition, on the live medium or the
+    installed system: no X server, no Wayland compositor, no display
+    manager, no desktop environment, no GUI installer. The user works in
+    the terminal (kmscon plus tetron-wm). An app that also has a GUI is
+    allowed when it is useful from the terminal, through a TUI, a CLI or a
+    headless mode (for example keepassxc-cli, mpv on the framebuffer), and
+    its packages do not pull in a graphical session. Library-level
+    dependencies such as X11 or Wayland client libraries are tracked in
     config/gui-allowlist.txt. The build and the VM tests enforce this."""
 
 
