@@ -1,0 +1,8 @@
+#!/bin/sh
+# Give tty1 back to the kernel getty.
+set -e
+if [ "$1" = remove ] || [ "$1" = purge ]; then
+	systemctl disable kmsconvt@tty1.service 2>/dev/null || true
+	systemctl enable getty@tty1.service 2>/dev/null || true
+	if [ -d /run/systemd/system ]; then systemctl daemon-reload || true; fi
+fi

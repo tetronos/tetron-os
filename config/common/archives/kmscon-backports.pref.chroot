@@ -1,0 +1,9 @@
+# kmscon 10 and libtsm4 4.8 are only in trixie-backports. Raise just those
+# two; every other backports package stays at the default 100.
+Package: kmscon libtsm4
+Pin: release n=trixie-backports
+Pin-Priority: 600
+
+Package: *
+Pin: release n=trixie-backports
+Pin-Priority: 100

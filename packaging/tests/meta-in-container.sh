@@ -8,6 +8,9 @@ ok()  { echo "  ok   $*"; }
 bad() { echo "  FAIL $*"; fail=1; }
 installed() { dpkg-query -W -f '${db:Status-Abbrev} ${Package}\n' 2>/dev/null | awk '$1 == "ii" {print $2}' | sort; }
 
+# kmscon (tetronos-core) is only in trixie-backports: same source and pin as the ISO.
+echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
+cp /kmscon-backports.pref /etc/apt/preferences.d/kmscon-backports.pref
 apt-get update -qq >/dev/null
 apt-get install -y -qq --no-install-recommends apt-utils >/dev/null 2>&1 || { echo "FAIL apt-utils"; exit 1; }
 mkdir -p /repo && cp /debs/*.deb /repo/

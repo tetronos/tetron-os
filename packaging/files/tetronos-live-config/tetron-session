@@ -1,0 +1,10 @@
+#!/bin/sh
+# Start the tetron-wm desktop for this login: take over a running session
+# (attach -d detaches any other client) or start a new one. Without
+# tetron-wm, fall back to a login shell so the console stays usable.
+command -v tetron-wm >/dev/null 2>&1 || exec "${SHELL:-/bin/sh}" -l
+export TETRON_WM_ACTIVE=1
+if tetron-wm ls 2>/dev/null | grep -qE ' (attached|detached) '; then
+	exec tetron-wm attach -d
+fi
+exec tetron-wm

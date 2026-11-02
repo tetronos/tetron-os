@@ -103,7 +103,7 @@ def check_manifest() -> dict:
     bad = []
     for pkg in m.get("package", []):
         src = pkg.get("source", {})
-        if pkg.get("kind", "release") == "meta":
+        if pkg.get("kind", "release") in ("meta", "local"):
             continue
         if not (pkg.get("version") and src.get("url") and (src.get("sha256") or src.get("sha256_url"))):
             bad.append(pkg.get("name", "?"))

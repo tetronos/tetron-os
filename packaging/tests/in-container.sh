@@ -6,6 +6,9 @@ ok()   { echo "  ok   $*"; }
 bad()  { echo "  FAIL $*"; fail=1; }
 check() { desc="$1"; shift; if "$@" >/dev/null 2>&1; then ok "$desc"; else bad "$desc"; fi; }
 
+# kmscon (tetronos-core) is only in trixie-backports: same source and pin as the ISO.
+echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
+cp /kmscon-backports.pref /etc/apt/preferences.d/kmscon-backports.pref
 apt-get update -qq >/dev/null
 apt-get install -y -qq --no-install-recommends systemd >/dev/null 2>&1
 
@@ -31,6 +34,13 @@ while IFS='|' read -r name version smoke; do
 		check "no /etc/tetron created at install" sh -c '! [ -e /etc/tetron ]'
 		check "no identity created" sh -c '! [ -e /etc/tetron/secret_key ]'
 	}
+	[ "$name" = tetronos-live-config ] && {
+		check "kmsconvt@tty1 enabled" systemctl is-enabled kmsconvt@tty1.service
+		check "getty@tty1 disabled" sh -c '! systemctl is-enabled getty@tty1.service'
+		check "kmscon drop-in parses" systemd-analyze verify --man=no kmsconvt@tty1.service
+		check "profile.d hook parses" sh -n /etc/profile.d/tetronos-session.sh
+		check "profile.d hook is a conffile" sh -c "dpkg-query -W -f '\${Conffiles}' tetronos-live-config | grep -q tetronos-session.sh"
+	}
 done < /debs/tests.list
 
 # Remove and purge in reverse dependency order (tui depends on tetron).
@@ -39,6 +49,10 @@ for name in $(for n in $installed; do echo $n; done | tac); do
 	check "dpkg -r" dpkg -r "$name"
 	check "dpkg -P" dpkg -P "$name"
 	check "files gone" sh -c "! dpkg -L $name"
+	[ "$name" = tetronos-live-config ] && {
+		check "getty@tty1 enabled again" systemctl is-enabled getty@tty1.service
+		check "kmsconvt@tty1 not enabled" sh -c '! systemctl is-enabled kmsconvt@tty1.service'
+	}
 done
 [ $fail = 0 ] && echo "ALL PASS" || echo "FAILURES"
 exit $fail

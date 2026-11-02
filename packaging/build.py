@@ -92,6 +92,9 @@ def copyright_text(pkg: dict) -> str:
     if pkg.get("kind") == "meta":
         return ("This is a metapackage of TetronOS. It has no content of its own:\n"
                 "it only depends on other packages, each with its own copyright file.\n")
+    if pkg.get("kind") == "local":
+        return ("This package is TetronOS configuration. Its files are maintained in\n"
+                "the TetronOS repository; it contains no third-party code.\n")
     return (f"Upstream: {pkg.get('homepage', '')}\n"
             f"License: {pkg['license']}\n"
             f"The full license text is in /usr/share/common-licenses/{pkg['license']}.\n")
@@ -134,7 +137,7 @@ def take_release_deb(pkg: dict, out: Path) -> Path:
 def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
     name = pkg["name"]
     print(f"{name} {pkg['version']}-{pkg['revision']}")
-    asset = None if pkg.get("kind") == "meta" else get_asset(pkg)
+    asset = None if pkg.get("kind") in ("meta", "local") else get_asset(pkg)
     with tempfile.TemporaryDirectory() as td:
         stage = Path(td) / "stage"
         for f in pkg.get("files", []):
@@ -156,6 +159,9 @@ def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
         (deb / "control").write_text(control(pkg, top["maintainer"], size_kib))
         (deb / "md5sums").write_text("".join(
             f"{hashlib.md5(p.read_bytes()).hexdigest()}  {p.relative_to(stage)}\n" for p in files))
+        conf = [f"/{p.relative_to(stage)}\n" for p in files if p.relative_to(stage).parts[0] == "etc"]
+        if conf:
+            (deb / "conffiles").write_text("".join(conf))
         for script, path in pkg.get("scripts", {}).items():
             dst = deb / script
             shutil.copyfile(HERE / path, dst)

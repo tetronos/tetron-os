@@ -1,6 +1,7 @@
 # Single source of truth for the TetronOS .debs. See spec/packaging.py.
 # kind = "deb": the component's release .deb, verified and used unchanged.
 # kind = "meta": a metapackage built here from the entry alone (no download).
+# kind = "local": built here from files under packaging/files/<name>/ (no download).
 # Other packages are built here from a release binary (none at the moment);
 # their Maintainer is the placeholder below until USER decides (plan open item 6).
 source_date_epoch = 1792998000
@@ -99,10 +100,11 @@ description = "TetronOS Server edition package set"
 long_description = """
 Installs the tetron mesh VPN (daemon and CLI), its terminal dashboard
 tetron-tui, the tetron-wm terminal window manager, an SSH server and
-NetworkManager. Desktop apps are not included: see tetronos-suite.
+NetworkManager and the kmscon console (from trixie-backports). Desktop
+apps are not included: see tetronos-suite.
 """
 depends = ["tetron (>= 0.15)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
-           "openssh-server", "network-manager"]
+           "openssh-server", "network-manager", "kmscon (>= 10)"]
 
 [[package]]
 name = "tetronos-suite"
@@ -119,3 +121,38 @@ tetron-webui and its message board addon tetron-messageboard.
 """
 depends = ["tetronos-core (= 0.15.0-1)", "tetron-wm-extras (>= 0.15)",
            "tetron-webui (>= 0.15)", "tetron-messageboard (>= 0.15)"]
+
+[[package]]
+name = "tetronos-live-config"
+kind = "local"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "admin"
+description = "TetronOS live medium: kmscon console with autologin to tetron-wm"
+long_description = """
+Runs kmscon on tty1 with autologin of the live user tetron and starts
+tetron-wm in that login. Installed only on the TetronOS live ISO; the
+live user and its sudo rights come from live-config.
+"""
+depends = ["tetronos-core (= 0.15.0-1)", "live-boot", "live-config", "live-config-systemd",
+           "sudo", "fonts-dejavu-core"]
+
+[[package.files]]
+src = "files/tetronos-live-config/kmsconvt-autologin.conf"
+dst = "usr/lib/systemd/system/kmsconvt@tty1.service.d/tetronos-autologin.conf"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-live-config/tetron-session"
+dst = "usr/bin/tetron-session"
+mode = "0755"
+
+[[package.files]]
+src = "files/tetronos-live-config/tetronos-session.sh"
+dst = "etc/profile.d/tetronos-session.sh"
+mode = "0644"
+
+[package.scripts]
+postinst = "files/tetronos-live-config/postinst"
+postrm = "files/tetronos-live-config/postrm"

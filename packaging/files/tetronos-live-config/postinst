@@ -1,0 +1,9 @@
+#!/bin/sh
+# kmscon replaces the kernel getty on tty1. getty@tty1 stays installed: it
+# is kmsconvt's OnFailure fallback.
+set -e
+if [ "$1" = configure ]; then
+	systemctl enable kmsconvt@tty1.service
+	systemctl disable getty@tty1.service
+	if [ -d /run/systemd/system ]; then systemctl daemon-reload || true; fi
+fi

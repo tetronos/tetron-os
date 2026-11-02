@@ -68,5 +68,31 @@ class MetaBuild(unittest.TestCase):
             self.assertEqual(da, db)
 
 
+LOCAL = {"name": "tetronos-live-config", "kind": "local", "version": "0.15.0", "revision": "1",
+         "arch": "all", "description": "TetronOS live", "depends": ["tetronos-core (= 0.15.0-1)"],
+         "files": [{"src": "files/tetronos-live-config/tetron-session", "dst": "usr/bin/tetron-session", "mode": "0755"},
+                   {"src": "files/tetronos-live-config/tetronos-session.sh",
+                    "dst": "etc/profile.d/tetronos-session.sh", "mode": "0644"}],
+         "scripts": {"postinst": "files/tetronos-live-config/postinst"}}
+
+
+class LocalBuild(unittest.TestCase):
+    def test_builds_from_repo_files_without_download(self):
+        import subprocess, tempfile
+        with tempfile.TemporaryDirectory() as td:
+            deb = build.build_one(LOCAL, TOP, Path(td), 1792998000)
+            listing = subprocess.run(["dpkg-deb", "-c", str(deb)], capture_output=True, text=True,
+                                     check=True).stdout.splitlines()
+            files = {l.split()[-1]: l.split()[0] for l in listing if not l.endswith("/")}
+            self.assertEqual(files["./usr/bin/tetron-session"], "-rwxr-xr-x")
+            self.assertEqual(files["./etc/profile.d/tetronos-session.sh"], "-rw-r--r--")
+            conf = subprocess.run(["dpkg-deb", "-I", str(deb), "conffiles"], capture_output=True, text=True,
+                                  check=True).stdout
+            self.assertEqual(conf, "/etc/profile.d/tetronos-session.sh\n")
+
+    def test_local_copyright_says_tetronos_configuration(self):
+        self.assertIn("TetronOS configuration", build.copyright_text(LOCAL))
+
+
 if __name__ == "__main__":
     unittest.main()
