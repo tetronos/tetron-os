@@ -83,3 +83,11 @@ class InstallModes(Requirement):
     """Install mode asks only disk, confirm, username, password and hostname,
     everything else fixed. Expert mode exposes partitioning, LUKS, LVM,
     filesystem, locale, keyboard, timezone, mirrors and extra packages."""
+
+
+class BrandedBoot(Requirement):
+    """A shipped ISO shows TetronOS branding, not Debian's: its own logo on
+    the boot menu splash (syslinux on BIOS, grub on UEFI) and a TetronOS
+    boot menu title, and TetronOS greeting text in /etc/issue, the motd
+    and the kmscon login banner. Logo art and wording are USER decisions.
+    Required before the release candidate (M8)."""
