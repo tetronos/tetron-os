@@ -8,3 +8,21 @@ packaging/cache/
 __pycache__/
 *.pyc
 .libspec/cache/
+
+# Safety net: build products and VM state must never be committed.
+*.deb
+*.img
+*.qcow2
+*.squashfs
+*.fd
+*.part
+*.sha256
+# live-build trees, if lb is ever run in the repo root
+/chroot/
+/binary/
+/cache/
+/.build/
+/config/binary
+/config/bootstrap
+/config/chroot
+/config/source
