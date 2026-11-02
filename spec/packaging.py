@@ -2,11 +2,11 @@ from libspec import Requirement
 
 
 class TetronDeb(Requirement):
-    """The tetron core daemon and CLI are packaged as a .deb named tetron,
-    built by packaging/ from the pinned upstream release asset (static musl
-    x86_64), checksum verified before packaging. Installs /usr/bin/tetron.
-    The package version equals the upstream version with a Debian revision
-    (for example 0.14.3-1)."""
+    """The tetron core daemon and CLI come from the .deb that the tetron
+    repository publishes with each release (tetron_<version>-<rev>_amd64.deb),
+    pinned in the manifest and checksum verified. TetronOS does not rebuild
+    it. Installs /usr/bin/tetron. The package version is the upstream
+    version with a Debian revision (for example 0.15.0-1)."""
 
 
 class TetronDebUnit(Requirement):
@@ -47,8 +47,11 @@ class PackagingManifest(Requirement):
     """packaging/manifest.toml is the single source of truth for every
     package: name, version, Debian revision, architecture, description,
     license, homepage, depends, source (release asset URL plus sha256 or a
-    sha256 URL), installed files with modes, and maintainer scripts. Nothing
-    is built from an unpinned or unverified input."""
+    sha256 URL), installed files with modes, and maintainer scripts. A
+    package whose upstream publishes a .deb uses kind = "deb" instead: name,
+    version, revision, architecture, smoke command and the release .deb URL
+    with its sha256 URL; files, scripts and control fields then come from
+    that deb. Nothing is built from an unpinned or unverified input."""
 
 
 class PackagingVerifiesChecksum(Requirement):
@@ -75,3 +78,19 @@ class PackagingTestsInCleanTrixie(Requirement):
     debian:trixie container using apt (so Depends resolve), checks the file
     list and modes, runs the smoke command, verifies unit files with
     systemd-analyze, then removes and purges the package cleanly."""
+
+
+class PackagingConsumesReleaseDebs(Requirement):
+    """For a kind = "deb" package, packaging/build.py downloads the release
+    .deb into packaging/cache/, verifies its sha256, checks that its Package,
+    Version and Architecture fields equal the manifest's name,
+    version-revision and arch, aborts on any mismatch, and copies the deb
+    unchanged to packaging/out/ as <name>_<version>-<revision>_<arch>.deb.
+    The upstream deb is never unpacked or rebuilt."""
+
+
+class SuiteDebsFromReleases(Requirement):
+    """The manifest takes tetron, tetron-tui, tetron-wm, tetron-wm-desktop
+    and tetron-wm-extras from their published release debs, all at the same
+    tetron minor. tetron-wm-desktop and tetron-wm-extras are Architecture:
+    all metapackages; packaging/tests installs them without Recommends."""

@@ -93,6 +93,40 @@ def copyright_text(pkg: dict) -> str:
             f"The full license text is in /usr/share/common-licenses/{pkg['license']}.\n")
 
 
+def deb_filename(pkg: dict) -> str:
+    return f"{pkg['name']}_{pkg['version']}-{pkg['revision']}_{pkg['arch']}.deb"
+
+
+def deb_field_mismatches(fields: dict, pkg: dict) -> list[str]:
+    want = {"Package": pkg["name"], "Version": f"{pkg['version']}-{pkg['revision']}",
+            "Architecture": pkg["arch"]}
+    return [f"{k}: expected {v}, deb has {fields.get(k, '(missing)')}"
+            for k, v in want.items() if fields.get(k) != v]
+
+
+def deb_fields(path: Path) -> dict:
+    r = subprocess.run(["dpkg-deb", "-f", str(path), "Package", "Version", "Architecture"],
+                       capture_output=True, text=True)
+    if r.returncode:
+        die(f"cannot read control fields of {path}: {r.stderr.strip()}")
+    return dict(line.split(": ", 1) for line in r.stdout.splitlines() if ": " in line)
+
+
+def take_release_deb(pkg: dict, out: Path) -> Path:
+    """kind = "deb": verify the published deb and copy it unchanged."""
+    name = pkg["name"]
+    print(f"{name} {pkg['version']}-{pkg['revision']} (release deb)")
+    asset = get_asset(pkg)
+    bad = deb_field_mismatches(deb_fields(asset), pkg)
+    if bad:
+        die(f"{name}: release deb does not match the manifest: " + "; ".join(bad))
+    out.mkdir(parents=True, exist_ok=True)
+    target = out / deb_filename(pkg)
+    shutil.copyfile(asset, target)
+    print(f"  -> {target} ({target.stat().st_size // 1024} KiB)")
+    return target
+
+
 def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
     name = pkg["name"]
     print(f"{name} {pkg['version']}-{pkg['revision']}")
@@ -127,7 +161,7 @@ def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
             if p.is_dir():
                 p.chmod(0o755)
         out.mkdir(parents=True, exist_ok=True)
-        target = out / f"{name}_{pkg['version']}-{pkg['revision']}_{pkg['arch']}.deb"
+        target = out / deb_filename(pkg)
         env = dict(os.environ, SOURCE_DATE_EPOCH=str(epoch))
         r = subprocess.run(["dpkg-deb", "--root-owner-group", "-Zxz", "--build", str(stage), str(target)],
                            env=env, capture_output=True, text=True)
@@ -153,7 +187,10 @@ def main() -> None:
         return
     epoch = int(os.environ.get("SOURCE_DATE_EPOCH", top["source_date_epoch"]))
     for p in pkgs:
-        build_one(p, top, Path(a.out), epoch)
+        if p.get("kind") == "deb":
+            take_release_deb(p, Path(a.out))
+        else:
+            build_one(p, top, Path(a.out), epoch)
 
 
 if __name__ == "__main__":
