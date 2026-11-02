@@ -14,9 +14,24 @@ cp -a "$SRC/auto" .
 for d in "$SRC/config/common" "$SRC/config/$EDITION"; do
 	[ -d "$d" ] && cp -a "$d/." config/
 done
+# Local apt repository of the TetronOS debs, served on 127.0.0.1 only while
+# live-build runs (config/common/archives/tetronos-local.list.chroot).
+REPO="$WORK/repo"
+rm -rf "$REPO"; mkdir -p "$REPO"
+ls "$SRC"/packaging/out/*.deb >/dev/null 2>&1 || { echo "no debs in packaging/out; run: make debs" >&2; exit 1; }
+cp "$SRC"/packaging/out/*.deb "$REPO/"
+(cd "$REPO" && apt-ftparchive packages . > Packages && apt-ftparchive release . > Release)
+python3 -m http.server 8099 --bind 127.0.0.1 --directory "$REPO" >"$WORK/repo-http.log" 2>&1 &
+HTTP_PID=$!
+trap 'kill $HTTP_PID 2>/dev/null || true' EXIT
+sleep 1
 export EDITION
+# Drop stage stamps, chroot and binary of an earlier build (the download cache stays).
+lb clean
 lb config
 lb build
+kill $HTTP_PID 2>/dev/null || true
+python3 "$SRC/scripts/no_gui_check.py" binary/live/filesystem.packages "$SRC/config/gui-allowlist.txt"
 mkdir -p "$OUTDIR"
 ISO=$(ls -1 live-image-*.iso | head -1)
 OUT="$OUTDIR/tetronos-$EDITION-$(date +%Y%m%d)-amd64.iso"

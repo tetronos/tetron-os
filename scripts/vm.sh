@@ -38,7 +38,7 @@ users:
 package_update: true
 packages: [live-build, debootstrap, xorriso, squashfs-tools, mtools, dosfstools, cpio, make, rsync,
   grub-pc-bin, grub-efi-amd64-bin, grub-efi-amd64-signed, shim-signed, isolinux, syslinux,
-  syslinux-common, ca-certificates, gnupg, procps]
+  syslinux-common, ca-certificates, gnupg, procps, apt-utils, python3]
 runcmd:
   - touch /var/lib/tetronos-builder-ready
 UD
@@ -83,7 +83,7 @@ case "${1:-}" in
 	stop) stop ;;
 	status) running && echo running || echo stopped ;;
 	ssh) shift; ssh_vm "$@" ;;
-	sync) rsync -a --delete -e "ssh $SSH_OPTS" --exclude build --exclude out --exclude .git --exclude DO-NOT-COMMIT "$ROOT/" builder@127.0.0.1:src/ ;;
+	sync) rsync -a --delete -e "ssh $SSH_OPTS" --exclude /build --exclude /out --exclude /.git --exclude /DO-NOT-COMMIT --exclude /packaging/cache "$ROOT/" builder@127.0.0.1:src/ ;;
 	pull) mkdir -p "$ROOT/out"; rsync -a -e "ssh $SSH_OPTS" builder@127.0.0.1:out/ "$ROOT/out/" ;;
 	destroy) stop; rm -rf "$VMDIR" ;;
 	*) echo "usage: $0 create|start|stop|status|ssh|sync|pull|destroy" >&2; exit 2 ;;

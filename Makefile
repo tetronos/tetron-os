@@ -7,7 +7,7 @@ VM      := scripts/vm.sh
 
 .PHONY: iso vm-create vm-start vm-stop vm-shell vm-destroy docker-image clean distclean
 
-iso:
+iso: debs
 ifeq ($(RUNNER),vm)
 	$(VM) start
 	$(VM) sync

@@ -131,12 +131,12 @@ arch = "all"
 section = "admin"
 description = "TetronOS live medium: kmscon console with autologin to tetron-wm"
 long_description = """
-Runs kmscon on tty1 with autologin of the live user tetron and starts
+Runs kmscon on tty1 with autologin of the live user tetronos and starts
 tetron-wm in that login. Installed only on the TetronOS live ISO; the
 live user and its sudo rights come from live-config.
 """
 depends = ["tetronos-core (= 0.15.0-1)", "live-boot", "live-config", "live-config-systemd",
-           "sudo", "fonts-dejavu-core"]
+           "user-setup", "sudo", "fonts-dejavu-core"]
 
 [[package.files]]
 src = "files/tetronos-live-config/kmsconvt-autologin.conf"

@@ -1,0 +1,5 @@
+#!/bin/sh
+# The tetron deb does not enable its unit; the image does. The node
+# identity is created on first daemon start on the booted system.
+set -e
+systemctl enable tetron.service
