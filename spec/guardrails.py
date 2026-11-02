@@ -66,9 +66,10 @@ class BmcFriendlyServer(Requirement):
 
 
 class ServerSizeBudget(Requirement):
-    """The Server ISO is under 300 MB. If a milestone cannot meet it, the
-    measured size and the top packages are recorded in SIZES.md with next
-    steps."""
+    """The Server ISO targets 300 MB. The target is fungible, not a gate:
+    no function is dropped to meet it without USER approval. Every built
+    size is recorded in SIZES.md; when over the target, with the top
+    packages and next steps."""
 
 
 class InstallerSafety(Requirement):

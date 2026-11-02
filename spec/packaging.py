@@ -156,15 +156,19 @@ class TetronosLiveConfig(Requirement):
     """tetronos-live-config turns the live medium into a console that boots
     to tetron-wm. It is installed only in the ISO, never by tetronos-core
     or tetronos-suite. It Depends on tetronos-core, live-boot, live-config,
-    live-config-systemd, sudo and fonts-dejavu-core, and ships:
+    live-config-systemd, user-setup (live-config creates the live user only
+    with it, and the image installs no Recommends), sudo and
+    fonts-dejavu-core, and ships:
     a kmsconvt@tty1 drop-in in /usr/lib/systemd/system that runs kmscon
     on tty1 with DejaVu Sans Mono 14, us keyboard, mouse on, and agetty
-    autologin of user tetron with TERM xterm-256color; /usr/bin/tetron-session,
+    autologin of the live user tetronos with TERM xterm-256color; /usr/bin/tetron-session,
     which attaches to a running tetron-wm session (tetron-wm attach -d) or
     starts one, and falls back to a login shell when tetron-wm is missing;
     /etc/profile.d/tetronos-session.sh, which runs tetron-session only in a
     login shell under kmscon or on tty1, never over ssh, never inside
     tetron-wm. Its postinst enables kmsconvt@tty1 and disables getty@tty1;
-    removing the package reverts both. The live user tetron, its
-    passwordless sudo and the serial console autologin come from
-    live-config (username=tetron on the kernel command line)."""
+    removing the package reverts both. The live user tetronos and its
+    passwordless sudo come from live-config (username=tetronos on the
+    kernel command line). The user is not named tetron: that name is the
+    tetron daemon's system group, and adduser can not create a user whose
+    own group already exists. The serial console shows a login prompt (no autologin)."""

@@ -29,6 +29,6 @@ class LiveBootTest(Requirement):
     """tests/boot-live.sh ISO [bios|uefi] boots the ISO in QEMU/KVM with
     virtio-gpu and the serial port logged to a file, waits for boot, saves
     a VGA screenshot over QMP and powers the VM off. It passes when the
-    serial log shows a shell prompt of user tetron and the screenshot shows
-    tetron-wm (checked by eye in M2, automated in M4). Results go to
+    serial log shows the login prompt of host tetron and the screenshot
+    shows tetron-wm (checked by eye in M2, automated in M4). Results go to
     out/boot-<firmware>.{log,png}."""

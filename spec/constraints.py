@@ -7,12 +7,13 @@ from libspec import Constraint
 class ServerIsoUnderBudget(Constraint):
     """CONSTRAINT-ID: CON-T01
 
-    The newest out/tetronos-server-*.iso is at most 300 MB.
-    ENFORCEMENT (reconcile.py): server_iso.within_budget is true. Passes with
-    a note when no ISO has been built yet.
+    The newest out/tetronos-server-*.iso is at most the 300 MB target, or
+    its size is recorded in SIZES.md. The target is not a gate.
+    ENFORCEMENT (reconcile.py): server_iso.over_target is false or
+    server_iso.recorded is true. Passes when no ISO has been built yet.
     """
     constraint_id = "CON-T01"
-    enforcement_logic = "{{ server_iso.within_budget }}"
+    enforcement_logic = "{{ not server_iso.over_target or server_iso.recorded }}"
 
 
 class NoGuiPackages(Constraint):

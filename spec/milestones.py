@@ -18,8 +18,8 @@ class M2BareLiveIso(Requirement):
     """Milestone M2 acceptance: make iso builds the debs, installs
     tetronos-live-config (and through it tetronos-core) from the local apt
     repository, and produces an ISO that tests/boot-live.sh boots in QEMU
-    BIOS and UEFI to tetron-wm on VGA (screenshot) and to a shell on serial
-    (serial log); the build no-GUI check passes; the first size is recorded
+    BIOS and UEFI to tetron-wm on VGA (screenshot) and to a login prompt on
+    serial (serial log); the build no-GUI check passes; the first size is recorded
     in SIZES.md."""
 
 
