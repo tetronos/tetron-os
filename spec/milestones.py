@@ -15,8 +15,12 @@ class M1Packages(Requirement):
 
 
 class M2BareLiveIso(Requirement):
-    """Milestone M2 acceptance: ISO boots in QEMU BIOS and UEFI to tetron-wm on
-    VGA and to a shell on serial; no-GUI check passes; first size recorded."""
+    """Milestone M2 acceptance: make iso builds the debs, installs
+    tetronos-live-config (and through it tetronos-core) from the local apt
+    repository, and produces an ISO that tests/boot-live.sh boots in QEMU
+    BIOS and UEFI to tetron-wm on VGA (screenshot) and to a shell on serial
+    (serial log); the build no-GUI check passes; the first size is recorded
+    in SIZES.md."""
 
 
 class M3SizePass(Requirement):

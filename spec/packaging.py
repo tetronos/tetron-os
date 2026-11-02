@@ -109,10 +109,12 @@ class MetapackagesBuiltHere(Requirement):
 
 class TetronosCoreMeta(Requirement):
     """tetronos-core is the Server edition package set: it Depends on
-    tetron, tetron-tui, tetron-wm, openssh-server and network-manager.
-    It does not pull tetron-wm-desktop, so Recommends of the desktop app
-    list never reach the Server image. kmscon, its libtsm4, the symbols
-    font and tetron-install are added when they have packages (M2, M5)."""
+    tetron, tetron-tui, tetron-wm, openssh-server, network-manager and
+    kmscon (>= 10), which brings libtsm4 (>= 4.8) with it. Both come from
+    trixie-backports (see KmsconFromBackports). It does not pull
+    tetron-wm-desktop, so Recommends of the desktop app list never reach
+    the Server image. The symbols font and tetron-install are added when
+    they have packages (M5)."""
 
 
 class TetronosSuiteMeta(Requirement):
@@ -129,3 +131,40 @@ class MetapackagesInstallFromRepo(Requirement):
     Recommends, and checks that every package named in the Depends of
     tetronos-core and tetronos-suite is installed. Removing tetronos-suite
     and tetronos-core then removes no other package."""
+
+
+class KmsconFromBackports(Requirement):
+    """kmscon 10 and libtsm4 4.8 exist only in trixie-backports. TetronOS
+    enables trixie-backports with an apt pin that raises only kmscon and
+    libtsm4 (priority 600) and leaves every other backports package at 100,
+    so nothing else is taken from backports. The ISO build uses the pin in
+    the chroot and ships it in the image (binary). packaging/tests enables
+    the same source and pin in the container before installing the
+    metapackages."""
+
+
+class LocalPackagesBuiltHere(Requirement):
+    """A kind = "local" manifest entry is a package built by
+    packaging/build.py from files tracked in this repository
+    (packaging/files/<name>/), with modes and maintainer scripts taken from
+    the entry. Nothing is downloaded; the inputs are pinned by the
+    repository commit. It is reproducible like every other package built
+    here. Its copyright file states that it is TetronOS configuration."""
+
+
+class TetronosLiveConfig(Requirement):
+    """tetronos-live-config turns the live medium into a console that boots
+    to tetron-wm. It is installed only in the ISO, never by tetronos-core
+    or tetronos-suite. It Depends on tetronos-core, live-boot, live-config,
+    live-config-systemd, sudo and fonts-dejavu-core, and ships:
+    a kmsconvt@tty1 drop-in in /usr/lib/systemd/system that runs kmscon
+    on tty1 with DejaVu Sans Mono 14, us keyboard, mouse on, and agetty
+    autologin of user tetron with TERM xterm-256color; /usr/bin/tetron-session,
+    which attaches to a running tetron-wm session (tetron-wm attach -d) or
+    starts one, and falls back to a login shell when tetron-wm is missing;
+    /etc/profile.d/tetronos-session.sh, which runs tetron-session only in a
+    login shell under kmscon or on tty1, never over ssh, never inside
+    tetron-wm. Its postinst enables kmsconvt@tty1 and disables getty@tty1;
+    removing the package reverts both. The live user tetron, its
+    passwordless sudo and the serial console autologin come from
+    live-config (username=tetron on the kernel command line)."""

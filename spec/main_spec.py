@@ -3,8 +3,8 @@ TetronOS main spec
 '''
 
 from libspec import Spec
-from . import product, guardrails, milestones, packaging, constraints
+from . import product, guardrails, milestones, packaging, live, constraints
 
 class MainSpec(Spec):
     def modules(self):
-        return [product, guardrails, milestones, packaging, constraints]
+        return [product, guardrails, milestones, packaging, live, constraints]
