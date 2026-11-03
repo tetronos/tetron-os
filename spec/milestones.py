@@ -64,8 +64,9 @@ class M9PizzaboxHardware(Requirement):
 
 
 class R0RegularLists(Requirement):
-    """Milestone R0 acceptance: make iso EDITION=regular builds and make test-
-    live EDITION=regular passes."""
+    """Milestone R0 acceptance: make iso EDITION=full builds and make test-
+    live EDITION=full passes (the plan's Regular edition, now the full
+    level above desktop)."""
 
 
 class R1CarbonylAndFresh(Requirement):
@@ -110,3 +111,13 @@ class P4IsoIntegration(Requirement):
     core and tetronos-live-config into the ISO; dpkg -l in the chroot lists
     them."""
 
+
+
+class D1DesktopIso(Requirement):
+    """Milestone D1 acceptance: make iso EDITION=desktop builds
+    tetronos-desktop-fw-*.iso with all firmware; tests/boot-live.sh boots it
+    in BIOS and UEFI to tetron-wm; in the VM the live user can list and
+    change NetworkManager connections without sudo (nmcli), sees a
+    pipewire audio sink on an emulated sound card, and sshd is not
+    running; the build no-GUI check passes; the size is recorded. Then a
+    live boot on the ThinkPad P1 (wifi, sound) by USER."""

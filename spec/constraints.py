@@ -51,12 +51,12 @@ class ScriptsParse(Constraint):
 class EditionsSelectable(Constraint):
     """CONSTRAINT-ID: CON-T05
 
-    auto/config handles both the server and regular editions, with
-    --firmware-chroot decided per edition.
-    ENFORCEMENT (reconcile.py): editions.server and editions.regular are true.
+    auto/config handles the server and desktop editions, with
+    --firmware-chroot following FIRMWARE.
+    ENFORCEMENT (reconcile.py): editions.server and editions.desktop are true.
     """
     constraint_id = "CON-T05"
-    enforcement_logic = "{{ editions.server and editions.regular and editions.firmware_per_edition }}"
+    enforcement_logic = "{{ editions.server and editions.desktop and editions.firmware_axis }}"
 
 
 class NoLegacyWmName(Constraint):

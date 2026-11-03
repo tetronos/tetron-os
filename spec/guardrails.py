@@ -21,7 +21,8 @@ class NoGui(Requirement):
 
 
 class RegularNotBlocked(Requirement):
-    """Server work must never block the Regular (fully provisioned) edition.
+    """Server work must never block the desktop and full editions (the plan's
+    Regular edition, split into desktop and full).
     Package lists are split by edition, tetronos-suite is a real metapackage
     from the start, kernel and firmware pruning is Server-only, both console
     paths (VGA kmscon and serial) work in both editions, the installer
@@ -91,3 +92,12 @@ class BrandedBoot(Requirement):
     boot menu title, and TetronOS greeting text in /etc/issue, the motd
     and the kmscon login banner. Logo art and wording are USER decisions.
     Required before the release candidate (M8)."""
+
+
+class EditionsAndFirmwareAxis(Requirement):
+    """Editions are levels of one tree: server and desktop now, minimal and
+    full later (core < server < desktop < full). EDITION selects the level.
+    Firmware is a second, independent axis: FIRMWARE=none|all, default
+    none for server and all for desktop. --firmware-chroot follows
+    FIRMWARE. The ISO is named tetronos-<edition>[-fw]-<date>-amd64.iso,
+    with -fw whenever FIRMWARE=all."""

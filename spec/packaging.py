@@ -108,9 +108,10 @@ class MetapackagesBuiltHere(Requirement):
 
 
 class TetronosCoreMeta(Requirement):
-    """tetronos-core is the Server edition package set: it Depends on
-    tetron, tetron-tui, tetron-wm, openssh-server, network-manager and
-    kmscon (>= 10), which brings libtsm4 (>= 4.8) with it. Both come from
+    """tetronos-core is the base package set of every edition: it Depends on
+    tetron, tetron-tui, tetron-wm, network-manager and kmscon (>= 10),
+    which brings libtsm4 (>= 4.8) with it. openssh-server is not in core:
+    it comes with tetronos-server. Both come from
     trixie-backports (see KmsconFromBackports). It does not pull
     tetron-wm-desktop, so Recommends of the desktop app list never reach
     the Server image. The symbols font and tetron-install are added when
@@ -172,3 +173,31 @@ class TetronosLiveConfig(Requirement):
     kernel command line). The user is not named tetron: that name is the
     tetron daemon's system group, and adduser can not create a user whose
     own group already exists. The serial console shows a login prompt (no autologin)."""
+
+
+class TetronosServerMeta(Requirement):
+    """tetronos-server is the Server edition package set: it Depends on
+    tetronos-core (same version) and openssh-server. The Server ISO keeps
+    sshd enabled."""
+
+
+class TetronosDesktopMeta(Requirement):
+    """tetronos-desktop is the Desktop edition package set, the level above
+    server (core < server < desktop < full): it Depends on tetronos-server
+    (same version), tetronos-desktop-config, tetron-wm-desktop, polkitd,
+    libpam-systemd and dbus-user-session (a logind session and a user bus
+    for the console login), wpasupplicant, wireless-regdb, iw, pipewire,
+    pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
+    brightnessctl, upower, intel-microcode and amd64-microcode. Installing
+    it on a server with apt (Recommends on) also brings the tetron-wm-desktop
+    tools."""
+
+
+class TetronosDesktopConfig(Requirement):
+    """tetronos-desktop-config (kind local) ships polkit rules in
+    /usr/share/polkit-1/rules.d/ that let members of netdev manage
+    NetworkManager and members of users power off, reboot, suspend and
+    hibernate. kmscon runs the login on a pts, so the session is not an
+    active seat session and polkit's allow_active defaults do not apply.
+    Bluetooth access comes from bluez's own D-Bus policy for the bluetooth
+    group."""

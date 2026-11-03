@@ -26,9 +26,23 @@ class NoGuiBuildCheck(Requirement):
 
 
 class LiveBootTest(Requirement):
-    """tests/boot-live.sh ISO [bios|uefi] boots the ISO in QEMU/KVM with
+    """tests/boot-live.sh ISO [bios|uefi] boots the ISO (any edition) in QEMU/KVM with
     virtio-gpu and the serial port logged to a file, waits for boot, saves
     a VGA screenshot over QMP and powers the VM off. It passes when the
     serial log shows the login prompt of host tetron and the screenshot
     shows tetron-wm (checked by eye in M2, automated in M4). Results go to
     out/boot-<firmware>.{log,png}."""
+
+
+class DesktopToolsInImage(Requirement):
+    """The image installs no Recommends, so for the desktop edition
+    scripts/build.sh writes the Recommends of the tetron-wm-desktop deb
+    (first choice of each alternative) into a generated package list. The
+    tools then always match the tetron-wm release in the manifest."""
+
+
+class DesktopSshOff(Requirement):
+    """The desktop edition installs openssh-server but a chroot hook
+    disables ssh.service and ssh.socket, so a fresh desktop (live or
+    installed from it) does not listen for ssh. A server upgraded to
+    desktop keeps its sshd state."""
