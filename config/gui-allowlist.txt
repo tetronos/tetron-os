@@ -1,0 +1,8 @@
+# Packages the no-GUI check allows (scripts/no_gui_check.py). Only library
+# level dependencies of terminal-useful apps; never an X server, Wayland
+# compositor, display manager or desktop environment. One name per line,
+# with the reason.
+
+# x11-common: /etc/X11 session files only (no server). Pulled by libxss1
+# (mpv, libsdl2) and libice6 (libxt6t64 via xclip). Desktop edition.
+x11-common
