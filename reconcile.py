@@ -25,7 +25,7 @@ def tracked() -> list[str]:
 
 
 def check_server_iso() -> dict:
-    isos = sorted(glob.glob("out/tetronos-server-*.iso"))
+    isos = sorted(i for i in glob.glob("out/tetronos-server-*.iso") if "-fw-" not in i)
     if not isos:
         return {"built": False, "mb": 0, "target_mb": TARGET_MB, "over_target": False, "recorded": True}
     mb = Path(isos[-1]).stat().st_size / 1e6
@@ -67,8 +67,8 @@ def check_editions() -> dict:
     t = Path("auto/config").read_text() if Path("auto/config").exists() else ""
     return {
         "server": "server)" in t,
-        "regular": "regular)" in t,
-        "firmware_per_edition": 'FW=false' in t and 'FW=true' in t and '--firmware-chroot "$FW"' in t,
+        "desktop": "desktop)" in t,
+        "firmware_axis": "FIRMWARE" in t and 'FW=false' in t and 'FW=true' in t and '--firmware-chroot "$FW"' in t,
     }
 
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
         and ctx["no_gui"]["violations"] == 0
         and ctx["secrets"]["count"] == 0
         and ctx["scripts"]["failures"] == 0
-        and ctx["editions"]["server"] and ctx["editions"]["regular"] and ctx["editions"]["firmware_per_edition"]
+        and ctx["editions"]["server"] and ctx["editions"]["desktop"] and ctx["editions"]["firmware_axis"]
         and ctx["legacy_name"]["count"] == 0
         and ctx["local_docs"]["ignored"] and ctx["local_docs"]["tracked"] == 0
         and ctx["manifest"]["parsed"] and ctx["manifest"]["unpinned"] == 0

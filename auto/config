@@ -1,13 +1,20 @@
 #!/bin/sh
-# live-build config for TetronOS. EDITION selects the variant (server|regular).
+# live-build config for TetronOS. EDITION selects the level (server|desktop);
+# FIRMWARE (none|all) is set by scripts/build.sh from the edition default.
 set -e
 EDITION="${EDITION:-server}"
+: "${FIRMWARE:?FIRMWARE must be none or all (set by scripts/build.sh)}"
 
 APPEND="boot=live components username=tetronos hostname=tetron locales=en_US.UTF-8 keyboard-layouts=us"
 case "$EDITION" in
-	server)  APPEND="$APPEND console=tty0 console=ttyS0,115200n8"; FW=false ;;
-	regular) APPEND="$APPEND quiet"; FW=true ;;
+	server)  APPEND="$APPEND console=tty0 console=ttyS0,115200n8" ;;
+	desktop) APPEND="$APPEND quiet console=ttyS0,115200n8 console=tty0" ;;
 	*) echo "unknown EDITION: $EDITION" >&2; exit 1 ;;
+esac
+case "$FIRMWARE" in
+	none) FW=false ;;
+	all)  FW=true ;;
+	*) echo "unknown FIRMWARE: $FIRMWARE" >&2; exit 1 ;;
 esac
 
 lb config noauto \

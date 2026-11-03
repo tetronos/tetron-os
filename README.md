@@ -2,7 +2,7 @@
 
 A GUI-less Debian trixie live ISO and installer. kmscon console, tetron-wm desktop, tetron mesh. No X11, no Wayland.
 
-Editions: `server` (minimum size, built and tested first) and `regular` (everything rolled in).
+Editions are levels of one tree: `server` (ssh, no firmware) and `desktop` (hardware, sound, wifi, all firmware); `minimal` and `full` come later. `FIRMWARE=none|all` is a separate axis; `-fw` in the ISO name marks all firmware.
 
 ## Build
 
@@ -10,6 +10,7 @@ Default runner is a Debian 13 build VM (QEMU/KVM). `make vm-create` once, then `
 
     make vm-create
     make iso EDITION=server      # output in out/
+    make iso EDITION=desktop     # tetronos-desktop-fw-*.iso
 
 ## Layout
 

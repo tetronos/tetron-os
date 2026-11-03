@@ -9,6 +9,8 @@ check() { desc="$1"; shift; if "$@" >/dev/null 2>&1; then ok "$desc"; else bad "
 # kmscon (tetronos-core) is only in trixie-backports: same source and pin as the ISO.
 echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
 cp /kmscon-backports.pref /etc/apt/preferences.d/kmscon-backports.pref
+# CPU microcode (tetronos-desktop) is in non-free-firmware, like on the ISO.
+sed -i 's/^Components: main$/Components: main non-free-firmware/' /etc/apt/sources.list.d/debian.sources
 apt-get update -qq >/dev/null
 apt-get install -y -qq --no-install-recommends systemd >/dev/null 2>&1
 
@@ -33,6 +35,9 @@ while IFS='|' read -r name version smoke; do
 		check "group tetron created" getent group tetron
 		check "no /etc/tetron created at install" sh -c '! [ -e /etc/tetron ]'
 		check "no identity created" sh -c '! [ -e /etc/tetron/secret_key ]'
+	}
+	[ "$name" = tetronos-desktop-config ] && {
+		check "polkit rules installed" test -f /usr/share/polkit-1/rules.d/50-tetronos-desktop.rules
 	}
 	[ "$name" = tetronos-live-config ] && {
 		check "kmsconvt@tty1 enabled" systemctl is-enabled kmsconvt@tty1.service

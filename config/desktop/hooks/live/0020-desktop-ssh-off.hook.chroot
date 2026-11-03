@@ -1,0 +1,6 @@
+#!/bin/sh
+# Desktop installs openssh-server but does not listen by default; a laptop
+# should not accept ssh on public networks until the user turns it on.
+set -e
+systemctl disable ssh.service
+systemctl disable ssh.socket 2>/dev/null || true

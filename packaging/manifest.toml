@@ -96,15 +96,69 @@ version = "0.15.0"
 revision = "1"
 arch = "all"
 section = "metapackages"
-description = "TetronOS Server edition package set"
+description = "TetronOS base package set of every edition"
 long_description = """
 Installs the tetron mesh VPN (daemon and CLI), its terminal dashboard
-tetron-tui, the tetron-wm terminal window manager, an SSH server and
-NetworkManager and the kmscon console (from trixie-backports). Desktop
-apps are not included: see tetronos-suite.
+tetron-tui, the tetron-wm terminal window manager, NetworkManager and the
+kmscon console (from trixie-backports). The SSH server comes with
+tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
-           "openssh-server", "network-manager", "kmscon (>= 10)"]
+           "network-manager", "kmscon (>= 10)"]
+
+[[package]]
+name = "tetronos-server"
+kind = "meta"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "metapackages"
+description = "TetronOS Server edition package set"
+long_description = """
+Installs tetronos-core and an SSH server.
+"""
+depends = ["tetronos-core (= 0.15.0-1)", "openssh-server"]
+
+[[package]]
+name = "tetronos-desktop-config"
+kind = "local"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "admin"
+description = "TetronOS desktop: polkit rules for console logins"
+long_description = """
+kmscon runs the login on a pseudo terminal, so the session is not an
+active seat session. These polkit rules let members of netdev manage
+NetworkManager and members of users power off, reboot and suspend.
+"""
+depends = ["polkitd"]
+
+[[package.files]]
+src = "files/tetronos-desktop-config/50-tetronos-desktop.rules"
+dst = "usr/share/polkit-1/rules.d/50-tetronos-desktop.rules"
+mode = "0644"
+
+[[package]]
+name = "tetronos-desktop"
+kind = "meta"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "metapackages"
+description = "TetronOS Desktop edition package set"
+long_description = """
+Installs tetronos-server plus what a laptop or desktop needs: polkit and
+a logind session for the console login, wifi (wpasupplicant), sound
+(PipeWire), bluetooth, backlight and battery tools, CPU microcode and the
+tools tetron-wm features use (tetron-wm-desktop). The SSH server is
+installed; a fresh Desktop install leaves it off.
+"""
+depends = ["tetronos-server (= 0.15.0-1)", "tetronos-desktop-config (= 0.15.0-1)",
+           "tetron-wm-desktop (>= 0.15)", "polkitd", "libpam-systemd", "dbus-user-session",
+           "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
+           "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
+           "upower", "intel-microcode", "amd64-microcode"]
 
 [[package]]
 name = "tetronos-suite"

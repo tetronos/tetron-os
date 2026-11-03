@@ -3,6 +3,13 @@
 # into /build/$EDITION and runs live-build there.
 set -e
 EDITION="${EDITION:-server}"
+# Firmware is its own axis; each edition has a default.
+case "$EDITION" in
+	server)  FIRMWARE="${FIRMWARE:-none}" ;;
+	desktop) FIRMWARE="${FIRMWARE:-all}" ;;
+	*) echo "unknown EDITION: $EDITION" >&2; exit 1 ;;
+esac
+SUFFIX=""; [ "$FIRMWARE" = all ] && SUFFIX="-fw"
 SRC="${SRC:-/src}"
 WORK="${WORKROOT:-/build}/$EDITION"
 OUTDIR="${OUTDIR:-/out}"
@@ -25,7 +32,14 @@ python3 -m http.server 8099 --bind 127.0.0.1 --directory "$REPO" >"$WORK/repo-ht
 HTTP_PID=$!
 trap 'kill $HTTP_PID 2>/dev/null || true' EXIT
 sleep 1
-export EDITION
+# The image installs no Recommends: the desktop gets the tools tetron-wm
+# features use from the Recommends of the tetron-wm-desktop deb.
+if [ "$EDITION" = desktop ]; then
+	WMD=$(ls "$REPO"/tetron-wm-desktop_*_all.deb | head -1)
+	dpkg-deb -f "$WMD" Recommends | tr ',' '\n' | sed 's/|.*//; s/(.*)//; s/ //g' | grep . \
+		> config/package-lists/tetron-wm-desktop-tools.list.chroot
+fi
+export EDITION FIRMWARE
 # Drop stage stamps, chroot and binary of an earlier build (the download cache stays).
 lb clean
 lb config
@@ -34,7 +48,7 @@ kill $HTTP_PID 2>/dev/null || true
 python3 "$SRC/scripts/no_gui_check.py" binary/live/filesystem.packages "$SRC/config/gui-allowlist.txt"
 mkdir -p "$OUTDIR"
 ISO=$(ls -1 live-image-*.iso | head -1)
-OUT="$OUTDIR/tetronos-$EDITION-$(date +%Y%m%d)-amd64.iso"
+OUT="$OUTDIR/tetronos-$EDITION$SUFFIX-$(date +%Y%m%d)-amd64.iso"
 cp "$ISO" "$OUT"
 cp binary/live/filesystem.packages "${OUT%.iso}.packages"
 ls -l "$OUT"

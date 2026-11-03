@@ -1,0 +1,13 @@
+// kmscon runs the login on a pts, so the user's session is not an active
+// seat session and the allow_active defaults never apply. Grant the
+// desktop actions by group instead.
+polkit.addRule(function (action, subject) {
+	if (action.id.indexOf("org.freedesktop.NetworkManager.") === 0 &&
+	    subject.isInGroup("netdev")) {
+		return polkit.Result.YES;
+	}
+	if (/^org\.freedesktop\.login1\.(power-off|reboot|suspend|hibernate)/.test(action.id) &&
+	    subject.isInGroup("users")) {
+		return polkit.Result.YES;
+	}
+});
