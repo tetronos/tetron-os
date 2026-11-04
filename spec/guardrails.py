@@ -118,4 +118,9 @@ class BuildOutputsNeverOverwritten(Requirement):
     (<name>-<YYYYmmdd-HHMMSS>.iso) before the new one is written. Pulling
     from the build VM does the same on the host: files it would replace go
     to out/archive/replaced-<pull time>/. Nothing in out/ is deleted by
-    the build; cleaning up is USER's call."""
+    the build; cleaning up is USER's call. So that the archive can not
+    grow unnoticed, every build and every pull prints the size of out/
+    and out/archive (count and GB) and the free space on that disk, and
+    warns when the archive passes ARCHIVE_WARN_GB (default 20) or the free
+    space drops under FREE_WARN_GB (default 15, sized for the 40 GB build
+    VM). The warning names the folder; it never deletes."""
