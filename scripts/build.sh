@@ -51,6 +51,15 @@ python3 "$SRC/scripts/no_gui_check.py" binary/live/filesystem.packages "$SRC/con
 mkdir -p "$OUTDIR"
 ISO=$(ls -1 live-image-*.iso | head -1)
 OUT="$OUTDIR/tetronos-$EDITION$SUFFIX-$(date +%Y%m%d)-amd64.iso"
+# Never overwrite an earlier ISO: move a same-name one and its package list
+# to out/archive with its old timestamp first.
+if [ -e "$OUT" ]; then
+	mkdir -p "$OUTDIR/archive"
+	OLD="$OUTDIR/archive/$(basename "${OUT%.iso}")-$(date -r "$OUT" +%Y%m%d-%H%M%S)"
+	mv "$OUT" "$OLD.iso"
+	[ -e "${OUT%.iso}.packages" ] && mv "${OUT%.iso}.packages" "$OLD.packages"
+	echo "archived earlier ISO to $OLD.iso"
+fi
 cp "$ISO" "$OUT"
 cp binary/live/filesystem.packages "${OUT%.iso}.packages"
 ls -l "$OUT"

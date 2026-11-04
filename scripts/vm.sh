@@ -84,7 +84,10 @@ case "${1:-}" in
 	status) running && echo running || echo stopped ;;
 	ssh) shift; ssh_vm "$@" ;;
 	sync) rsync -a --delete -e "ssh $SSH_OPTS" --exclude /build --exclude /out --exclude /.git --exclude /DO-NOT-COMMIT --exclude /packaging/cache "$ROOT/" builder@127.0.0.1:src/ ;;
-	pull) mkdir -p "$ROOT/out"; rsync -a -e "ssh $SSH_OPTS" builder@127.0.0.1:out/ "$ROOT/out/" ;;
+	# Files the pull would replace on the host go to out/archive/replaced-<time>;
+	# the VM's own out/archive stays in the VM (the host keeps its own copies).
+	pull) mkdir -p "$ROOT/out"; rsync -a --exclude /archive/ --backup --backup-dir="archive/replaced-$(date +%Y%m%d-%H%M%S)" \
+		-e "ssh $SSH_OPTS" builder@127.0.0.1:out/ "$ROOT/out/" ;;
 	destroy) stop; rm -rf "$VMDIR" ;;
 	*) echo "usage: $0 create|start|stop|status|ssh|sync|pull|destroy" >&2; exit 2 ;;
 esac
