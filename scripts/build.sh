@@ -63,4 +63,5 @@ fi
 cp "$ISO" "$OUT"
 cp binary/live/filesystem.packages "${OUT%.iso}.packages"
 ls -l "$OUT"
+sh "$SRC/scripts/out-report.sh" "$OUTDIR"
 chown -R "${HOST_UID:-0}:${HOST_GID:-0}" "$OUTDIR" "$WORK"

@@ -14,6 +14,7 @@ ifeq ($(RUNNER),vm)
 	$(VM) sync
 	$(VM) ssh 'sudo env EDITION=$(EDITION) FIRMWARE=$(FIRMWARE) SRC=/home/builder/src WORKROOT=/var/tmp/build OUTDIR=/home/builder/out HOST_UID=$$(id -u) HOST_GID=$$(id -g) /home/builder/src/scripts/build.sh'
 	$(VM) pull
+	scripts/out-report.sh out
 else
 	$(MAKE) docker-image
 	mkdir -p build out
