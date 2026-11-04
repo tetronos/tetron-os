@@ -87,10 +87,17 @@ class InstallModes(Requirement):
 
 
 class BrandedBoot(Requirement):
-    """A shipped ISO shows TetronOS branding, not Debian's: its own logo on
-    the boot menu splash (syslinux on BIOS, grub on UEFI) and a TetronOS
-    boot menu title, and TetronOS greeting text in /etc/issue, the motd
-    and the kmscon login banner. Logo art and wording are USER decisions.
+    """A shipped ISO shows TetronOS branding, not Debian's. Logo art and
+    wording are USER decisions; decided: the green circle T icon
+    (docs/images/icon.svg) and the tagline "The desktop for your
+    terminal.". The boot menu splash (syslinux on BIOS, grub on UEFI, one
+    SVG in config/common/bootloaders) shows the icon, the TetronOS name,
+    the tagline and a small line with the edition, the Debian base release,
+    the build date and the kernel. Menu entries read "TetronOS live"
+    instead of "Live system"; the syslinux menu title is TetronOS and the
+    grub theme has no title text (the splash carries the name). Greeting
+    text in /etc/issue (also the kmscon login banner, agetty prints it),
+    /etc/issue.net and /etc/motd comes from tetronos-branding.
     Required before the release candidate (M8)."""
 
 

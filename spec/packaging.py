@@ -109,7 +109,7 @@ class MetapackagesBuiltHere(Requirement):
 
 class TetronosCoreMeta(Requirement):
     """tetronos-core is the base package set of every edition: it Depends on
-    tetron, tetron-tui, tetron-wm, network-manager and kmscon (>= 10),
+    tetron, tetron-tui, tetron-wm, tetronos-branding, network-manager and kmscon (>= 10),
     which brings libtsm4 (>= 4.8) with it. openssh-server is not in core:
     it comes with tetronos-server. Both come from
     trixie-backports (see KmsconFromBackports). It does not pull
@@ -201,3 +201,16 @@ class TetronosDesktopConfig(Requirement):
     active seat session and polkit's allow_active defaults do not apply.
     Bluetooth access comes from bluez's own D-Bus policy for the bluetooth
     group."""
+
+
+class TetronosBranding(Requirement):
+    """tetronos-branding (kind local) gives every TetronOS system, live or
+    installed, TetronOS greeting text. It ships issue, issue.net and motd in
+    /usr/share/tetronos-branding/. Its postinst diverts /etc/issue,
+    /etc/issue.net and /etc/motd from base-files to <file>.debian with
+    dpkg-divert --rename and points each at its TetronOS copy with a
+    symlink, so base-files upgrades never overwrite them. /etc/issue names
+    the base with agetty's \\S{PRETTY_NAME}, so it stays right across
+    Debian releases. A file the admin put in place of a symlink is kept.
+    Removing the package removes its symlinks and restores the Debian
+    files."""
