@@ -123,4 +123,8 @@ class BuildOutputsNeverOverwritten(Requirement):
     and out/archive (count and GB) and the free space on that disk, and
     warns when the archive passes ARCHIVE_WARN_GB (default 20) or the free
     space drops under FREE_WARN_GB (default 15, sized for the 40 GB build
-    VM). The warning names the folder; it never deletes."""
+    VM). The warning names the folder; it never deletes. One exception,
+    decided by USER on 2026-11-04: after a pull, the build VM deletes its
+    own copy of a file in out/ (archive included) once a file with the
+    same SHA-256 exists on the host under out/. Files without a confirmed
+    host copy stay in the VM. The host side never deletes."""
