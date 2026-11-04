@@ -14,6 +14,21 @@ KEY="$VMDIR/id_ed25519"
 SSH_OPTS="-i $KEY -p $PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=5"
 
 ssh_vm() { ssh $SSH_OPTS builder@127.0.0.1 "$@"; }
+# Delete the VM's copy of each file in out/ (archive included) whose SHA-256
+# matches a file on the host under out/. Unconfirmed files stay in the VM.
+prune_vm_out() {
+	host=$(mktemp); vm=$(mktemp)
+	find "$ROOT/out" -type f -exec sha256sum {} + | awk '{print $1}' | sort -u > "$host"
+	ssh_vm 'cd out && find . -type f -exec sha256sum {} +' > "$vm" || { rm -f "$host" "$vm"; return 1; }
+	confirmed=$(awk 'NR == FNR {h[$1]; next} ($1 in h) {print substr($0, 67)}' "$host" "$vm")
+	kept=$(awk 'NR == FNR {h[$1]; next} !($1 in h) {print substr($0, 67)}' "$host" "$vm")
+	if [ -n "$confirmed" ]; then
+		printf '%s\n' "$confirmed" | ssh_vm 'cd out && tr "\n" "\0" | xargs -0 rm -f -- && find . -mindepth 1 -type d -empty -delete'
+		echo "VM out: deleted $(printf '%s\n' "$confirmed" | wc -l) file(s) confirmed on the host by SHA-256"
+	fi
+	[ -n "$kept" ] && printf 'VM out: kept (no matching host copy): %s\n' "$kept"
+	rm -f "$host" "$vm"
+}
 running() { [ -f "$VMDIR/qemu.pid" ] && kill -0 "$(cat "$VMDIR/qemu.pid")" 2>/dev/null; }
 
 create() {
@@ -87,7 +102,7 @@ case "${1:-}" in
 	# Files the pull would replace on the host go to out/archive/replaced-<time>;
 	# the VM's own out/archive stays in the VM (the host keeps its own copies).
 	pull) mkdir -p "$ROOT/out"; rsync -a --exclude /archive/ --backup --backup-dir="archive/replaced-$(date +%Y%m%d-%H%M%S)" \
-		-e "ssh $SSH_OPTS" builder@127.0.0.1:out/ "$ROOT/out/" ;;
+		-e "ssh $SSH_OPTS" builder@127.0.0.1:out/ "$ROOT/out/" && prune_vm_out ;;
 	destroy) stop; rm -rf "$VMDIR" ;;
 	*) echo "usage: $0 create|start|stop|status|ssh|sync|pull|destroy" >&2; exit 2 ;;
 esac
