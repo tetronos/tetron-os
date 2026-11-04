@@ -108,3 +108,14 @@ class EditionsAndFirmwareAxis(Requirement):
     none for server and all for desktop. --firmware-chroot follows
     FIRMWARE. The ISO is named tetronos-<edition>[-fw]-<date>-amd64.iso,
     with -fw whenever FIRMWARE=all."""
+
+
+class BuildOutputsNeverOverwritten(Requirement):
+    """A build never overwrites an earlier ISO (USER is data-loss averse).
+    When the target name tetronos-<edition>[-fw]-<date>-amd64.iso already
+    exists, the old ISO and its .packages list move to out/archive/ with
+    the old file's modification time added to the name
+    (<name>-<YYYYmmdd-HHMMSS>.iso) before the new one is written. Pulling
+    from the build VM does the same on the host: files it would replace go
+    to out/archive/replaced-<pull time>/. Nothing in out/ is deleted by
+    the build; cleaning up is USER's call."""
