@@ -11,7 +11,7 @@ OUT="$(cd "$(dirname "$0")/.." && pwd)/out"
 mkdir -p "$OUT"
 LOG="$OUT/boot-$FW.log"; PNG="$OUT/boot-$FW.png"
 TMP=$(mktemp -d); QMP="$TMP/qmp.sock"
-trap 'kill $QEMU_PID 2>/dev/null; rm -rf "$TMP"' EXIT
+trap 'kill $QEMU_PID 2>/dev/null || true; rm -rf "$TMP"' EXIT
 rm -f "$LOG" "$PNG"
 
 case "$FW" in
