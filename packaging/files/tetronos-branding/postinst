@@ -1,0 +1,13 @@
+#!/bin/sh
+# Take /etc/issue, /etc/issue.net and /etc/motd over from base-files: the
+# Debian files move to <file>.debian, ours are symlinks. A regular file an
+# admin put there is left alone.
+set -e
+if [ "$1" = configure ]; then
+	for f in issue issue.net motd; do
+		dpkg-divert --package tetronos-branding --add --rename --divert "/etc/$f.debian" "/etc/$f" >/dev/null
+		if [ ! -e "/etc/$f" ] || [ -L "/etc/$f" ]; then
+			ln -sfn "/usr/share/tetronos-branding/$f" "/etc/$f"
+		fi
+	done
+fi

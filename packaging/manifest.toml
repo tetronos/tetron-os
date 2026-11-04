@@ -90,6 +90,40 @@ url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download
 sha256_url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb.sha256"
 
 [[package]]
+name = "tetronos-branding"
+kind = "local"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "admin"
+description = "TetronOS greeting text for the console, ssh and login"
+long_description = """
+Diverts /etc/issue, /etc/issue.net and /etc/motd from base-files and
+points them at the TetronOS greeting. Removing the package restores the
+Debian files.
+"""
+depends = ["base-files"]
+
+[[package.files]]
+src = "files/tetronos-branding/issue"
+dst = "usr/share/tetronos-branding/issue"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-branding/issue.net"
+dst = "usr/share/tetronos-branding/issue.net"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-branding/motd"
+dst = "usr/share/tetronos-branding/motd"
+mode = "0644"
+
+[package.scripts]
+postinst = "files/tetronos-branding/postinst"
+postrm = "files/tetronos-branding/postrm"
+
+[[package]]
 name = "tetronos-core"
 kind = "meta"
 version = "0.15.0"
@@ -104,7 +138,7 @@ kmscon console (from trixie-backports). The SSH server comes with
 tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
-           "network-manager", "kmscon (>= 10)"]
+           "tetronos-branding (= 0.15.0-1)", "network-manager", "kmscon (>= 10)"]
 
 [[package]]
 name = "tetronos-server"

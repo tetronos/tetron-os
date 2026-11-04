@@ -15,12 +15,14 @@ WORK="${WORKROOT:-/build}/$EDITION"
 OUTDIR="${OUTDIR:-/out}"
 mkdir -p "$WORK"
 cd "$WORK"
-rm -rf auto config/package-lists config/includes.chroot config/hooks config/archives config/packages.chroot
+rm -rf auto config/package-lists config/includes.chroot config/hooks config/archives config/packages.chroot config/bootloaders
 mkdir -p config
 cp -a "$SRC/auto" .
 for d in "$SRC/config/common" "$SRC/config/$EDITION"; do
 	[ -d "$d" ] && cp -a "$d/." config/
 done
+# The boot splash names the edition (live-build fills the other @...@ fields).
+[ -f config/bootloaders/splash.svg ] && sed -i "s/@TETRONOS_EDITION@/$EDITION/" config/bootloaders/splash.svg
 # Local apt repository of the TetronOS debs, served on 127.0.0.1 only while
 # live-build runs (config/common/archives/tetronos-local.list.chroot).
 REPO="$WORK/repo"

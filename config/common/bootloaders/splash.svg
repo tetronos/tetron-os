@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TetronOS boot menu splash. live-build renders it to 640x480 PNG for
+     syslinux (BIOS) and grub (UEFI) and fills the @...@ placeholders.
+     The menu draws over the lower half, so art stays above y=180. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <defs>
+    <radialGradient id="bg" cx="0.2" cy="0.15" r="1.1">
+      <stop offset="0" stop-color="#16231a"/>
+      <stop offset="0.55" stop-color="#0d1110"/>
+      <stop offset="1" stop-color="#080a09"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <g transform="translate(100,96) scale(5) translate(-15.5,-15.5)">
+    <circle cx="15.5" cy="15.5" r="12" fill="#4CAF50"/>
+    <polygon points="10,8 21,8 21,11 17.25,11 17.25,23 13.75,23 13.75,11 10,11" fill="#FFFFFF"/>
+  </g>
+  <text x="186" y="92" font-family="DejaVu Sans" font-weight="bold" font-size="46" fill="#ffffff">TetronOS</text>
+  <text x="188" y="122" font-family="DejaVu Sans Mono" font-size="16" fill="#8bc34a">The desktop for your terminal.</text>
+  <text x="188" y="150" font-family="DejaVu Sans Mono" font-size="10" fill="#8a948c">@TETRONOS_EDITION@ edition · based on Debian @VERSION@ (@DISTRIBUTION@) · @ARCHITECTURE@</text>
+  <text x="188" y="164" font-family="DejaVu Sans Mono" font-size="10" fill="#8a948c">built @YEAR@-@MONTH@-@DAY@ · linux @LINUX_VERSIONS@</text>
+  <rect x="40" y="182" width="560" height="1" fill="#4CAF50" opacity="0.45"/>
+</svg>

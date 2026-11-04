@@ -36,6 +36,12 @@ while IFS='|' read -r name version smoke; do
 		check "no /etc/tetron created at install" sh -c '! [ -e /etc/tetron ]'
 		check "no identity created" sh -c '! [ -e /etc/tetron/secret_key ]'
 	}
+	[ "$name" = tetronos-branding ] && {
+		for f in issue issue.net motd; do
+			check "/etc/$f is TetronOS" grep -q TetronOS /etc/$f
+			check "/etc/$f.debian kept" test -e /etc/$f.debian
+		done
+	}
 	[ "$name" = tetronos-desktop-config ] && {
 		check "polkit rules installed" test -f /usr/share/polkit-1/rules.d/50-tetronos-desktop.rules
 	}
@@ -54,6 +60,11 @@ for name in $(for n in $installed; do echo $n; done | tac); do
 	check "dpkg -r" dpkg -r "$name"
 	check "dpkg -P" dpkg -P "$name"
 	check "files gone" sh -c "! dpkg -L $name"
+	[ "$name" = tetronos-branding ] && {
+		check "/etc/issue is Debian again" grep -q Debian /etc/issue
+		check "/etc/motd is Debian again" grep -q Debian /etc/motd
+		check "no diversions left" sh -c "! dpkg-divert --list tetronos-branding | grep -q ."
+	}
 	[ "$name" = tetronos-live-config ] && {
 		check "getty@tty1 enabled again" systemctl is-enabled getty@tty1.service
 		check "kmsconvt@tty1 not enabled" sh -c '! systemctl is-enabled kmsconvt@tty1.service'

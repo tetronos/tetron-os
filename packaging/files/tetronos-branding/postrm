@@ -1,0 +1,16 @@
+#!/bin/sh
+# Give /etc/issue, /etc/issue.net and /etc/motd back to base-files. A file
+# an admin put in place of our symlink stays; the Debian copy then stays
+# as <file>.debian.
+set -e
+if [ "$1" = remove ] || [ "$1" = purge ]; then
+	for f in issue issue.net motd; do
+		dpkg-divert --package tetronos-branding --list "/etc/$f" | grep -q . || continue
+		[ "$(readlink "/etc/$f" || true)" = "/usr/share/tetronos-branding/$f" ] && rm -f "/etc/$f"
+		if [ -e "/etc/$f" ]; then
+			dpkg-divert --package tetronos-branding --remove --divert "/etc/$f.debian" "/etc/$f" >/dev/null
+		else
+			dpkg-divert --package tetronos-branding --remove --rename --divert "/etc/$f.debian" "/etc/$f" >/dev/null
+		fi
+	done
+fi

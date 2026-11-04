@@ -1,0 +1,8 @@
+#!/bin/sh
+# Boot menu entries read TetronOS live instead of Live system (grub on UEFI,
+# syslinux on BIOS). Runs in binary/ after the bootloader configs exist.
+set -e
+for f in boot/grub/grub.cfg isolinux/live.cfg isolinux/menu.cfg; do
+	[ -f "$f" ] || continue
+	sed -i -e 's/Live system/TetronOS live/g' -e 's/^menu title Boot menu/menu title TetronOS/' "$f"
+done
