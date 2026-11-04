@@ -177,8 +177,10 @@ class TetronosLiveConfig(Requirement):
 
 class TetronosServerMeta(Requirement):
     """tetronos-server is the Server edition package set: it Depends on
-    tetronos-core (same version) and openssh-server. The Server ISO keeps
-    sshd enabled."""
+    tetronos-core (same version), openssh-server, python3 and python3-apt.
+    The Server ISO keeps sshd enabled. python3 is there because users
+    expect Ansible to manage a server, and Ansible needs python3 on the
+    managed node; python3-apt is what Ansible's apt module uses."""
 
 
 class TetronosDesktopMeta(Requirement):
