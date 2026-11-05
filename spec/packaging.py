@@ -37,10 +37,39 @@ class TetronDebSmokeTest(Requirement):
 
 
 class TetronFirstBootOperator(Requirement):
-    """On first boot, after the tetron daemon is running, the primary user
-    (uid 1000) is made the tetron operator (tetron set-operator USER) so the
-    user can run tetron without sudo. Done by a oneshot unit in tetronos-core
-    that disables itself afterwards."""
+    """tetronos-firstboot ships tetronos-firstboot.service (Type=oneshot) and
+    /usr/libexec/tetronos/firstboot. The unit runs after tetron.service and
+    live-config.service, once per system: it creates the stamp
+    /var/lib/tetronos/firstboot.done and does not run while the stamp
+    exists (on the live ISO the stamp lives in RAM, so it runs every live
+    boot). The script waits up to 60 s for the tetron daemon to answer,
+    then makes the primary user (the first /etc/passwd entry with a uid
+    from 1000 to 59999: tetronos on the live ISO, the installed user on an
+    installed system) the tetron operator with `tetron set-operator`, so
+    that user can join, invite and leave without sudo. If
+    /etc/tetron/pending-invite exists (written 0600 by the installer, or
+    dropped in by hand), it waits up to 60 s for the network
+    (nm-online), runs `tetron join --invite-file /etc/tetron/pending-invite`
+    and deletes the file whatever the result. The invite never appears in
+    argv, the journal or a log; only the step names and outcomes are logged.
+    Packages never enable units: the image enables it (live hook), the
+    installer enables it on the target. tetronos-core Depends on it
+    (USER 2026-11-04, join plan decisions 13 and 14)."""
+
+
+class TetronosLiveLeave(Requirement):
+    """tetronos-live-config ships tetronos-live-leave.service and
+    /usr/libexec/tetronos/live-leave so a live session that joined a mesh
+    leaves it on shutdown or reboot and no stale member is left. The unit
+    is RemainAfterExit oneshot ordered after tetron.service and
+    NetworkManager.service, so at shutdown its stop step runs while the
+    daemon and the network are still up; TimeoutStopSec bounds it. The
+    stop step does nothing when /run/tetronos/tetron-handed-over exists
+    (the installer carried this membership to the target). Otherwise, for
+    each network in `tetron status --json`: role Member runs
+    `tetron leave <network_key>`; role Coordinator prints a warning that
+    names the network and does nothing (USER 2026-11-04, join plan
+    decision 18). The live hook enables the unit; the package does not."""
 
 
 class PackagingManifest(Requirement):
@@ -109,8 +138,10 @@ class MetapackagesBuiltHere(Requirement):
 
 class TetronosCoreMeta(Requirement):
     """tetronos-core is the base package set of every edition: it Depends on
-    tetron, tetron-tui, tetron-wm, tetronos-branding, network-manager and kmscon (>= 10),
-    which brings libtsm4 (>= 4.8) with it. openssh-server is not in core:
+    tetron, tetron-tui, tetron-wm, tetronos-branding, tetronos-firstboot,
+    network-manager, curl and kmscon (>= 10), which brings libtsm4 (>= 4.8)
+    with it. curl is the invite URL fetcher of every edition (join plan
+    decision 19). openssh-server is not in core:
     it comes with tetronos-server. Both come from
     trixie-backports (see KmsconFromBackports). It does not pull
     tetron-wm-desktop, so Recommends of the desktop app list never reach
