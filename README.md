@@ -12,6 +12,8 @@ Default runner is a Debian 13 build VM (QEMU/KVM). `make vm-create` once, then `
     make iso EDITION=server      # output in out/
     make iso EDITION=desktop     # tetronos-desktop-fw-*.iso
 
+Each `make iso` also writes its full output to `out/logs/make-iso-<edition>[-fw]-<time>.log`.
+
 ## Layout
 
 - `builder/`   Dockerfile for the build container

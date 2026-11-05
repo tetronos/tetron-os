@@ -6,9 +6,20 @@ RUN     := docker run --rm --privileged -v $(CURDIR):/src:ro -v $(CURDIR)/build:
            -e EDITION=$(EDITION) -e FIRMWARE=$(FIRMWARE) -e HOST_UID=$(shell id -u) -e HOST_GID=$(shell id -g)
 VM      := scripts/vm.sh
 
-.PHONY: iso vm-create vm-start vm-stop vm-shell vm-destroy docker-image clean distclean
+.PHONY: iso iso-build vm-create vm-start vm-stop vm-shell vm-destroy docker-image clean distclean
 
-iso: debs
+# Whole build output to the terminal and out/logs/ (BuildLogsInOut); the
+# exit status is the build's, not tee's. -fw follows build.sh: FIRMWARE=all,
+# or FIRMWARE unset on the desktop edition.
+iso:
+	@mkdir -p out/logs; \
+	fw=; case "$(FIRMWARE)/$(EDITION)" in all/*|/desktop) fw=-fw ;; esac; \
+	log=out/logs/make-iso-$(EDITION)$$fw-$$(date +%Y%m%d-%H%M%S).log; st=$$(mktemp); \
+	echo "log: $$log"; \
+	{ $(MAKE) --no-print-directory iso-build; echo $$? > $$st; } 2>&1 | tee $$log; \
+	rc=$$(cat $$st); rm -f $$st; echo "log: $$log"; exit $$rc
+
+iso-build: debs
 ifeq ($(RUNNER),vm)
 	$(VM) start
 	$(VM) sync
