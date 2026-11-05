@@ -128,3 +128,11 @@ class BuildOutputsNeverOverwritten(Requirement):
     own copy of a file in out/ (archive included) once a file with the
     same SHA-256 exists on the host under out/. Files without a confirmed
     host copy stay in the VM. The host side never deletes."""
+
+
+class BuildLogsInOut(Requirement):
+    """`make iso` writes its whole output (debs, VM build, pull, report) to
+    the terminal and to out/logs/make-iso-<edition>[-fw]-<YYYYmmdd-HHMMSS>.log,
+    never to the repo root (USER 2026-11-05). The make exit status is the
+    build's, not tee's. Logs are never overwritten or deleted, as with
+    BuildOutputsNeverOverwritten."""
