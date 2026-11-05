@@ -1,0 +1,22 @@
+#!/bin/sh
+# Live session shutdown: leave every tetron network this live node is a
+# member of, so no stale member is left. Skipped when the installer carried
+# the membership to the installed system. A coordinator is warned about and
+# left alone (it can not leave without stranding the network).
+[ -e /run/tetronos/tetron-handed-over ] && { echo "membership handed over to the install, not leaving"; exit 0; }
+tetron status --json 2>/dev/null | python3 -c '
+import json, sys
+try:
+    nets = json.load(sys.stdin).get("networks") or []
+except ValueError:
+    nets = []
+for n in nets:
+    print(n.get("role", ""), n.get("network_key", ""), n.get("network", ""))
+' | while read -r role key name; do
+	[ -n "$key" ] || continue
+	case $role in
+	Coordinator) echo "WARNING: this live session is an admin of tetron network $name; not leaving it" ;;
+	*) tetron leave "$key" >/dev/null 2>&1 && echo "left $name" || echo "leave $name failed" ;;
+	esac
+done
+exit 0

@@ -1,0 +1,13 @@
+[Unit]
+Description=TetronOS first boot: tetron operator and pending invite join
+After=tetron.service live-config.service NetworkManager.service
+Wants=tetron.service
+ConditionPathExists=!/var/lib/tetronos/firstboot.done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/tetronos/firstboot
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

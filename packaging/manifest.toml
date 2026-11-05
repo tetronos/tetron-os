@@ -124,10 +124,37 @@ postinst = "files/tetronos-branding/postinst"
 postrm = "files/tetronos-branding/postrm"
 
 [[package]]
+name = "tetronos-firstboot"
+kind = "local"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "admin"
+description = "TetronOS first boot: tetron operator and pending invite join"
+long_description = """
+A oneshot unit that runs once per system after the tetron daemon starts:
+it makes the primary user the tetron operator and, if the installer left
+an invite in /etc/tetron/pending-invite, joins that mesh and deletes the
+invite. The unit is enabled by the image or the installer, not by the
+package.
+"""
+depends = ["tetron (>= 0.15.2)", "network-manager"]
+
+[[package.files]]
+src = "files/tetronos-firstboot/tetronos-firstboot.service"
+dst = "usr/lib/systemd/system/tetronos-firstboot.service"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-firstboot/firstboot"
+dst = "usr/libexec/tetronos/firstboot"
+mode = "0755"
+
+[[package]]
 name = "tetronos-core"
 kind = "meta"
 version = "0.15.0"
-revision = "1"
+revision = "2"
 arch = "all"
 section = "metapackages"
 description = "TetronOS base package set of every edition"
@@ -137,14 +164,15 @@ tetron-tui, the tetron-wm terminal window manager, NetworkManager and the
 kmscon console (from trixie-backports). The SSH server comes with
 tetronos-server, hardware and sound with tetronos-desktop.
 """
-depends = ["tetron (>= 0.15)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
-           "tetronos-branding (= 0.15.0-1)", "network-manager", "kmscon (>= 10)"]
+depends = ["tetron (>= 0.15.2)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
+           "tetronos-branding (= 0.15.0-1)", "tetronos-firstboot (= 0.15.0-1)",
+           "network-manager", "curl", "kmscon (>= 10)"]
 
 [[package]]
 name = "tetronos-server"
 kind = "meta"
 version = "0.15.0"
-revision = "1"
+revision = "2"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Server edition package set"
@@ -152,7 +180,7 @@ long_description = """
 Installs tetronos-core, an SSH server, and python3 with python3-apt so
 Ansible can manage the machine.
 """
-depends = ["tetronos-core (= 0.15.0-1)", "openssh-server", "python3", "python3-apt"]
+depends = ["tetronos-core (= 0.15.0-2)", "openssh-server", "python3", "python3-apt"]
 
 [[package]]
 name = "tetronos-desktop-config"
@@ -178,7 +206,7 @@ mode = "0644"
 name = "tetronos-desktop"
 kind = "meta"
 version = "0.15.0"
-revision = "1"
+revision = "2"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Desktop edition package set"
@@ -189,7 +217,7 @@ a logind session for the console login, wifi (wpasupplicant), sound
 tools tetron-wm features use (tetron-wm-desktop). The SSH server is
 installed; a fresh Desktop install leaves it off.
 """
-depends = ["tetronos-server (= 0.15.0-1)", "tetronos-desktop-config (= 0.15.0-1)",
+depends = ["tetronos-server (= 0.15.0-2)", "tetronos-desktop-config (= 0.15.0-1)",
            "tetron-wm-desktop (>= 0.15)", "polkitd", "libpam-systemd", "dbus-user-session",
            "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
@@ -199,7 +227,7 @@ depends = ["tetronos-server (= 0.15.0-1)", "tetronos-desktop-config (= 0.15.0-1)
 name = "tetronos-suite"
 kind = "meta"
 version = "0.15.0"
-revision = "1"
+revision = "2"
 arch = "all"
 section = "metapackages"
 description = "TetronOS with the full tetron suite"
@@ -208,14 +236,14 @@ Installs tetronos-core, tetron-wm-extras (tetron-wm-desktop and the
 terminal apps that tetron-wm features use), the tetron web dashboard
 tetron-webui and its message board addon tetron-messageboard.
 """
-depends = ["tetronos-core (= 0.15.0-1)", "tetron-wm-extras (>= 0.15)",
+depends = ["tetronos-core (= 0.15.0-2)", "tetron-wm-extras (>= 0.15)",
            "tetron-webui (>= 0.15)", "tetron-messageboard (>= 0.15)"]
 
 [[package]]
 name = "tetronos-live-config"
 kind = "local"
 version = "0.15.0"
-revision = "1"
+revision = "2"
 arch = "all"
 section = "admin"
 description = "TetronOS live medium: kmscon console with autologin to tetron-wm"
@@ -224,8 +252,8 @@ Runs kmscon on tty1 with autologin of the live user tetronos and starts
 tetron-wm in that login. Installed only on the TetronOS live ISO; the
 live user and its sudo rights come from live-config.
 """
-depends = ["tetronos-core (= 0.15.0-1)", "live-boot", "live-config", "live-config-systemd",
-           "user-setup", "sudo", "fonts-dejavu-core"]
+depends = ["tetronos-core (= 0.15.0-2)", "live-boot", "live-config", "live-config-systemd",
+           "user-setup", "sudo", "fonts-dejavu-core", "python3"]
 
 [[package.files]]
 src = "files/tetronos-live-config/kmsconvt-autologin.conf"
@@ -241,6 +269,16 @@ mode = "0755"
 src = "files/tetronos-live-config/tetronos-session.sh"
 dst = "etc/profile.d/tetronos-session.sh"
 mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-live-config/tetronos-live-leave.service"
+dst = "usr/lib/systemd/system/tetronos-live-leave.service"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-live-config/live-leave"
+dst = "usr/libexec/tetronos/live-leave"
+mode = "0755"
 
 [package.scripts]
 postinst = "files/tetronos-live-config/postinst"

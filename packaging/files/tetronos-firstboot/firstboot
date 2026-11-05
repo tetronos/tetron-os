@@ -1,0 +1,35 @@
+#!/bin/sh
+# TetronOS first boot: make the primary user the tetron operator, then join
+# with a pending invite if one was left in /etc/tetron/pending-invite. The
+# invite is never printed; the file is deleted whatever the result.
+invite=/etc/tetron/pending-invite
+stamp=/var/lib/tetronos/firstboot.done
+
+mkdir -p "${stamp%/*}" && : > "$stamp"
+
+i=0
+until tetron status >/dev/null 2>&1; do
+	i=$((i + 1))
+	[ "$i" -lt 60 ] || { echo "tetron daemon not answering after 60 s"; break; }
+	sleep 1
+done
+
+user=$(awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }' /etc/passwd)
+if [ -n "$user" ]; then
+	tetron set-operator "$user" >/dev/null 2>&1 &&
+		echo "operator: $user" || echo "operator: set-operator $user failed"
+else
+	echo "operator: no user with uid 1000-59999"
+fi
+
+if [ -f "$invite" ]; then
+	nm-online -q -t 60 || echo "join: network not up after 60 s, trying anyway"
+	if tetron join --invite-file "$invite" >/dev/null 2>&1; then
+		echo "join: ok"
+	else
+		echo "join: failed (exit $?)"
+	fi
+	rm -f "$invite"
+	echo "join: pending invite deleted"
+fi
+exit 0

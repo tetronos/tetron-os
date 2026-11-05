@@ -1,0 +1,14 @@
+[Unit]
+Description=TetronOS live: leave joined tetron networks on shutdown
+After=tetron.service NetworkManager.service network.target
+Wants=tetron.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+ExecStop=/usr/libexec/tetronos/live-leave
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

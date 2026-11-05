@@ -1,5 +1,7 @@
 #!/bin/sh
-# The tetron deb does not enable its unit; the image does. The node
-# identity is created on first daemon start on the booted system.
+# Packages do not enable their units; the image does. The node identity is
+# created on first daemon start on the booted system. tetronos-firstboot
+# makes the live user the tetron operator (and joins a pending invite);
+# tetronos-live-leave leaves joined networks on shutdown.
 set -e
-systemctl enable tetron.service
+systemctl enable tetron.service tetronos-firstboot.service tetronos-live-leave.service
