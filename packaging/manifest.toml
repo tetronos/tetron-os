@@ -91,7 +91,7 @@ sha256_url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/d
 
 [[package]]
 name = "tetron-browser"
-version = "0.0.3+tetron1"
+version = "0.15.0"
 revision = "1"
 arch = "amd64"
 section = "web"
@@ -111,11 +111,11 @@ conflicts = ["carbonyl"]
 smoke = "tetron-browser --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.0.3-tetron1/tetron-browser.linux-amd64.zip"
-sha256 = "ac410d7868353f12606ca380b04b665615289ed32a22db228d31dc3f39540628"
+url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.15.0/tetron-browser.linux-amd64.zip"
+sha256 = "a46a5dae34bd20b2f4a44c3b4ba233ae2dad245207e86feb0aac8eee064de437"
 
 [[package.trees]]
-src = "tetron-browser-0.0.3+tetron1"
+src = "tetron-browser-0.15.0"
 dst = "usr/lib/tetron-browser"
 
 [[package.files]]
@@ -285,7 +285,7 @@ depends = ["tetronos-server (= 0.15.0-4)", "tetronos-desktop-config (= 0.15.0-1)
            "tetron-wm-desktop (>= 0.15)", "polkitd", "libpam-systemd", "dbus-user-session",
            "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
-           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.0.3+tetron1)"]
+           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)"]
 
 [[package]]
 name = "tetronos-suite"
