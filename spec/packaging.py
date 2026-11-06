@@ -57,6 +57,34 @@ class TetronFirstBootOperator(Requirement):
     (USER 2026-11-04, join plan decisions 13 and 14)."""
 
 
+class TetronosBaseConfig(Requirement):
+    """tetronos-base-config (kind local) is the config every edition shares.
+    Its postinst creates /etc/skel/Desktop, Documents, Downloads and
+    Pictures (mode 0755), so every new user, the live user tetronos
+    included, has the folders the tetron-wm Files app expects (USER
+    2026-11-03). Its postrm on remove or purge deletes those folders only
+    when they are empty. tetronos-core Depends on it."""
+
+
+class TetronosLiveSshPassword(Requirement):
+    """On the live ISO, SSH password login is allowed only once no account
+    has the public live password. live-config sets the live user's
+    password to "live" (a DES crypt hash) and switches
+    PasswordAuthentication off in /etc/ssh/sshd_config. tetronos-live-config
+    ships /usr/libexec/tetronos/live-ssh-password, which checks every
+    /etc/shadow hash against crypt("live") and writes
+    /etc/ssh/sshd_config.d/40-tetronos-live-password.conf with
+    PasswordAuthentication and KbdInteractiveAuthentication both "no"
+    while any account still matches, and both "yes" once none does (the
+    drop-in is read first, so it wins over the main file). It runs
+    before sshd starts (ssh.service drop-in ExecStartPre) and whenever
+    /etc/shadow changes (tetronos-live-ssh-password.path), then reloads ssh
+    if it is running, so `passwd` alone enables password login. sshd stays
+    off by default on the Desktop live ISO and on on the Server live ISO;
+    this only decides how it accepts logins (USER 2026-11-05: if a user
+    enables ssh it should accept a password)."""
+
+
 class TetronosLiveLeave(Requirement):
     """tetronos-live-config ships tetronos-live-leave.service and
     /usr/libexec/tetronos/live-leave so a live session that joined a mesh
@@ -139,7 +167,8 @@ class MetapackagesBuiltHere(Requirement):
 class TetronosCoreMeta(Requirement):
     """tetronos-core is the base package set of every edition: it Depends on
     tetron, tetron-tui, tetron-wm, tetronos-branding, tetronos-firstboot,
-    network-manager, curl and kmscon (>= 10), which brings libtsm4 (>= 4.8)
+    tetronos-base-config, network-manager, curl, iputils-ping and
+    kmscon (>= 10), which brings libtsm4 (>= 4.8)
     with it. curl is the invite URL fetcher of every edition (join plan
     decision 19). openssh-server is not in core:
     it comes with tetronos-server. Both come from
@@ -221,7 +250,8 @@ class TetronosDesktopMeta(Requirement):
     libpam-systemd and dbus-user-session (a logind session and a user bus
     for the console login), wpasupplicant, wireless-regdb, iw, pipewire,
     pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
-    brightnessctl, upower, intel-microcode and amd64-microcode. Installing
+    brightnessctl, upower, rtkit (realtime scheduling for PipeWire),
+    intel-microcode and amd64-microcode. Installing
     it on a server with apt (Recommends on) also brings the tetron-wm-desktop
     tools."""
 
