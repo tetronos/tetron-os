@@ -16,8 +16,8 @@ arch = "amd64"
 smoke = "tetron --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.15.3/tetron_0.15.3-1_amd64.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.15.3/tetron_0.15.3-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron/releases/download/v0.15.3/tetron_0.15.3-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron/releases/download/v0.15.3/tetron_0.15.3-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-tui"
@@ -28,8 +28,8 @@ arch = "amd64"
 smoke = "tetron-tui --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-tui/releases/download/v0.15.1/tetron-tui_0.15.1-1_amd64.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron-tui/releases/download/v0.15.1/tetron-tui_0.15.1-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-tui/releases/download/v0.15.1/tetron-tui_0.15.1-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-tui/releases/download/v0.15.1/tetron-tui_0.15.1-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-wm"
@@ -40,8 +40,8 @@ arch = "amd64"
 smoke = "tetron-wm --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm_0.15.0-1_amd64.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm_0.15.0-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.0/tetron-wm_0.15.0-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.0/tetron-wm_0.15.0-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-wm-desktop"
@@ -51,8 +51,8 @@ revision = "1"
 arch = "all"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm-desktop_0.15.0-1_all.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm-desktop_0.15.0-1_all.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.0/tetron-wm-desktop_0.15.0-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.0/tetron-wm-desktop_0.15.0-1_all.deb.sha256"
 
 [[package]]
 name = "tetron-wm-extras"
@@ -62,8 +62,8 @@ revision = "1"
 arch = "all"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm-extras_0.15.0-1_all.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron-wm/releases/download/v0.15.0/tetron-wm-extras_0.15.0-1_all.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.0/tetron-wm-extras_0.15.0-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.0/tetron-wm-extras_0.15.0-1_all.deb.sha256"
 
 [[package]]
 name = "tetron-webui"
@@ -74,8 +74,8 @@ arch = "amd64"
 smoke = "tetron-webui --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-webui/releases/download/v0.15.0/tetron-webui_0.15.0-1_amd64.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron-webui/releases/download/v0.15.0/tetron-webui_0.15.0-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-webui/releases/download/v0.15.0/tetron-webui_0.15.0-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-webui/releases/download/v0.15.0/tetron-webui_0.15.0-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-messageboard"
@@ -86,8 +86,8 @@ arch = "amd64"
 smoke = "tetron-messageboard --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-browser"
@@ -98,8 +98,8 @@ arch = "amd64"
 smoke = "tetron-browser --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.15.1/tetron-browser_0.15.1-1_amd64.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.15.1/tetron-browser_0.15.1-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-browser/releases/download/v0.15.1/tetron-browser_0.15.1-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-browser/releases/download/v0.15.1/tetron-browser_0.15.1-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetronos-branding"

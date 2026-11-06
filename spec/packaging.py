@@ -135,7 +135,7 @@ class TetronBrowserDeb(Requirement):
     continuation of Carbonyl (the terminal Chromium browser, abandoned
     upstream after v0.0.3 in 2023-02), renamed as forks are. Like the other
     suite add-ons it is the release .deb of
-    github.com/ErikAllanKincaid/tetron-browser (kind = "deb", amd64),
+    github.com/tetronos/tetron-browser (kind = "deb", amd64),
     verified against its published sha256 and used unchanged. Its minor
     version follows tetron core (0.15.1). The package installs
     /usr/bin/tetron-browser and the short command /usr/bin/twww (USER
