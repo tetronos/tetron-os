@@ -90,41 +90,42 @@ url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download
 sha256_url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb.sha256"
 
 [[package]]
-name = "carbonyl"
-version = "0.0.3"
+name = "tetron-browser"
+version = "0.0.3+tetron1"
 revision = "1"
 arch = "amd64"
 section = "web"
 license = "BSD-3-Clause"
-homepage = "https://github.com/fathyb/carbonyl"
+homepage = "https://github.com/ErikAllanKincaid/tetron-browser"
 description = "Chromium based web browser that runs in a terminal"
 long_description = """
-Carbonyl renders web pages with Chromium and draws them in the terminal
-with truecolor blocks, with mouse and keyboard input. Packaged unchanged
-from the upstream v0.0.3 release; the program and its Chromium files are
-in /usr/lib/carbonyl.
+tetron-browser renders web pages with Chromium and draws them in the
+terminal with truecolor blocks, with mouse and keyboard input. It is a
+maintained continuation of Carbonyl: the Carbonyl v0.0.3 Chromium runtime
+with a rebuilt libcarbonyl.so that no longer crashes when the window is
+resized very small. Its files are in /usr/lib/tetron-browser.
 """
 depends = ["libnss3", "libnspr4", "libexpat1", "libasound2t64"]
-smoke = "carbonyl --version"
+replaces = ["carbonyl"]
+conflicts = ["carbonyl"]
+smoke = "tetron-browser --version"
 
-# Upstream publishes no checksum file: sha256 of the zip, pinned 2026-11-06.
-# Not the npm "latest" tag (0.0.2-next.bacf3db): it spins a core while idle.
 [package.source]
-url = "https://github.com/fathyb/carbonyl/releases/download/v0.0.3/carbonyl.linux-amd64.zip"
-sha256 = "46a902ea29bb32f773fb4ee341423705b92345a810422b8df93eaea6a1ec7ad2"
+url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.0.3-tetron1/tetron-browser.linux-amd64.zip"
+sha256 = "ac410d7868353f12606ca380b04b665615289ed32a22db228d31dc3f39540628"
 
 [[package.trees]]
-src = "carbonyl-0.0.3"
-dst = "usr/lib/carbonyl"
+src = "tetron-browser-0.0.3+tetron1"
+dst = "usr/lib/tetron-browser"
 
 [[package.files]]
-src = "files/carbonyl/carbonyl"
-dst = "usr/bin/carbonyl"
+src = "files/tetron-browser/tetron-browser"
+dst = "usr/bin/tetron-browser"
 mode = "0755"
 
 [[package.files]]
-src = "files/carbonyl/copyright"
-dst = "usr/share/doc/carbonyl/copyright"
+src = "files/tetron-browser/copyright"
+dst = "usr/share/doc/tetron-browser/copyright"
 mode = "0644"
 
 [[package]]
@@ -269,7 +270,7 @@ mode = "0644"
 name = "tetronos-desktop"
 kind = "meta"
 version = "0.15.0"
-revision = "5"
+revision = "6"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Desktop edition package set"
@@ -284,7 +285,7 @@ depends = ["tetronos-server (= 0.15.0-4)", "tetronos-desktop-config (= 0.15.0-1)
            "tetron-wm-desktop (>= 0.15)", "polkitd", "libpam-systemd", "dbus-user-session",
            "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
-           "upower", "rtkit", "intel-microcode", "amd64-microcode", "carbonyl (>= 0.0.3)"]
+           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.0.3+tetron1)"]
 
 [[package]]
 name = "tetronos-suite"

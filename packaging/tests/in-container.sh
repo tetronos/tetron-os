@@ -36,9 +36,10 @@ while IFS='|' read -r name version smoke; do
 		check "no /etc/tetron created at install" sh -c '! [ -e /etc/tetron ]'
 		check "no identity created" sh -c '! [ -e /etc/tetron/secret_key ]'
 	}
-	[ "$name" = carbonyl ] && {
-		check "carbonyl libraries all resolve" sh -c '! ldd /usr/lib/carbonyl/carbonyl /usr/lib/carbonyl/*.so | grep -q "not found"'
-		check "carbonyl draws about:blank in a pty" sh -c 'cd /tmp && TERM=xterm-256color timeout 15 script -qfc "carbonyl --no-sandbox about:blank" /dev/null </dev/null >cb.out 2>&1; grep -q "about:blank" cb.out'
+	[ "$name" = tetron-browser ] && {
+		check "tetron-browser libraries all resolve" sh -c '! ldd /usr/lib/tetron-browser/carbonyl /usr/lib/tetron-browser/*.so | grep -q "not found"'
+		check "tetron-browser draws about:blank in a pty" sh -c 'cd /tmp && TERM=xterm-256color timeout 15 script -qfc "tetron-browser --no-sandbox about:blank" /dev/null </dev/null >cb.out 2>&1; grep -q "about:blank" cb.out'
+		check "no carbonyl command" sh -c '! command -v carbonyl'
 	}
 	[ "$name" = tetronos-branding ] && {
 		for f in issue issue.net motd; do

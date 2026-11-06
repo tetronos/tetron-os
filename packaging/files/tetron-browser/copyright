@@ -1,8 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: carbonyl
-Source: https://github.com/fathyb/carbonyl/releases/tag/v0.0.3
-Comment: Binary release v0.0.3 (carbonyl.linux-amd64.zip), repackaged unchanged by TetronOS.
- The bundled Chromium components carry their own licenses, listed upstream.
+Upstream-Name: tetron-browser (continuation of Carbonyl by Fathy Boundjadj)
+Source: https://github.com/ErikAllanKincaid/tetron-browser/releases/tag/v0.0.3-tetron1
+Comment: Release v0.0.3-tetron1: the Carbonyl v0.0.3 Chromium runtime
+ (https://github.com/fathyb/carbonyl) with libcarbonyl.so rebuilt from the
+ tetron-browser source. The bundled Chromium components carry their own
+ licenses, listed upstream.
 
 Files: *
 Copyright: 2023 Fathy Boundjadj

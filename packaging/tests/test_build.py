@@ -45,6 +45,13 @@ class MetaControl(unittest.TestCase):
         self.assertIn("Recommends: htop\n", c)
         self.assertIn("Architecture: all\n", c)
 
+    def test_relation_fields(self):
+        pkg = dict(META, provides=["carbonyl"], replaces=["carbonyl"], conflicts=["carbonyl"])
+        c = build.control(pkg, TOP["maintainer"], 1)
+        for f in ("Provides", "Replaces", "Conflicts"):
+            self.assertIn(f"{f}: carbonyl\n", c)
+        self.assertNotIn("Provides:", build.control(META, TOP["maintainer"], 1))
+
     def test_meta_copyright_says_no_content(self):
         self.assertIn("no content of its own", build.copyright_text(META))
 
