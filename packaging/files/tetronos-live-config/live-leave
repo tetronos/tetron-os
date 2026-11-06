@@ -4,7 +4,15 @@
 # the membership to the installed system. A coordinator is warned about and
 # left alone (it can not leave without stranding the network).
 [ -e /run/tetronos/tetron-handed-over ] && { echo "membership handed over to the install, not leaving"; exit 0; }
-tetron status --json 2>/dev/null | python3 -c '
+# The daemon can be briefly unavailable (restarting): retry status.
+json=
+for i in 1 2 3 4 5; do
+	json=$(tetron status --json 2>/dev/null) && break
+	json=
+	sleep 1
+done
+[ -n "$json" ] || { echo "tetron daemon not answering; nothing left"; exit 0; }
+printf '%s\n' "$json" | python3 -c '
 import json, sys
 try:
     nets = json.load(sys.stdin).get("networks") or []

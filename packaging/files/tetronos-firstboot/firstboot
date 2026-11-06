@@ -16,8 +16,17 @@ done
 
 user=$(awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }' /etc/passwd)
 if [ -n "$user" ]; then
-	tetron set-operator "$user" >/dev/null 2>&1 &&
-		echo "operator: $user" || echo "operator: set-operator $user failed"
+	# The daemon can answer status before it accepts set-operator: retry.
+	i=0
+	until out=$(tetron set-operator "$user" 2>&1); do
+		i=$((i + 1))
+		if [ "$i" -ge 30 ]; then
+			echo "operator: set-operator $user failed: $out"
+			break
+		fi
+		sleep 2
+	done
+	[ "$i" -ge 30 ] || echo "operator: $user"
 else
 	echo "operator: no user with uid 1000-59999"
 fi

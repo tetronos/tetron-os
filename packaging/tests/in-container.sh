@@ -44,6 +44,7 @@ while IFS='|' read -r name version smoke; do
 	}
 	[ "$name" = tetronos-base-config ] && {
 		for d in Desktop Documents Downloads Pictures; do check "/etc/skel/$d created" test -d /etc/skel/$d; done
+		check "ping sysctl drop-in installed" grep -q '^net.ipv4.ping_group_range = 0 2147483647$' /usr/lib/sysctl.d/50-tetronos-ping.conf
 	}
 	[ "$name" = tetronos-live-config ] && {
 		check "live-ssh-password writes no while an account has the live password" sh -c 'useradd -p "$(perl -e "print crypt(q(live), q(8A))")" livetest && /usr/libexec/tetronos/live-ssh-password >/dev/null && grep -q "^PasswordAuthentication no" /etc/ssh/sshd_config.d/40-tetronos-live-password.conf'
