@@ -91,42 +91,15 @@ sha256_url = "https://github.com/ErikAllanKincaid/tetron-messageboard/releases/d
 
 [[package]]
 name = "tetron-browser"
-version = "0.15.0"
+kind = "deb"
+version = "0.15.1"
 revision = "1"
 arch = "amd64"
-section = "web"
-license = "BSD-3-Clause"
-homepage = "https://github.com/ErikAllanKincaid/tetron-browser"
-description = "Chromium based web browser that runs in a terminal"
-long_description = """
-tetron-browser renders web pages with Chromium and draws them in the
-terminal with truecolor blocks, with mouse and keyboard input. It is a
-maintained continuation of Carbonyl: the Carbonyl v0.0.3 Chromium runtime
-with a rebuilt libcarbonyl.so that no longer crashes when the window is
-resized very small. Its files are in /usr/lib/tetron-browser.
-"""
-depends = ["libnss3", "libnspr4", "libexpat1", "libasound2t64"]
-replaces = ["carbonyl"]
-conflicts = ["carbonyl"]
 smoke = "tetron-browser --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.15.0/tetron-browser.linux-amd64.zip"
-sha256 = "a46a5dae34bd20b2f4a44c3b4ba233ae2dad245207e86feb0aac8eee064de437"
-
-[[package.trees]]
-src = "tetron-browser-0.15.0"
-dst = "usr/lib/tetron-browser"
-
-[[package.files]]
-src = "files/tetron-browser/tetron-browser"
-dst = "usr/bin/tetron-browser"
-mode = "0755"
-
-[[package.files]]
-src = "files/tetron-browser/copyright"
-dst = "usr/share/doc/tetron-browser/copyright"
-mode = "0644"
+url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.15.1/tetron-browser_0.15.1-1_amd64.deb"
+sha256_url = "https://github.com/ErikAllanKincaid/tetron-browser/releases/download/v0.15.1/tetron-browser_0.15.1-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetronos-branding"
