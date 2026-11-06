@@ -46,7 +46,10 @@ class TetronFirstBootOperator(Requirement):
     then makes the primary user (the first /etc/passwd entry with a uid
     from 1000 to 59999: tetronos on the live ISO, the installed user on an
     installed system) the tetron operator with `tetron set-operator`, so
-    that user can join, invite and leave without sudo. If
+    that user can join, invite and leave without sudo. The daemon can answer
+    `status` before it accepts `set-operator` (VM test 2026-11-05: it failed
+    0.2 s after start), so set-operator is retried every 2 s for up to 60 s
+    and its error text is logged when it still fails. If
     /etc/tetron/pending-invite exists (written 0600 by the installer, or
     dropped in by hand), it waits up to 60 s for the network
     (nm-online), runs `tetron join --invite-file /etc/tetron/pending-invite`
@@ -63,7 +66,13 @@ class TetronosBaseConfig(Requirement):
     Pictures (mode 0755), so every new user, the live user tetronos
     included, has the folders the tetron-wm Files app expects (USER
     2026-11-03). Its postrm on remove or purge deletes those folders only
-    when they are empty. tetronos-core Depends on it."""
+    when they are empty. It also ships
+    /usr/lib/sysctl.d/50-tetronos-ping.conf with
+    `net.ipv4.ping_group_range = 0 2147483647`, so every user can ping
+    through ICMP datagram sockets: the image loses ping's cap_net_raw file
+    capability, and the kernel default range "1 0" allows nobody (VM test
+    2026-11-05). This is the systemd upstream default. tetronos-core
+    Depends on it."""
 
 
 class TetronosLiveSshPassword(Requirement):
@@ -94,7 +103,8 @@ class TetronosLiveLeave(Requirement):
     daemon and the network are still up; TimeoutStopSec bounds it. The
     stop step does nothing when /run/tetronos/tetron-handed-over exists
     (the installer carried this membership to the target). Otherwise, for
-    each network in `tetron status --json`: role Member runs
+    each network in `tetron status --json` (retried up to 5 times, 1 s
+    apart, when the daemon does not answer): role Member runs
     `tetron leave <network_key>`; role Coordinator prints a warning that
     names the network and does nothing (USER 2026-11-04, join plan
     decision 18). The live hook enables the unit; the package does not."""
