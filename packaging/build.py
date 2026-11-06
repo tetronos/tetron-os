@@ -12,6 +12,7 @@ import sys
 import tempfile
 import tomllib
 import urllib.request
+import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -134,6 +135,34 @@ def take_release_deb(pkg: dict, out: Path) -> Path:
     return target
 
 
+def extract_trees(pkg: dict, archive: Path, stage: Path) -> None:
+    """Copy each [[package.trees]] src directory of a zip asset to its dst:
+    regular files only, 0755 if executable in the archive, else 0644."""
+    import stat
+    with zipfile.ZipFile(archive) as z:
+        for t in pkg.get("trees", []):
+            prefix = t["src"].strip("/") + "/"
+            n = 0
+            for zi in z.infolist():
+                name = zi.filename
+                parts = Path(name).parts
+                if name.startswith("/") or ".." in parts:
+                    die(f"{pkg['name']}: unsafe path in archive: {name}")
+                if not name.startswith(prefix) or zi.is_dir():
+                    continue
+                mode = zi.external_attr >> 16
+                if stat.S_ISLNK(mode) or (mode and not stat.S_ISREG(mode)):
+                    die(f"{pkg['name']}: not a regular file in archive: {name}")
+                dst = stage / t["dst"] / name[len(prefix):]
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                with z.open(zi) as src, dst.open("wb") as f:
+                    shutil.copyfileobj(src, f)
+                dst.chmod(0o755 if mode & 0o111 else 0o644)
+                n += 1
+            if not n:
+                die(f"{pkg['name']}: no files under {prefix} in {archive.name}")
+
+
 def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
     name = pkg["name"]
     print(f"{name} {pkg['version']}-{pkg['revision']}")
@@ -148,10 +177,13 @@ def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(src, dst)
             dst.chmod(int(f["mode"], 8))
+        if pkg.get("trees"):
+            extract_trees(pkg, asset, stage)
         doc = stage / "usr/share/doc" / name / "copyright"
-        doc.parent.mkdir(parents=True, exist_ok=True)
-        doc.write_text(copyright_text(pkg))
-        doc.chmod(0o644)
+        if not doc.exists():  # a package may ship the upstream license text
+            doc.parent.mkdir(parents=True, exist_ok=True)
+            doc.write_text(copyright_text(pkg))
+            doc.chmod(0o644)
         files = sorted(p for p in stage.rglob("*") if p.is_file())
         size_kib = (sum(p.stat().st_size for p in files) + 1023) // 1024
         deb = stage / "DEBIAN"

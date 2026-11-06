@@ -126,8 +126,8 @@ class PackagingArchiveTrees(Requirement):
     entries: src is a directory inside the archive, dst a directory in the
     package. packaging/build.py copies every regular file under src to dst,
     mode 0755 when the archive marks it executable, else 0644. It aborts
-    when the archive has a symlink, an absolute path or a '..' component
-    under src, or when src holds no file."""
+    when the archive has an absolute path or a '..' component anywhere, a
+    symlink or other non-regular file under src, or no file under src."""
 
 
 class CarbonylDeb(Requirement):

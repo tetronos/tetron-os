@@ -1,0 +1,3 @@
+#!/bin/sh
+# Chromium finds its data files and libraries next to its own binary.
+exec /usr/lib/carbonyl/carbonyl "$@"

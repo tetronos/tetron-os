@@ -94,5 +94,60 @@ class LocalBuild(unittest.TestCase):
         self.assertIn("TetronOS configuration", build.copyright_text(LOCAL))
 
 
+def make_zip(path, members):
+    """members: (name, mode, data) or (name, "link", target)."""
+    import stat, zipfile
+    with zipfile.ZipFile(path, "w") as z:
+        for name, mode, data in members:
+            zi = zipfile.ZipInfo(name)
+            if mode == "link":
+                zi.external_attr = (stat.S_IFLNK | 0o777) << 16
+            else:
+                zi.external_attr = (stat.S_IFREG | mode) << 16
+            z.writestr(zi, data)
+
+
+TREE_PKG = {"name": "carbonyl", "version": "0.0.3", "revision": "1", "arch": "amd64",
+            "description": "test", "license": "BSD-3-Clause",
+            "trees": [{"src": "carbonyl-0.0.3", "dst": "usr/lib/carbonyl"}]}
+
+
+class ArchiveTrees(unittest.TestCase):
+    def stage(self, members):
+        import tempfile
+        td = tempfile.mkdtemp()
+        z = Path(td) / "a.zip"
+        make_zip(z, members)
+        st = Path(td) / "stage"
+        build.extract_trees(TREE_PKG, z, st)
+        return st
+
+    def test_copies_files_under_src_with_modes(self):
+        st = self.stage([("carbonyl-0.0.3/carbonyl", 0o755, "bin"),
+                         ("carbonyl-0.0.3/icudtl.dat", 0o600, "data"),
+                         ("carbonyl-0.0.3/sub/x.json", 0o644, "{}"),
+                         ("other/ignored", 0o644, "no")])
+        d = st / "usr/lib/carbonyl"
+        self.assertEqual((d / "carbonyl").stat().st_mode & 0o777, 0o755)
+        self.assertEqual((d / "icudtl.dat").stat().st_mode & 0o777, 0o644)
+        self.assertEqual((d / "sub/x.json").read_text(), "{}")
+        self.assertFalse((st / "other").exists())
+        self.assertFalse((d / "other").exists())
+
+    def test_rejects_symlink(self):
+        with self.assertRaises(SystemExit):
+            self.stage([("carbonyl-0.0.3/a", 0o755, "x"), ("carbonyl-0.0.3/l", "link", "/etc/passwd")])
+
+    def test_rejects_dotdot_and_absolute(self):
+        with self.assertRaises(SystemExit):
+            self.stage([("carbonyl-0.0.3/../evil", 0o644, "x")])
+        with self.assertRaises(SystemExit):
+            self.stage([("carbonyl-0.0.3/a", 0o644, "x"), ("/carbonyl-0.0.3/b", 0o644, "x")])
+
+    def test_empty_src_aborts(self):
+        with self.assertRaises(SystemExit):
+            self.stage([("other/a", 0o644, "x")])
+
+
 if __name__ == "__main__":
     unittest.main()
