@@ -121,6 +121,27 @@ class PackagingManifest(Requirement):
     that deb. Nothing is built from an unpinned or unverified input."""
 
 
+class PackagingArchiveTrees(Requirement):
+    """A release package whose asset is a zip archive lists [[package.trees]]
+    entries: src is a directory inside the archive, dst a directory in the
+    package. packaging/build.py copies every regular file under src to dst,
+    mode 0755 when the archive marks it executable, else 0644. It aborts
+    when the archive has a symlink, an absolute path or a '..' component
+    under src, or when src holds no file."""
+
+
+class CarbonylDeb(Requirement):
+    """carbonyl (the terminal Chromium browser) is a package built here from
+    the pinned v0.0.3 GitHub release zip for amd64. Upstream publishes no
+    checksum, so the manifest pins the zip's sha256. The release tree goes
+    to /usr/lib/carbonyl and /usr/bin/carbonyl is a wrapper that execs
+    /usr/lib/carbonyl/carbonyl. Depends: libnss3, libnspr4, libexpat1 and
+    libasound2t64 (what ldd finds missing on trixie). Smoke: carbonyl
+    --version prints 0.0.3. The npm latest tag (0.0.2-next.bacf3db) is never
+    used: it spins one core at 100% while idle, fixed upstream in b4ab3a8
+    (found on the live Desktop ISO 2026-11-05). License BSD-3-Clause."""
+
+
 class PackagingVerifiesChecksum(Requirement):
     """The build downloads each release asset into packaging/cache/, verifies
     its sha256 against the published checksum, and aborts with a clear error
@@ -261,7 +282,8 @@ class TetronosDesktopMeta(Requirement):
     for the console login), wpasupplicant, wireless-regdb, iw, pipewire,
     pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
     brightnessctl, upower, rtkit (realtime scheduling for PipeWire),
-    intel-microcode and amd64-microcode. Installing
+    intel-microcode, amd64-microcode and carbonyl (the web browser).
+    Installing
     it on a server with apt (Recommends on) also brings the tetron-wm-desktop
     tools."""
 
