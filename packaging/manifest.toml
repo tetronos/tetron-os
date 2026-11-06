@@ -10,14 +10,14 @@ maintainer = "TetronOS <noreply@tetron.invalid>"
 [[package]]
 name = "tetron"
 kind = "deb"
-version = "0.15.2"
+version = "0.15.3"
 revision = "1"
 arch = "amd64"
 smoke = "tetron --version"
 
 [package.source]
-url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.15.2/tetron_0.15.2-1_amd64.deb"
-sha256_url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.15.2/tetron_0.15.2-1_amd64.deb.sha256"
+url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.15.3/tetron_0.15.3-1_amd64.deb"
+sha256_url = "https://github.com/ErikAllanKincaid/tetron/releases/download/v0.15.3/tetron_0.15.3-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-tui"
@@ -162,7 +162,7 @@ an invite in /etc/tetron/pending-invite, joins that mesh and deletes the
 invite. The unit is enabled by the image or the installer, not by the
 package.
 """
-depends = ["tetron (>= 0.15.2)", "network-manager"]
+depends = ["tetron (>= 0.15.3)", "network-manager"]
 
 [[package.files]]
 src = "files/tetronos-firstboot/tetronos-firstboot.service"
@@ -188,7 +188,7 @@ tetron-tui, the tetron-wm terminal window manager, NetworkManager and the
 kmscon console (from trixie-backports). The SSH server comes with
 tetronos-server, hardware and sound with tetronos-desktop.
 """
-depends = ["tetron (>= 0.15.2)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
+depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-branding (= 0.15.0-1)", "tetronos-firstboot (= 0.15.0-2)",
            "tetronos-base-config (= 0.15.0-2)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)"]
