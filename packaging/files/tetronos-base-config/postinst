@@ -1,0 +1,9 @@
+#!/bin/sh
+# Folders the tetron-wm Files app expects in every new home directory.
+set -e
+if [ "$1" = configure ]; then
+	for d in Desktop Documents Downloads Pictures; do
+		mkdir -p "/etc/skel/$d"
+		chmod 0755 "/etc/skel/$d"
+	done
+fi

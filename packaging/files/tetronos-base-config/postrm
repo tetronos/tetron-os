@@ -1,0 +1,8 @@
+#!/bin/sh
+# Remove the /etc/skel folders, but only when they are still empty.
+set -e
+if [ "$1" = remove ] || [ "$1" = purge ]; then
+	for d in Desktop Documents Downloads Pictures; do
+		rmdir "/etc/skel/$d" 2>/dev/null || true
+	done
+fi

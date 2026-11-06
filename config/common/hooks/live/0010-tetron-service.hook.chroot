@@ -2,6 +2,7 @@
 # Packages do not enable their units; the image does. The node identity is
 # created on first daemon start on the booted system. tetronos-firstboot
 # makes the live user the tetron operator (and joins a pending invite);
-# tetronos-live-leave leaves joined networks on shutdown.
+# tetronos-live-leave leaves joined networks on shutdown;
+# tetronos-live-ssh-password.path re-checks ssh password login on passwd.
 set -e
-systemctl enable tetron.service tetronos-firstboot.service tetronos-live-leave.service
+systemctl enable tetron.service tetronos-firstboot.service tetronos-live-leave.service tetronos-live-ssh-password.path

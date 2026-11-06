@@ -42,6 +42,14 @@ while IFS='|' read -r name version smoke; do
 			check "/etc/$f.debian kept" test -e /etc/$f.debian
 		done
 	}
+	[ "$name" = tetronos-base-config ] && {
+		for d in Desktop Documents Downloads Pictures; do check "/etc/skel/$d created" test -d /etc/skel/$d; done
+	}
+	[ "$name" = tetronos-live-config ] && {
+		check "live-ssh-password writes no while an account has the live password" sh -c 'useradd -p "$(perl -e "print crypt(q(live), q(8A))")" livetest && /usr/libexec/tetronos/live-ssh-password >/dev/null && grep -q "^PasswordAuthentication no" /etc/ssh/sshd_config.d/40-tetronos-live-password.conf'
+		check "live-ssh-password writes yes once no account has it" sh -c 'userdel livetest && /usr/libexec/tetronos/live-ssh-password >/dev/null && grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config.d/40-tetronos-live-password.conf'
+		rm -f /etc/ssh/sshd_config.d/40-tetronos-live-password.conf
+	}
 	[ "$name" = tetronos-desktop-config ] && {
 		check "polkit rules installed" test -f /usr/share/polkit-1/rules.d/50-tetronos-desktop.rules
 	}
@@ -64,6 +72,9 @@ for name in $(for n in $installed; do echo $n; done | tac); do
 		check "/etc/issue is Debian again" grep -q Debian /etc/issue
 		check "/etc/motd is Debian again" grep -q Debian /etc/motd
 		check "no diversions left" sh -c "! dpkg-divert --list tetronos-branding | grep -q ."
+	}
+	[ "$name" = tetronos-base-config ] && {
+		check "empty /etc/skel folders removed" sh -c '! test -e /etc/skel/Desktop'
 	}
 	[ "$name" = tetronos-live-config ] && {
 		check "getty@tty1 enabled again" systemctl is-enabled getty@tty1.service
