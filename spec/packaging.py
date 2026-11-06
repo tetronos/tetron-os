@@ -130,16 +130,30 @@ class PackagingArchiveTrees(Requirement):
     symlink or other non-regular file under src, or no file under src."""
 
 
-class CarbonylDeb(Requirement):
-    """carbonyl (the terminal Chromium browser) is a package built here from
-    the pinned v0.0.3 GitHub release zip for amd64. Upstream publishes no
-    checksum, so the manifest pins the zip's sha256. The release tree goes
-    to /usr/lib/carbonyl and /usr/bin/carbonyl is a wrapper that execs
-    /usr/lib/carbonyl/carbonyl. Depends: libnss3, libnspr4, libexpat1 and
-    libasound2t64 (what ldd finds missing on trixie). Smoke: carbonyl
-    --version prints 0.0.3. The npm latest tag (0.0.2-next.bacf3db) is never
-    used: it spins one core at 100% while idle, fixed upstream in b4ab3a8
-    (found on the live Desktop ISO 2026-11-05). License BSD-3-Clause."""
+class TetronBrowserDeb(Requirement):
+    """tetron-browser is the web browser package: USER's maintained
+    continuation of Carbonyl (the terminal Chromium browser, abandoned
+    upstream after v0.0.3 in 2023-02), renamed as forks are. It is built
+    here from the pinned v0.0.3-tetron1 release zip of
+    github.com/ErikAllanKincaid/tetron-browser (amd64): the Carbonyl v0.0.3
+    Chromium runtime with libcarbonyl.so rebuilt on Debian 12. The manifest
+    pins the zip's sha256. The tree goes to /usr/lib/tetron-browser and
+    /usr/bin/tetron-browser is a wrapper that execs
+    /usr/lib/tetron-browser/carbonyl (the runtime keeps its internal name).
+    There is no carbonyl command and no short alias yet (USER: alias to be
+    decided). Version 0.0.3+tetron1. Replaces and Conflicts: carbonyl (the
+    earlier package built from the upstream zip). Depends: libnss3,
+    libnspr4, libexpat1, libasound2t64. Smoke: tetron-browser --version
+    prints 0.0.3+tetron1. It fixes the SIGTRAP crash when a window is
+    resized to one or two columns (found on the live Desktop ISO
+    2026-11-06). The npm carbonyl (latest tag 0.0.2-next.bacf3db, spins one
+    core while idle) is never used. License BSD-3-Clause."""
+
+
+class PackagingRelationFields(Requirement):
+    """A manifest entry may list provides, replaces and conflicts; build.py
+    writes them as the Provides, Replaces and Conflicts control fields, and
+    leaves a field out when its list is empty."""
 
 
 class PackagingVerifiesChecksum(Requirement):
@@ -282,7 +296,8 @@ class TetronosDesktopMeta(Requirement):
     for the console login), wpasupplicant, wireless-regdb, iw, pipewire,
     pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
     brightnessctl, upower, rtkit (realtime scheduling for PipeWire),
-    intel-microcode, amd64-microcode and carbonyl (the web browser).
+    intel-microcode, amd64-microcode and tetron-browser (the web
+    browser, >= 0.0.3+tetron1).
     Installing
     it on a server with apt (Recommends on) also brings the tetron-wm-desktop
     tools."""
