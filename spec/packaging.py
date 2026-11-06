@@ -133,22 +133,21 @@ class PackagingArchiveTrees(Requirement):
 class TetronBrowserDeb(Requirement):
     """tetron-browser is the web browser package: USER's maintained
     continuation of Carbonyl (the terminal Chromium browser, abandoned
-    upstream after v0.0.3 in 2023-02), renamed as forks are. It is built
-    here from the pinned v0.15.0 release zip of
-    github.com/ErikAllanKincaid/tetron-browser (amd64): the Carbonyl v0.0.3
-    Chromium runtime with libcarbonyl.so rebuilt on Debian 12. The manifest
-    pins the zip's sha256. The tree goes to /usr/lib/tetron-browser and
-    /usr/bin/tetron-browser is a wrapper that execs
-    /usr/lib/tetron-browser/carbonyl (the runtime keeps its internal name).
-    There is no carbonyl command and no short alias yet (USER: alias to be
-    decided). Version 0.15.0: like every tetron add-on its minor follows
-    tetron core; --version names the Carbonyl 0.0.3 base. Replaces and Conflicts: carbonyl (the
-    earlier package built from the upstream zip). Depends: libnss3,
-    libnspr4, libexpat1, libasound2t64. Smoke: tetron-browser --version
-    prints 0.15.0. It fixes the SIGTRAP crash when a window is
-    resized to one or two columns (found on the live Desktop ISO
-    2026-11-06). The npm carbonyl (latest tag 0.0.2-next.bacf3db, spins one
-    core while idle) is never used. License BSD-3-Clause."""
+    upstream after v0.0.3 in 2023-02), renamed as forks are. Like the other
+    suite add-ons it is the release .deb of
+    github.com/ErikAllanKincaid/tetron-browser (kind = "deb", amd64),
+    verified against its published sha256 and used unchanged. Its minor
+    version follows tetron core (0.15.1). The package installs
+    /usr/bin/tetron-browser and the short command /usr/bin/twww (USER
+    2026-11-06), wrappers that run the Chromium program
+    /usr/lib/tetron-browser/tetron-browser with the profile in
+    ${XDG_CONFIG_HOME:-$HOME/.config}/tetron-browser; there is no carbonyl
+    command. It Conflicts with carbonyl (the earlier TetronOS package of
+    upstream Carbonyl). Smoke: tetron-browser --version prints 0.15.1. It
+    fixes the SIGTRAP crashes on resize found on the live Desktop ISO
+    2026-11-06 (a resize run on the wrong thread from the SIGWINCH handler,
+    and windows of one or two columns). The npm carbonyl (latest tag
+    0.0.2-next.bacf3db, spins one core while idle) is never used."""
 
 
 class PackagingRelationFields(Requirement):
