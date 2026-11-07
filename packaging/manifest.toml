@@ -187,10 +187,37 @@ dst = "usr/libexec/tetronos/firstboot"
 mode = "0755"
 
 [[package]]
+name = "tetronos-apt-source"
+kind = "local"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "admin"
+depends = ["ca-certificates"]
+description = "apt source and signing key of the tetronos repository"
+long_description = """
+Adds the tetronos apt repository (https://tetronos.github.io/apt, suite
+stable, component main) to apt with its own signing key, so the tetron
+suite and TetronOS packages install and upgrade with apt. The key is
+trusted only for this repository (Signed-By). Key fingerprint:
+86DFC7BD5781D4C50542F76D73F9AF0FB6625946.
+"""
+
+[[package.files]]
+src = "files/tetronos-apt-source/tetronos-archive-keyring.gpg"
+dst = "usr/share/keyrings/tetronos-archive-keyring.gpg"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-apt-source/tetronos.sources"
+dst = "etc/apt/sources.list.d/tetronos.sources"
+mode = "0644"
+
+[[package]]
 name = "tetronos-core"
 kind = "meta"
 version = "0.15.0"
-revision = "4"
+revision = "5"
 arch = "all"
 section = "metapackages"
 description = "TetronOS base package set of every edition"
@@ -202,14 +229,14 @@ tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-branding (= 0.15.0-1)", "tetronos-firstboot (= 0.15.0-2)",
-           "tetronos-base-config (= 0.15.0-2)", "network-manager", "curl", "iputils-ping",
+           "tetronos-base-config (= 0.15.0-2)", "tetronos-apt-source (= 0.15.0-1)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)"]
 
 [[package]]
 name = "tetronos-server"
 kind = "meta"
 version = "0.15.0"
-revision = "4"
+revision = "5"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Server edition package set"
@@ -217,7 +244,7 @@ long_description = """
 Installs tetronos-core, an SSH server, and python3 with python3-apt so
 Ansible can manage the machine.
 """
-depends = ["tetronos-core (= 0.15.0-4)", "openssh-server", "python3", "python3-apt"]
+depends = ["tetronos-core (= 0.15.0-5)", "openssh-server", "python3", "python3-apt"]
 
 [[package]]
 name = "tetronos-desktop-config"
@@ -243,7 +270,7 @@ mode = "0644"
 name = "tetronos-desktop"
 kind = "meta"
 version = "0.15.0"
-revision = "6"
+revision = "7"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Desktop edition package set"
@@ -254,7 +281,7 @@ a logind session for the console login, wifi (wpasupplicant), sound
 tools tetron-wm features use (tetron-wm-desktop). The SSH server is
 installed; a fresh Desktop install leaves it off.
 """
-depends = ["tetronos-server (= 0.15.0-4)", "tetronos-desktop-config (= 0.15.0-1)",
+depends = ["tetronos-server (= 0.15.0-5)", "tetronos-desktop-config (= 0.15.0-1)",
            "tetron-wm-desktop (>= 0.15)", "polkitd", "libpam-systemd", "dbus-user-session",
            "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
@@ -264,7 +291,7 @@ depends = ["tetronos-server (= 0.15.0-4)", "tetronos-desktop-config (= 0.15.0-1)
 name = "tetronos-suite"
 kind = "meta"
 version = "0.15.0"
-revision = "4"
+revision = "5"
 arch = "all"
 section = "metapackages"
 description = "TetronOS with the full tetron suite"
@@ -273,14 +300,14 @@ Installs tetronos-core, tetron-wm-extras (tetron-wm-desktop and the
 terminal apps that tetron-wm features use), the tetron web dashboard
 tetron-webui and its message board addon tetron-messageboard.
 """
-depends = ["tetronos-core (= 0.15.0-4)", "tetron-wm-extras (>= 0.15)",
+depends = ["tetronos-core (= 0.15.0-5)", "tetron-wm-extras (>= 0.15)",
            "tetron-webui (>= 0.15)", "tetron-messageboard (>= 0.15)"]
 
 [[package]]
 name = "tetronos-live-config"
 kind = "local"
 version = "0.15.0"
-revision = "4"
+revision = "5"
 arch = "all"
 section = "admin"
 description = "TetronOS live medium: kmscon console with autologin to tetron-wm"
@@ -289,7 +316,7 @@ Runs kmscon on tty1 with autologin of the live user tetronos and starts
 tetron-wm in that login. Installed only on the TetronOS live ISO; the
 live user and its sudo rights come from live-config.
 """
-depends = ["tetronos-core (= 0.15.0-4)", "live-boot", "live-config", "live-config-systemd",
+depends = ["tetronos-core (= 0.15.0-5)", "live-boot", "live-config", "live-config-systemd",
            "user-setup", "sudo", "fonts-dejavu-core", "python3"]
 
 [[package.files]]
