@@ -56,7 +56,7 @@ class ReproducibleBuild(Requirement):
 
 class VmFirstHardwareAfter(Requirement):
     """Everything is validated in QEMU/KVM VMs before any real hardware. Real
-    hardware validation (pizzabox via BMC virtual media) starts only after
+    hardware validation (a real server via BMC virtual media) starts only after
     the VM acceptance suite passes."""
 
 
