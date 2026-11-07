@@ -1,0 +1,44 @@
+name: Release
+
+# On a v* tag: build every package in packaging/manifest.toml, run the container tests (make test-debs:
+# install, check and purge each package in a clean debian:trixie, then install the metapackages from a
+# local apt repository), and attach the tetronos-owned packages (manifest kind local and meta) to the
+# GitHub release. Packages of kind deb are copies of other repos' releases; they are not attached, so the
+# tetronos apt repository (tetronos/apt) gets each package from exactly one place.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test all packages
+        run: make test-debs
+      - name: Pick the tetronos-owned packages
+        run: |
+          python3 - <<'PY' > release-files.txt
+          import tomllib, glob, sys
+          m = tomllib.load(open("packaging/manifest.toml", "rb"))
+          for p in m["package"]:
+              if p["kind"] in ("local", "meta"):
+                  f = f"packaging/out/{p['name']}_{p['version']}-{p['revision']}_{p['arch']}.deb"
+                  if not glob.glob(f):
+                      sys.exit(f"missing {f}")
+                  print(f)
+          PY
+          cat release-files.txt
+          cd packaging/out && sha256sum $(sed 's#packaging/out/##' ../../release-files.txt) > SHA256SUMS && cat SHA256SUMS
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "TetronOS $tag" --notes "TetronOS packages for the tetronos apt repository (https://tetronos.github.io/apt). Built and container-tested by this release's workflow run."
+          gh release upload "$tag" $(cat release-files.txt) packaging/out/SHA256SUMS --clobber
