@@ -10,7 +10,7 @@ class ServerBmcInstall(UserStory):
     Priority: high (v1).
     User journey: attach ISO via BMC -> boot on serial or BMC KVM -> unattended
     or TUI install to disk -> reboot -> the machine is on the tetron mesh.
-    Acceptance: verified in VMs first, then on pizzabox through its BMC
+    Acceptance: verified in VMs first, then on a real server through its BMC
     (milestone M9). The ISO stays under the Server size budget.
     """
     brief_title = "Remote install of Server edition via BMC"

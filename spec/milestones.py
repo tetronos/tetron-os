@@ -56,11 +56,11 @@ class M8ReleaseCandidate(Requirement):
     published."""
 
 
-class M9PizzaboxHardware(Requirement):
-    """Milestone M9 acceptance: The same ISO installs on pizzabox through BMC
+class M9ServerHardware(Requirement):
+    """Milestone M9 acceptance: The same ISO installs on a real server through BMC
     virtual media; consoles via BMC KVM, Serial-over-LAN and tetron work;
     the installed system has a unique identity, joins the mesh and powers
-    off via BMC; findings in HARDWARE_pizzabox.md; tag v1.0.0."""
+    off via BMC; findings in a HARDWARE_ notes file; tag v1.0.0."""
 
 
 class R0RegularLists(Requirement):
@@ -82,7 +82,7 @@ class R2FullSuiteValidation(Requirement):
 
 class R3RegularInstallAndHardware(Requirement):
     """Milestone R3 acceptance: Regular installs in BIOS and UEFI VMs and on
-    pizzabox via BMC; tag v1.1.0."""
+    a real server via BMC; tag v1.1.0."""
 
 
 class P0PackagingSkeleton(Requirement):
@@ -120,4 +120,4 @@ class D1DesktopIso(Requirement):
     change NetworkManager connections without sudo (nmcli), sees a
     pipewire audio sink on an emulated sound card, and sshd is not
     running; the build no-GUI check passes; the size is recorded. Then a
-    live boot on the ThinkPad P1 (wifi, sound) by USER."""
+    live boot on a test laptop (wifi, sound) by USER."""
