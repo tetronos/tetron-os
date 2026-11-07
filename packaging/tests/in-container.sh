@@ -61,6 +61,13 @@ while IFS='|' read -r name version smoke; do
 	[ "$name" = tetronos-desktop-config ] && {
 		check "polkit rules installed" test -f /usr/share/polkit-1/rules.d/50-tetronos-desktop.rules
 	}
+	[ "$name" = tetronos-apt-source ] && {
+		check "keyring installed" test -s /usr/share/keyrings/tetronos-archive-keyring.gpg
+		check "sources file is a conffile" sh -c "dpkg-query -W -f '\${Conffiles}' tetronos-apt-source | grep -q /etc/apt/sources.list.d/tetronos.sources"
+		check "sources file trusts only its own keyring" grep -q '^Signed-By: /usr/share/keyrings/tetronos-archive-keyring.gpg$' /etc/apt/sources.list.d/tetronos.sources
+		check "apt update verifies the tetronos repo" sh -c 'apt-get update 2>&1 | tee /tmp/aptu | grep -q "tetronos.github.io/apt stable InRelease" && ! grep -E "^(W|E):.*tetronos" /tmp/aptu'
+		check "tetron available from the tetronos repo" sh -c 'apt-cache policy tetron | grep -q "tetronos.github.io/apt stable/main"'
+	}
 	[ "$name" = tetronos-live-config ] && {
 		check "kmsconvt@tty1 enabled" systemctl is-enabled kmsconvt@tty1.service
 		check "getty@tty1 disabled" sh -c '! systemctl is-enabled getty@tty1.service'
@@ -83,6 +90,10 @@ for name in $(for n in $installed; do echo $n; done | tac); do
 	}
 	[ "$name" = tetronos-base-config ] && {
 		check "empty /etc/skel folders removed" sh -c '! test -e /etc/skel/Desktop'
+	}
+	[ "$name" = tetronos-apt-source ] && {
+		check "sources file gone after purge" sh -c '! test -e /etc/apt/sources.list.d/tetronos.sources'
+		check "keyring gone after purge" sh -c '! test -e /usr/share/keyrings/tetronos-archive-keyring.gpg'
 	}
 	[ "$name" = tetronos-live-config ] && {
 		check "getty@tty1 enabled again" systemctl is-enabled getty@tty1.service

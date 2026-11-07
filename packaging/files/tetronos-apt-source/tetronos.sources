@@ -1,0 +1,5 @@
+Types: deb
+URIs: https://tetronos.github.io/apt
+Suites: stable
+Components: main
+Signed-By: /usr/share/keyrings/tetronos-archive-keyring.gpg
