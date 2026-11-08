@@ -234,6 +234,23 @@ class ArchiveRootAndInclude(unittest.TestCase):
         self.assertIn("/usr/share/common-licenses/MIT", build.copyright_text(ROOT_PKG))
 
 
+class Retried(unittest.TestCase):
+    def test_transient_errors_are_retried_then_fatal(self):
+        calls = []
+
+        def flaky(u):
+            calls.append(u)
+            if len(calls) < 3:
+                raise OSError("HTTP Error 504")
+            return "ok"
+        self.assertEqual(build.retried("read", "u", flaky, wait=0), "ok")
+
+        def down(u):
+            raise OSError("HTTP Error 504")
+        with self.assertRaises(SystemExit):
+            build.retried("read", "u", down, tries=2, wait=0)
+
+
 class ListDebs(unittest.TestCase):
     def test_one_file_name_per_manifest_package(self):
         import subprocess, tomllib
@@ -241,7 +258,7 @@ class ListDebs(unittest.TestCase):
                              capture_output=True, text=True, check=True).stdout.split()
         pkgs = tomllib.loads((build.HERE / "manifest.toml").read_text())["package"]
         self.assertEqual(out, [build.deb_filename(p) for p in pkgs])
-        self.assertIn("tetron-wm_0.15.4-1_amd64.deb", out)
+        self.assertIn("tetron-wm_0.15.5-1_amd64.deb", out)
 
 
 if __name__ == "__main__":

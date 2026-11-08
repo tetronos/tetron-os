@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import tomllib
 import urllib.request
 import zipfile
@@ -32,26 +33,40 @@ def sha256_of(path: Path) -> str:
     return h.hexdigest()
 
 
+def retried(what: str, url: str, read, tries: int = 5, wait: float = 10.0):
+    """read(url) with retries: release downloads answer 502/503/504 at times."""
+    for i in range(tries):
+        try:
+            return read(url)
+        except OSError as e:
+            if i == tries - 1:
+                die(f"cannot {what} {url}: {e}")
+            print(f"  retry {i + 1}/{tries - 1} in {wait * (i + 1):.0f}s: {e}")
+            time.sleep(wait * (i + 1))
+
+
 def fetch(url: str, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
     print(f"  download {url}")
-    try:
-        with urllib.request.urlopen(url, timeout=60) as r, tmp.open("wb") as f:
+
+    def read(u):
+        with urllib.request.urlopen(u, timeout=60) as r, tmp.open("wb") as f:
             shutil.copyfileobj(r, f)
-    except OSError as e:
-        die(f"cannot download {url}: {e}")
+    retried("download", url, read)
     tmp.replace(dest)
 
 
 def expected_sha(src: dict) -> str:
     if src.get("sha256"):
         return src["sha256"].lower()
-    try:
-        with urllib.request.urlopen(src["sha256_url"], timeout=30) as r:
-            return r.read().decode().split()[0].lower()
-    except (OSError, IndexError) as e:
-        die(f"cannot read checksum {src['sha256_url']}: {e}")
+    def read(u):
+        with urllib.request.urlopen(u, timeout=30) as r:
+            return r.read().decode()
+    words = retried("read checksum", src["sha256_url"], read).split()
+    if not words:
+        die(f"empty checksum file {src['sha256_url']}")
+    return words[0].lower()
 
 
 def get_asset(pkg: dict) -> Path:
