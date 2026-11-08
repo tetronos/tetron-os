@@ -2,7 +2,7 @@ name: Release
 
 # On a v* tag: build every package in packaging/manifest.toml, run the container tests (make test-debs:
 # install, check and purge each package in a clean debian:trixie, then install the metapackages from a
-# local apt repository), and attach the tetronos-owned packages (manifest kind local and meta) to the
+# local apt repository), and attach the tetronos-owned packages (manifest kind local, meta and release) to the
 # GitHub release. Packages of kind deb are copies of other repos' releases; they are not attached, so the
 # tetronos apt repository (tetronos/apt) gets each package from exactly one place.
 
@@ -27,7 +27,7 @@ jobs:
           import tomllib, glob, sys
           m = tomllib.load(open("packaging/manifest.toml", "rb"))
           for p in m["package"]:
-              if p["kind"] in ("local", "meta"):
+              if p["kind"] in ("local", "meta", "release"):
                   f = f"packaging/out/{p['name']}_{p['version']}-{p['revision']}_{p['arch']}.deb"
                   if not glob.glob(f):
                       sys.exit(f"missing {f}")

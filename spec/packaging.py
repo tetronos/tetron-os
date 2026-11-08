@@ -127,7 +127,30 @@ class PackagingArchiveTrees(Requirement):
     package. packaging/build.py copies every regular file under src to dst,
     mode 0755 when the archive marks it executable, else 0644. It aborts
     when the archive has an absolute path or a '..' component anywhere, a
-    symlink or other non-regular file under src, or no file under src."""
+    symlink or other non-regular file under src, or no file under src.
+    src = "" is the archive root. An optional include list of globs
+    (matched against the path below src) limits the copy to matching
+    files. When a tree puts the upstream LICENSE into
+    usr/share/doc/<name>/, the generated copyright file points to it
+    instead of /usr/share/common-licenses/."""
+
+
+class NerdFontSymbolsPackage(Requirement):
+    """tetronos-nerd-font-symbols (kind = "release", Architecture all) is the
+    symbols-only Nerd Font, the glyphs tetron-wm draws for icon_style =
+    "nerd". No distribution packages it. It is built from the pinned
+    NerdFontsSymbolsOnly.zip of github.com/ryanoasis/nerd-fonts, verified
+    against a sha256 in the manifest (upstream publishes one SHA-256.txt
+    for every asset), and installs SymbolsNerdFont-Regular.ttf and
+    SymbolsNerdFontMono-Regular.ttf into
+    /usr/share/fonts/truetype/nerd-font-symbols/ and the upstream MIT
+    LICENSE into its doc directory. The archive's fontconfig file is left
+    out: it makes Symbols Nerd Font the preferred monospace family, which
+    would replace the console font; fontconfig uses the font as a fallback
+    without it. Its version follows tetron core minor (0.15.0); the
+    upstream version is in the source URL. kind = "release" packages are
+    tetronos-built, so the release workflow attaches them with kind local
+    and meta, and the tetronos apt repo serves them."""
 
 
 class TetronBrowserDeb(Requirement):

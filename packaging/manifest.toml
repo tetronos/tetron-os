@@ -102,6 +102,37 @@ url = "https://github.com/tetronos/tetron-browser/releases/download/v0.15.1/tetr
 sha256_url = "https://github.com/tetronos/tetron-browser/releases/download/v0.15.1/tetron-browser_0.15.1-1_amd64.deb.sha256"
 
 [[package]]
+name = "tetronos-nerd-font-symbols"
+kind = "release"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "fonts"
+description = "Symbols Nerd Font: the icon glyphs tetron-wm draws for icon_style nerd"
+long_description = """
+The symbols-only Nerd Font (SymbolsNerdFont and SymbolsNerdFontMono) from
+the Nerd Fonts project, upstream v3.5.1. fontconfig uses it as a fallback
+for icon code points; it does not replace the console font.
+"""
+license = "MIT"
+homepage = "https://github.com/ryanoasis/nerd-fonts"
+smoke = "test -s /usr/share/fonts/truetype/nerd-font-symbols/SymbolsNerdFontMono-Regular.ttf && dpkg-query -W -f='${Version}' tetronos-nerd-font-symbols"
+
+[package.source]
+url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/NerdFontsSymbolsOnly.zip"
+sha256 = "fdca3682534f6f65e1ccb2345b0362ccf67d9b8eca7c8025330946e93e2473bc"
+
+[[package.trees]]
+src = ""
+dst = "usr/share/fonts/truetype/nerd-font-symbols"
+include = ["*.ttf"]
+
+[[package.trees]]
+src = ""
+dst = "usr/share/doc/tetronos-nerd-font-symbols"
+include = ["LICENSE"]
+
+[[package]]
 name = "tetronos-branding"
 kind = "local"
 version = "0.15.0"

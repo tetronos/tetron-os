@@ -156,5 +156,40 @@ class ArchiveTrees(unittest.TestCase):
             self.stage([("other/a", 0o644, "x")])
 
 
+ROOT_PKG = {"name": "font", "version": "1", "revision": "1", "arch": "all",
+            "description": "test", "license": "MIT",
+            "trees": [{"src": "", "dst": "usr/share/fonts/x", "include": ["*.ttf"]},
+                      {"src": "", "dst": "usr/share/doc/font", "include": ["LICENSE"]}]}
+
+
+class ArchiveRootAndInclude(unittest.TestCase):
+    def stage(self, members, pkg=ROOT_PKG):
+        import tempfile
+        td = tempfile.mkdtemp()
+        z = Path(td) / "a.zip"
+        make_zip(z, members)
+        st = Path(td) / "stage"
+        build.extract_trees(pkg, z, st)
+        return st
+
+    def test_root_with_include_globs(self):
+        st = self.stage([("A.ttf", 0o644, "a"), ("B.ttf", 0o644, "b"), ("LICENSE", 0o644, "MIT"),
+                         ("10-x.conf", 0o644, "<xml/>"), ("README.md", 0o644, "r")])
+        self.assertEqual(sorted(p.name for p in (st / "usr/share/fonts/x").iterdir()), ["A.ttf", "B.ttf"])
+        self.assertEqual([p.name for p in (st / "usr/share/doc/font").iterdir()], ["LICENSE"])
+
+    def test_include_matching_nothing_aborts(self):
+        with self.assertRaises(SystemExit):
+            self.stage([("README.md", 0o644, "r"), ("LICENSE", 0o644, "MIT")])
+
+    def test_root_still_rejects_dotdot(self):
+        with self.assertRaises(SystemExit):
+            self.stage([("A.ttf", 0o644, "a"), ("LICENSE", 0o644, "MIT"), ("../evil.ttf", 0o644, "x")])
+
+    def test_copyright_points_to_upstream_license(self):
+        self.assertIn("/usr/share/doc/font/LICENSE", build.copyright_text(ROOT_PKG, True))
+        self.assertIn("/usr/share/common-licenses/MIT", build.copyright_text(ROOT_PKG))
+
+
 if __name__ == "__main__":
     unittest.main()

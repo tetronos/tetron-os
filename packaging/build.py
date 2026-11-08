@@ -92,16 +92,18 @@ def control(pkg: dict, maintainer: str, size_kib: int) -> str:
     return out + f"Description: {desc}\n" + (longd + "\n" if longd else "")
 
 
-def copyright_text(pkg: dict) -> str:
+def copyright_text(pkg: dict, upstream_license: bool = False) -> str:
     if pkg.get("kind") == "meta":
         return ("This is a metapackage of TetronOS. It has no content of its own:\n"
                 "it only depends on other packages, each with its own copyright file.\n")
     if pkg.get("kind") == "local":
         return ("This package is TetronOS configuration. Its files are maintained in\n"
                 "the TetronOS repository; it contains no third-party code.\n")
+    where = (f"/usr/share/doc/{pkg['name']}/LICENSE" if upstream_license
+             else f"/usr/share/common-licenses/{pkg['license']}")
     return (f"Upstream: {pkg.get('homepage', '')}\n"
             f"License: {pkg['license']}\n"
-            f"The full license text is in /usr/share/common-licenses/{pkg['license']}.\n")
+            f"The full license text is in {where}.\n")
 
 
 def deb_filename(pkg: dict) -> str:
@@ -140,11 +142,15 @@ def take_release_deb(pkg: dict, out: Path) -> Path:
 
 def extract_trees(pkg: dict, archive: Path, stage: Path) -> None:
     """Copy each [[package.trees]] src directory of a zip asset to its dst:
-    regular files only, 0755 if executable in the archive, else 0644."""
+    regular files only, 0755 if executable in the archive, else 0644.
+    src "" is the archive root; include (globs on the path below src) limits
+    the copy to matching files."""
+    from fnmatch import fnmatchcase
     import stat
     with zipfile.ZipFile(archive) as z:
         for t in pkg.get("trees", []):
-            prefix = t["src"].strip("/") + "/"
+            prefix = t["src"].strip("/") + "/" if t["src"].strip("/") else ""
+            include = t.get("include", [])
             n = 0
             for zi in z.infolist():
                 name = zi.filename
@@ -152,6 +158,8 @@ def extract_trees(pkg: dict, archive: Path, stage: Path) -> None:
                 if name.startswith("/") or ".." in parts:
                     die(f"{pkg['name']}: unsafe path in archive: {name}")
                 if not name.startswith(prefix) or zi.is_dir():
+                    continue
+                if include and not any(fnmatchcase(name[len(prefix):], g) for g in include):
                     continue
                 mode = zi.external_attr >> 16
                 if stat.S_ISLNK(mode) or (mode and not stat.S_ISREG(mode)):
@@ -163,7 +171,7 @@ def extract_trees(pkg: dict, archive: Path, stage: Path) -> None:
                 dst.chmod(0o755 if mode & 0o111 else 0o644)
                 n += 1
             if not n:
-                die(f"{pkg['name']}: no files under {prefix} in {archive.name}")
+                die(f"{pkg['name']}: no files under {prefix or 'the root'} in {archive.name}")
 
 
 def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
@@ -185,7 +193,7 @@ def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
         doc = stage / "usr/share/doc" / name / "copyright"
         if not doc.exists():  # a package may ship the upstream license text
             doc.parent.mkdir(parents=True, exist_ok=True)
-            doc.write_text(copyright_text(pkg))
+            doc.write_text(copyright_text(pkg, (doc.parent / "LICENSE").exists()))
             doc.chmod(0o644)
         files = sorted(p for p in stage.rglob("*") if p.is_file())
         size_kib = (sum(p.stat().st_size for p in files) + 1023) // 1024
