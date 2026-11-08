@@ -38,11 +38,15 @@ HTTP_PID=$!
 trap 'kill $HTTP_PID 2>/dev/null || true' EXIT
 sleep 1
 # The image installs no Recommends: the desktop gets the tools tetron-wm
-# features use from the Recommends of the tetron-wm-desktop deb.
+# features use and the Essentials and Recommended apps from the Recommends
+# of the tetron-wm-desktop, -essentials and -recommended debs.
 if [ "$EDITION" = desktop ]; then
-	WMD=$(ls "$REPO"/tetron-wm-desktop_*_all.deb | head -1)
-	dpkg-deb -f "$WMD" Recommends | tr ',' '\n' | sed 's/|.*//; s/(.*)//; s/ //g' | grep . \
-		> config/package-lists/tetron-wm-desktop-tools.list.chroot
+	for set in desktop essentials recommended; do
+		deb=$(ls "$REPO"/tetron-wm-${set}_*_all.deb 2>/dev/null | head -1)
+		[ -f "$deb" ] || { echo "missing tetron-wm-$set deb in the local repository" >&2; exit 1; }
+		dpkg-deb -f "$deb" Recommends | tr ',' '\n' | sed 's/|.*//; s/(.*)//; s/ //g' | grep . \
+			> config/package-lists/tetron-wm-$set-apps.list.chroot
+	done
 fi
 export EDITION FIRMWARE
 # Drop stage stamps, chroot and binary of an earlier build (the download cache stays).

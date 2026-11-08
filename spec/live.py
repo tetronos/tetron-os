@@ -36,9 +36,10 @@ class LiveBootTest(Requirement):
 
 class DesktopToolsInImage(Requirement):
     """The image installs no Recommends, so for the desktop edition
-    scripts/build.sh writes the Recommends of the tetron-wm-desktop deb
-    (first choice of each alternative) into a generated package list. The
-    tools then always match the tetron-wm release in the manifest."""
+    scripts/build.sh writes the Recommends of the tetron-wm-desktop,
+    tetron-wm-essentials and tetron-wm-recommended debs (first choice of
+    each alternative) into generated package lists. The tools and apps then
+    always match the tetron-wm release in the manifest."""
 
 
 class DesktopSshOff(Requirement):

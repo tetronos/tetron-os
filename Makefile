@@ -57,8 +57,10 @@ distclean:
 	rm -rf out
 
 .PHONY: debs test-debs
+# LOCAL_DEBS=DIR: test builds only, kind = deb packages are taken from DIR
+# when it has their file name (build.py --local-debs); never for a release.
 debs:
-	python3 packaging/build.py
+	python3 packaging/build.py $(if $(LOCAL_DEBS),--local-debs $(LOCAL_DEBS))
 
 test-debs: debs
 	python3 packaging/tests/test_build.py

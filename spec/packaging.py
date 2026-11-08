@@ -216,10 +216,14 @@ class PackagingConsumesReleaseDebs(Requirement):
 
 class SuiteDebsFromReleases(Requirement):
     """The manifest takes tetron, tetron-tui, tetron-wm, tetron-wm-desktop,
-    tetron-wm-extras, tetron-webui and tetron-messageboard from their
-    published release debs, all at the same tetron minor. tetron-wm-desktop
-    and tetron-wm-extras are Architecture: all metapackages; packaging/tests
-    installs them without Recommends."""
+    tetron-wm-essentials, tetron-wm-recommended, tetron-wm-extras,
+    tetron-webui and tetron-messageboard from their published release debs,
+    all at the same tetron minor. The four tetron-wm set packages are
+    Architecture: all metapackages; packaging/tests installs them without
+    Recommends. For test builds only, build.py --local-debs DIR (make
+    LOCAL_DEBS=DIR) takes a deb of the same file name from DIR instead of
+    the download, still checking its Package, Version and Architecture;
+    a release never uses it."""
 
 
 class MetapackagesBuiltHere(Requirement):
@@ -235,21 +239,22 @@ class MetapackagesBuiltHere(Requirement):
 class TetronosCoreMeta(Requirement):
     """tetronos-core is the base package set of every edition: it Depends on
     tetron, tetron-tui, tetron-wm, tetronos-branding, tetronos-firstboot,
-    tetronos-base-config, network-manager, curl, iputils-ping and
-    kmscon (>= 10), which brings libtsm4 (>= 4.8)
+    tetronos-base-config, tetronos-apt-source, tetronos-nerd-font-symbols
+    (the icon glyphs of tetron-wm and croft), network-manager, curl,
+    iputils-ping and kmscon (>= 10), which brings libtsm4 (>= 4.8)
     with it. curl is the invite URL fetcher of every edition (join plan
     decision 19). openssh-server is not in core:
     it comes with tetronos-server. Both come from
     trixie-backports (see KmsconFromBackports). It does not pull
     tetron-wm-desktop, so Recommends of the desktop app list never reach
-    the Server image. The symbols font and tetron-install are added when
-    they have packages (M5)."""
+    the Server image. tetron-install is added when it has a package (M5)."""
 
 
 class TetronosSuiteMeta(Requirement):
     """tetronos-suite is the full suite: it Depends on tetronos-core,
-    tetron-wm-extras (which pulls tetron-wm-desktop and its app list as
-    Recommends), tetron-webui and tetron-messageboard. tetron-sync-receiver
+    tetron-wm-recommended (which pulls tetron-wm-essentials and
+    tetron-wm-desktop, each with its app list as Recommends), tetron-webui
+    and tetron-messageboard. tetron-sync-receiver
     and tetron-scripts are added when they publish release debs.
     tetron-hosts and tetron-systray are not part of it."""
 
@@ -314,7 +319,8 @@ class TetronosServerMeta(Requirement):
 class TetronosDesktopMeta(Requirement):
     """tetronos-desktop is the Desktop edition package set, the level above
     server (core < server < desktop < full): it Depends on tetronos-server
-    (same version), tetronos-desktop-config, tetron-wm-desktop, polkitd,
+    (same version), tetronos-desktop-config, tetron-wm-essentials and
+    tetron-wm-recommended (>= 0.15.6; they pull tetron-wm-desktop), polkitd,
     libpam-systemd and dbus-user-session (a logind session and a user bus
     for the console login), wpasupplicant, wireless-regdb, iw, pipewire,
     pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
@@ -322,8 +328,8 @@ class TetronosDesktopMeta(Requirement):
     intel-microcode, amd64-microcode and tetron-browser (the web
     browser, >= 0.15).
     Installing
-    it on a server with apt (Recommends on) also brings the tetron-wm-desktop
-    tools."""
+    it on a server with apt (Recommends on) also brings the tools and apps
+    of the three tetron-wm sets."""
 
 
 class TetronosDesktopConfig(Requirement):

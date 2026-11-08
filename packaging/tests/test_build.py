@@ -258,7 +258,33 @@ class ListDebs(unittest.TestCase):
                              capture_output=True, text=True, check=True).stdout.split()
         pkgs = tomllib.loads((build.HERE / "manifest.toml").read_text())["package"]
         self.assertEqual(out, [build.deb_filename(p) for p in pkgs])
-        self.assertIn("tetron-wm_0.15.5-1_amd64.deb", out)
+        self.assertIn("tetron-wm_0.15.6-1_amd64.deb", out)
+        self.assertIn("tetron-wm-essentials_0.15.6-1_all.deb", out)
+        self.assertIn("tetron-wm-recommended_0.15.6-1_all.deb", out)
+
+
+class LocalDebs(unittest.TestCase):
+    def test_local_deb_is_taken_without_download_and_checked(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as src, tempfile.TemporaryDirectory() as out:
+            build.build_one(META, TOP, Path(src), 1792998000)
+            rel = dict(META, kind="deb", source={"url": "http://127.0.0.1:9/none.deb", "sha256": "0" * 64})
+            got = build.take_release_deb(rel, Path(out), Path(src))
+            self.assertEqual(got.read_bytes(), (Path(src) / got.name).read_bytes())
+            from unittest import mock
+            with mock.patch.object(build, "get_asset", side_effect=SystemExit("download")) as g:
+                with self.assertRaises(SystemExit):
+                    build.take_release_deb(dict(rel, revision="2"), Path(out), Path(src))
+                g.assert_called_once()
+
+    def test_wrong_fields_in_a_local_deb_abort(self):
+        import shutil, tempfile
+        with tempfile.TemporaryDirectory() as src, tempfile.TemporaryDirectory() as out:
+            deb = build.build_one(META, TOP, Path(src), 1792998000)
+            other = dict(META, name="tetronos-server", kind="deb", source={"url": "http://127.0.0.1:9/x", "sha256": "0" * 64})
+            shutil.copyfile(deb, Path(src) / build.deb_filename(other))
+            with self.assertRaises(SystemExit):
+                build.take_release_deb(other, Path(out), Path(src))
 
 
 if __name__ == "__main__":

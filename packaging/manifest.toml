@@ -46,36 +46,58 @@ sha256_url = "https://github.com/tetronos/tetron-tui/releases/download/v0.15.1/t
 [[package]]
 name = "tetron-wm"
 kind = "deb"
-version = "0.15.5"
+version = "0.15.6"
 revision = "1"
 arch = "amd64"
 smoke = "tetron-wm --version"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.5/tetron-wm_0.15.5-1_amd64.deb"
-sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.5/tetron-wm_0.15.5-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm_0.15.6-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm_0.15.6-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-wm-desktop"
 kind = "deb"
-version = "0.15.5"
+version = "0.15.6"
 revision = "1"
 arch = "all"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.5/tetron-wm-desktop_0.15.5-1_all.deb"
-sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.5/tetron-wm-desktop_0.15.5-1_all.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-desktop_0.15.6-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-desktop_0.15.6-1_all.deb.sha256"
+
+[[package]]
+name = "tetron-wm-essentials"
+kind = "deb"
+version = "0.15.6"
+revision = "1"
+arch = "all"
+
+[package.source]
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-essentials_0.15.6-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-essentials_0.15.6-1_all.deb.sha256"
+
+[[package]]
+name = "tetron-wm-recommended"
+kind = "deb"
+version = "0.15.6"
+revision = "1"
+arch = "all"
+
+[package.source]
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-recommended_0.15.6-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-recommended_0.15.6-1_all.deb.sha256"
 
 [[package]]
 name = "tetron-wm-extras"
 kind = "deb"
-version = "0.15.5"
+version = "0.15.6"
 revision = "1"
 arch = "all"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.5/tetron-wm-extras_0.15.5-1_all.deb"
-sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.5/tetron-wm-extras_0.15.5-1_all.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-extras_0.15.6-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.6/tetron-wm-extras_0.15.6-1_all.deb.sha256"
 
 [[package]]
 name = "tetron-webui"
@@ -261,19 +283,21 @@ mode = "0644"
 name = "tetronos-core"
 kind = "meta"
 version = "0.15.0"
-revision = "6"
+revision = "7"
 arch = "all"
 section = "metapackages"
 description = "TetronOS base package set of every edition"
 long_description = """
 Installs the tetron mesh VPN (daemon and CLI), its terminal dashboard
 tetron-tui, the tetron-wm terminal window manager, NetworkManager and the
-kmscon console (from trixie-backports). The SSH server comes with
+kmscon console (from trixie-backports) and the symbols Nerd Font for
+tetron-wm icons. The SSH server comes with
 tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-branding (>= 0.15.0-1)", "tetronos-branding (<< 0.16)", "tetronos-firstboot (>= 0.15.0-2)", "tetronos-firstboot (<< 0.16)",
-           "tetronos-base-config (>= 0.15.0-2)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)", "network-manager", "curl", "iputils-ping",
+           "tetronos-base-config (>= 0.15.0-2)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
+           "tetronos-nerd-font-symbols (>= 0.15.0-1)", "tetronos-nerd-font-symbols (<< 0.16)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)"]
 
 [[package]]
@@ -314,19 +338,21 @@ mode = "0644"
 name = "tetronos-desktop"
 kind = "meta"
 version = "0.15.0"
-revision = "8"
+revision = "9"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Desktop edition package set"
 long_description = """
 Installs tetronos-server plus what a laptop or desktop needs: polkit and
 a logind session for the console login, wifi (wpasupplicant), sound
-(PipeWire), bluetooth, backlight and battery tools, CPU microcode and the
-tools tetron-wm features use (tetron-wm-desktop). The SSH server is
+(PipeWire), bluetooth, backlight and battery tools, CPU microcode, and
+tetron-wm with the tools its features use and the Essentials and
+Recommended app sets (tetron-wm-essentials, tetron-wm-recommended). The
+SSH server is
 installed; a fresh Desktop install leaves it off.
 """
 depends = ["tetronos-server (>= 0.15.0-6)", "tetronos-server (<< 0.16)", "tetronos-desktop-config (>= 0.15.0-1)", "tetronos-desktop-config (<< 0.16)",
-           "tetron-wm-desktop (>= 0.15)", "polkitd", "libpam-systemd", "dbus-user-session",
+           "tetron-wm-essentials (>= 0.15.6)", "tetron-wm-recommended (>= 0.15.6)", "polkitd", "libpam-systemd", "dbus-user-session",
            "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
            "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)"]
@@ -335,16 +361,16 @@ depends = ["tetronos-server (>= 0.15.0-6)", "tetronos-server (<< 0.16)", "tetron
 name = "tetronos-suite"
 kind = "meta"
 version = "0.15.0"
-revision = "6"
+revision = "7"
 arch = "all"
 section = "metapackages"
 description = "TetronOS with the full tetron suite"
 long_description = """
-Installs tetronos-core, tetron-wm-extras (tetron-wm-desktop and the
-terminal apps that tetron-wm features use), the tetron web dashboard
+Installs tetronos-core, tetron-wm-recommended (tetron-wm, the tools its
+features use and the Essentials and Recommended app sets), the tetron web dashboard
 tetron-webui and its message board addon tetron-messageboard.
 """
-depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "tetron-wm-extras (>= 0.15)",
+depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "tetron-wm-recommended (>= 0.15.6)",
            "tetron-webui (>= 0.15)", "tetron-messageboard (>= 0.15)"]
 
 [[package]]

@@ -142,11 +142,18 @@ def deb_fields(path: Path) -> dict:
     return dict(line.split(": ", 1) for line in r.stdout.splitlines() if ": " in line)
 
 
-def take_release_deb(pkg: dict, out: Path) -> Path:
-    """kind = "deb": verify the published deb and copy it unchanged."""
+def take_release_deb(pkg: dict, out: Path, local: Path | None = None) -> Path:
+    """kind = "deb": verify the published deb and copy it unchanged. With
+    local (--local-debs, test builds only), a deb of the same file name in
+    that directory is taken instead of the download and its checksum."""
     name = pkg["name"]
-    print(f"{name} {pkg['version']}-{pkg['revision']} (release deb)")
-    asset = get_asset(pkg)
+    mine = local / deb_filename(pkg) if local else None
+    if mine and mine.is_file():
+        print(f"{name} {pkg['version']}-{pkg['revision']} (LOCAL deb {mine}, not the release)")
+        asset = mine
+    else:
+        print(f"{name} {pkg['version']}-{pkg['revision']} (release deb)")
+        asset = get_asset(pkg)
     bad = deb_field_mismatches(deb_fields(asset), pkg)
     if bad:
         die(f"{name}: release deb does not match the manifest: " + "; ".join(bad))
@@ -296,6 +303,8 @@ def main() -> None:
     ap.add_argument("--out", default=str(HERE / "out"))
     ap.add_argument("--list-tests", action="store_true", help="print 'name|smoke command' lines")
     ap.add_argument("--list-debs", action="store_true", help="print the .deb file names this manifest makes")
+    ap.add_argument("--local-debs", metavar="DIR",
+                    help="test builds only: take a kind = deb package from DIR when DIR has its file name")
     a = ap.parse_args()
     top = tomllib.loads((HERE / "manifest.toml").read_text())
     problems = pin_problems(top["package"])
@@ -315,7 +324,7 @@ def main() -> None:
     epoch = int(os.environ.get("SOURCE_DATE_EPOCH", top["source_date_epoch"]))
     for p in pkgs:
         if p.get("kind") == "deb":
-            take_release_deb(p, Path(a.out))
+            take_release_deb(p, Path(a.out), Path(a.local_debs) if a.local_debs else None)
         else:
             build_one(p, top, Path(a.out), epoch)
 
