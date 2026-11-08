@@ -90,3 +90,23 @@ class ManifestPinned(Constraint):
     """
     constraint_id = "CON-T08"
     enforcement_logic = "{{ manifest.parsed and manifest.unpinned == 0 }}"
+
+
+class OwnPackageRelationsFloorAndMinorCeiling(Constraint):
+    """CONSTRAINT-ID: CON-T09
+
+    A Depends or Recommends on a package built here (manifest kind meta,
+    local, release) is a floor plus the next core minor as ceiling, written
+    "name (>= FLOOR)", "name (<< NEXT_MINOR)", never "=", and FLOOR is not
+    above the revision the manifest builds. A changed package then needs only
+    its own new revision; the ceiling keeps one core minor together. Removals
+    and moved files are declared with breaks and replaces (rules in the
+    packaging/manifest.toml header). The release workflow installs the
+    previous release, upgrades it to the new build with apt full-upgrade and
+    fails when a package is removed or left behind
+    (packaging/tests/upgrade-in-container.sh).
+    ENFORCEMENT (reconcile.py and packaging/build.py, which refuses to
+    build): manifest.bad_relations equals 0.
+    """
+    constraint_id = "CON-T09"
+    enforcement_logic = "{{ manifest.parsed and manifest.bad_relations == 0 }}"

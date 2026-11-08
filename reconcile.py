@@ -94,7 +94,7 @@ def check_manifest() -> dict:
     try:
         m = tomllib.loads(p.read_text())
     except tomllib.TOMLDecodeError as e:
-        return {"parsed": False, "error": str(e), "unpinned": 0}
+        return {"parsed": False, "error": str(e), "unpinned": 0, "bad_relations": 0}
     bad = []
     for pkg in m.get("package", []):
         src = pkg.get("source", {})
@@ -102,7 +102,11 @@ def check_manifest() -> dict:
             continue
         if not (pkg.get("version") and src.get("url") and (src.get("sha256") or src.get("sha256_url"))):
             bad.append(pkg.get("name", "?"))
-    return {"parsed": True, "packages": len(m.get("package", [])), "unpinned": len(bad), "names": bad}
+    sys.path.insert(0, str(Path("packaging").resolve()))
+    import build
+    rel = build.pin_problems(m.get("package", []))
+    return {"parsed": True, "packages": len(m.get("package", [])), "unpinned": len(bad), "names": bad,
+            "bad_relations": len(rel), "relations": rel}
 
 
 def check_local_docs() -> dict:
@@ -132,5 +136,6 @@ if __name__ == "__main__":
         and ctx["legacy_name"]["count"] == 0
         and ctx["local_docs"]["ignored"] and ctx["local_docs"]["tracked"] == 0
         and ctx["manifest"]["parsed"] and ctx["manifest"]["unpinned"] == 0
+        and ctx["manifest"].get("bad_relations", 0) == 0
     )
     sys.exit(0 if ok else 1)

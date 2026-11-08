@@ -6,6 +6,7 @@ Usage: build.py [--only NAME] [--out DIR] [--list-tests]
 import argparse
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -82,6 +83,7 @@ def control(pkg: dict, maintainer: str, size_kib: int) -> str:
         ("Depends", ", ".join(pkg.get("depends", []))),
         ("Recommends", ", ".join(pkg.get("recommends", []))),
         ("Provides", ", ".join(pkg.get("provides", []))),
+        ("Breaks", ", ".join(pkg.get("breaks", []))),
         ("Replaces", ", ".join(pkg.get("replaces", []))),
         ("Conflicts", ", ".join(pkg.get("conflicts", []))),
         ("Section", pkg.get("section", "misc")),
@@ -224,6 +226,55 @@ def build_one(pkg: dict, top: dict, out: Path, epoch: int) -> Path:
     return target
 
 
+OWN_KINDS = ("local", "meta", "release")
+DEP_RE = re.compile(r"^\s*([a-z0-9][a-z0-9+.-]*)\s*(?:\(\s*(<<|<=|=|>=|>>)\s*([^)\s]+)\s*\))?\s*$")
+
+
+def version_key(v: str) -> tuple:
+    """0.15.0-6 -> (0, 15, 0, 6); our own versions are numeric only."""
+    return tuple(int(x) for x in re.split(r"[.-]", v))
+
+
+def next_minor(version: str) -> str:
+    major, minor = version.split(".")[:2]
+    return f"{major}.{int(minor) + 1}"
+
+
+def pin_problems(packages: list[dict]) -> list[str]:
+    """Relations to packages built here must be a floor plus the next core
+    minor as ceiling: `name (>= FLOOR), name (<< NEXT_MINOR)`, never `=`,
+    and FLOOR no higher than the version the manifest builds."""
+    own = {p["name"]: p for p in packages if p.get("kind") in OWN_KINDS}
+    bad = []
+    for p in packages:
+        rels = {}
+        for field in ("depends", "recommends", "breaks", "replaces", "conflicts"):
+            for entry in p.get(field, []):
+                for alt in entry.split("|"):
+                    m = DEP_RE.match(alt)
+                    if not m:
+                        bad.append(f"{p['name']}: can not parse {field} entry {alt!r}")
+                        continue
+                    name, op, ver = m.groups()
+                    if name in own and field in ("depends", "recommends"):
+                        rels.setdefault(name, []).append((op, ver))
+        for name, ops in rels.items():
+            dep = own[name]
+            have = f"{dep['version']}-{dep['revision']}"
+            floors = [v for o, v in ops if o == ">="]
+            ceils = [v for o, v in ops if o == "<<"]
+            other = [f"{o} {v}" for o, v in ops if o not in (">=", "<<")]
+            if other or len(floors) != 1 or len(ceils) != 1:
+                bad.append(f"{p['name']} -> {name}: write \"{name} (>= FLOOR)\", \"{name} (<< {next_minor(dep['version'])})\" "
+                           f"(found {', '.join(f'{o} {v}' if o else 'no version' for o, v in ops)})")
+                continue
+            if version_key(floors[0]) > version_key(have):
+                bad.append(f"{p['name']} -> {name}: floor {floors[0]} is above the built {have} (uninstallable)")
+            if ceils[0] != next_minor(dep["version"]):
+                bad.append(f"{p['name']} -> {name}: ceiling << {ceils[0]}, expected << {next_minor(dep['version'])}")
+    return bad
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="build only this package")
@@ -231,6 +282,9 @@ def main() -> None:
     ap.add_argument("--list-tests", action="store_true", help="print 'name|smoke command' lines")
     a = ap.parse_args()
     top = tomllib.loads((HERE / "manifest.toml").read_text())
+    problems = pin_problems(top["package"])
+    if problems:
+        die("package relations (rules in the packaging/manifest.toml header):\n  " + "\n  ".join(problems))
     pkgs = [p for p in top["package"] if not a.only or p["name"] == a.only]
     if not pkgs:
         die(f"no such package: {a.only}")

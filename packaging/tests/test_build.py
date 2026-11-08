@@ -76,7 +76,7 @@ class MetaBuild(unittest.TestCase):
 
 
 LOCAL = {"name": "tetronos-live-config", "kind": "local", "version": "0.15.0", "revision": "1",
-         "arch": "all", "description": "TetronOS live", "depends": ["tetronos-core (= 0.15.0-1)"],
+         "arch": "all", "description": "TetronOS live", "depends": ["tetronos-core (>= 0.15.0-1)", "tetronos-core (<< 0.16)"],
          "files": [{"src": "files/tetronos-live-config/tetron-session", "dst": "usr/bin/tetron-session", "mode": "0755"},
                    {"src": "files/tetronos-live-config/tetronos-session.sh",
                     "dst": "etc/profile.d/tetronos-session.sh", "mode": "0644"}],
@@ -99,6 +99,49 @@ class LocalBuild(unittest.TestCase):
 
     def test_local_copyright_says_tetronos_configuration(self):
         self.assertIn("TetronOS configuration", build.copyright_text(LOCAL))
+
+
+def own(name, rev="1", **kw):
+    return dict({"name": name, "kind": "meta", "version": "0.15.0", "revision": rev}, **kw)
+
+
+class PinProblems(unittest.TestCase):
+    def test_floor_and_minor_ceiling_pass(self):
+        pk = [own("a", "3"), own("b", depends=["a (>= 0.15.0-2)", "a (<< 0.16)", "curl"])]
+        self.assertEqual(build.pin_problems(pk), [])
+
+    def test_exact_pin_refused(self):
+        got = build.pin_problems([own("a"), own("b", depends=["a (= 0.15.0-1)"])])
+        self.assertEqual(len(got), 1)
+        self.assertIn("b -> a", got[0])
+
+    def test_missing_ceiling_or_version_refused(self):
+        self.assertEqual(len(build.pin_problems([own("a"), own("b", depends=["a (>= 0.15.0-1)"])])), 1)
+        self.assertEqual(len(build.pin_problems([own("a"), own("b", depends=["a"])])), 1)
+
+    def test_floor_above_built_revision_refused(self):
+        got = build.pin_problems([own("a", "2"), own("b", depends=["a (>= 0.15.0-3)", "a (<< 0.16)"])])
+        self.assertIn("uninstallable", got[0])
+
+    def test_wrong_ceiling_refused(self):
+        got = build.pin_problems([own("a"), own("b", depends=["a (>= 0.15.0-1)", "a (<< 0.17)"])])
+        self.assertIn("expected << 0.16", got[0])
+
+    def test_packages_from_other_repos_are_not_checked(self):
+        pk = [{"name": "tetron", "kind": "deb", "version": "0.15.3", "revision": "1"},
+              own("b", depends=["tetron (>= 0.15.3)"])]
+        self.assertEqual(build.pin_problems(pk), [])
+
+    def test_manifest_passes(self):
+        import tomllib
+        top = tomllib.loads((Path(build.__file__).parent / "manifest.toml").read_text())
+        self.assertEqual(build.pin_problems(top["package"]), [])
+
+
+class BreaksField(unittest.TestCase):
+    def test_breaks_written(self):
+        c = build.control(dict(own("b"), arch="all", description="d", breaks=["a (<< 0.15.0-4)"]), "m", 1)
+        self.assertIn("Breaks: a (<< 0.15.0-4)\n", c)
 
 
 def make_zip(path, members):

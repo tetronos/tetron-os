@@ -4,6 +4,18 @@
 # kind = "local": built here from files under packaging/files/<name>/ (no download).
 # Other packages are built here from a release binary (none at the moment);
 # their Maintainer is the placeholder below until USER decides (plan open item 6).
+#
+# Relations between packages built here (kind meta, local, release); build.py refuses others:
+# 1. Write "name (>= FLOOR)", "name (<< NEXT_MINOR)" (e.g. "tetronos-core (>= 0.15.0-6)",
+#    "tetronos-core (<< 0.16)"), never "=". The ceiling keeps one core minor together.
+# 2. FLOOR is the lowest revision with what the dependent uses: raise it in the commit that
+#    starts using something new. A changed package needs only its own new revision.
+# 3. Removing or renaming something another package here uses: add breaks = ["other (<< FIXED)"]
+#    and ship the fixed other in the same release.
+# 4. A file moving from package A to B: B gets breaks and replaces = ["A (<< V)"], V the first
+#    A revision without the file (Debian policy 7.6).
+# 5. Every change to a package gets a new revision (the apt repo holds one .deb per version).
+# The release workflow upgrades the previous release to this one and fails on removals.
 source_date_epoch = 1792998000
 maintainer = "TetronOS <noreply@tetron.invalid>"
 
@@ -259,8 +271,8 @@ kmscon console (from trixie-backports). The SSH server comes with
 tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
-           "tetronos-branding (= 0.15.0-1)", "tetronos-firstboot (= 0.15.0-2)",
-           "tetronos-base-config (= 0.15.0-2)", "tetronos-apt-source (= 0.15.0-2)", "network-manager", "curl", "iputils-ping",
+           "tetronos-branding (>= 0.15.0-1)", "tetronos-branding (<< 0.16)", "tetronos-firstboot (>= 0.15.0-2)", "tetronos-firstboot (<< 0.16)",
+           "tetronos-base-config (>= 0.15.0-2)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)"]
 
 [[package]]
@@ -275,7 +287,7 @@ long_description = """
 Installs tetronos-core, an SSH server, and python3 with python3-apt so
 Ansible can manage the machine.
 """
-depends = ["tetronos-core (= 0.15.0-6)", "openssh-server", "python3", "python3-apt"]
+depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "openssh-server", "python3", "python3-apt"]
 
 [[package]]
 name = "tetronos-desktop-config"
@@ -312,7 +324,7 @@ a logind session for the console login, wifi (wpasupplicant), sound
 tools tetron-wm features use (tetron-wm-desktop). The SSH server is
 installed; a fresh Desktop install leaves it off.
 """
-depends = ["tetronos-server (= 0.15.0-6)", "tetronos-desktop-config (= 0.15.0-1)",
+depends = ["tetronos-server (>= 0.15.0-6)", "tetronos-server (<< 0.16)", "tetronos-desktop-config (>= 0.15.0-1)", "tetronos-desktop-config (<< 0.16)",
            "tetron-wm-desktop (>= 0.15)", "polkitd", "libpam-systemd", "dbus-user-session",
            "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
@@ -331,7 +343,7 @@ Installs tetronos-core, tetron-wm-extras (tetron-wm-desktop and the
 terminal apps that tetron-wm features use), the tetron web dashboard
 tetron-webui and its message board addon tetron-messageboard.
 """
-depends = ["tetronos-core (= 0.15.0-6)", "tetron-wm-extras (>= 0.15)",
+depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "tetron-wm-extras (>= 0.15)",
            "tetron-webui (>= 0.15)", "tetron-messageboard (>= 0.15)"]
 
 [[package]]
@@ -347,7 +359,7 @@ Runs kmscon on tty1 with autologin of the live user tetronos and starts
 tetron-wm in that login. Installed only on the TetronOS live ISO; the
 live user and its sudo rights come from live-config.
 """
-depends = ["tetronos-core (= 0.15.0-6)", "live-boot", "live-config", "live-config-systemd",
+depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "live-boot", "live-config", "live-config-systemd",
            "user-setup", "sudo", "fonts-dejavu-core", "python3"]
 
 [[package.files]]
