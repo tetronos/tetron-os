@@ -27,8 +27,11 @@ done
 # live-build runs (config/common/archives/tetronos-local.list.chroot).
 REPO="$WORK/repo"
 rm -rf "$REPO"; mkdir -p "$REPO"
-ls "$SRC"/packaging/out/*.deb >/dev/null 2>&1 || { echo "no debs in packaging/out; run: make debs" >&2; exit 1; }
-cp "$SRC"/packaging/out/*.deb "$REPO/"
+# Only the debs the manifest makes: packaging/out keeps older builds.
+for f in $(python3 "$SRC/packaging/build.py" --list-debs); do
+	[ -f "$SRC/packaging/out/$f" ] || { echo "missing packaging/out/$f; run: make debs" >&2; exit 1; }
+	cp "$SRC/packaging/out/$f" "$REPO/"
+done
 (cd "$REPO" && apt-ftparchive packages . > Packages && apt-ftparchive release . > Release)
 python3 -m http.server 8099 --bind 127.0.0.1 --directory "$REPO" >"$WORK/repo-http.log" 2>&1 &
 HTTP_PID=$!
