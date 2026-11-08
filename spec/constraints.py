@@ -110,3 +110,18 @@ class OwnPackageRelationsFloorAndMinorCeiling(Constraint):
     """
     constraint_id = "CON-T09"
     enforcement_logic = "{{ manifest.parsed and manifest.bad_relations == 0 }}"
+
+
+class DesktopIsoParity(Constraint):
+    """CONSTRAINT-ID: CON-T10
+
+    The Desktop ISO ends in the state the tetron-wm suite installer gives
+    for the desktop size where tetron-wm says it should: tetron-wm ships
+    its parity table (usr/share/doc/tetron-wm/parity.toml in the tetron-wm
+    deb, from 0.15.6); every package a row names in iso_packages is in the
+    last Desktop package list, and every unit in iso_units is enabled by a
+    Desktop or common image hook (config/*/hooks/live).
+    ENFORCEMENT (reconcile.py): parity.ok is true.
+    """
+    constraint_id = "CON-T10"
+    enforcement_logic = "{{ parity.ok }}"

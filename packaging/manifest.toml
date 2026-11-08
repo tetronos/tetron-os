@@ -206,16 +206,17 @@ postrm = "files/tetronos-base-config/postrm"
 name = "tetronos-firstboot"
 kind = "local"
 version = "0.15.0"
-revision = "2"
+revision = "3"
 arch = "all"
 section = "admin"
-description = "TetronOS first boot: tetron operator and pending invite join"
+description = "TetronOS first boot: tetron operator, pending invite join, full screen helper"
 long_description = """
 A oneshot unit that runs once per system after the tetron daemon starts:
 it makes the primary user the tetron operator and, if the installer left
 an invite in /etc/tetron/pending-invite, joins that mesh and deletes the
-invite. The unit is enabled by the image or the installer, not by the
-package.
+invite. On the Desktop (tetron-wm-desktop installed) it enables the
+tetron-wm full screen video helper on tty9 for that user. The unit is
+enabled by the image or the installer, not by the package.
 """
 depends = ["tetron (>= 0.15.3)", "network-manager"]
 

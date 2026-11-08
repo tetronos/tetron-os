@@ -1,0 +1,9 @@
+#!/bin/sh
+# tetron-wm-desktop ships its units without enabling them; the Desktop image
+# does. The app server runs as a user service for every user, so apps live
+# through UI reloads and updates. The full screen video helper owns tty9 for
+# the live user; tetronos-firstboot enables it for the user an install
+# creates.
+set -e
+systemctl --global enable tetron-wm-apphost.service
+systemctl enable tetron-wm-fullscreen@tetronos.service

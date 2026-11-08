@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # reconcile.py -- run from the tetron-os repo root.
-# Checks the automatable constraints (CON-T01..CON-T08) from spec/constraints.py.
+# Checks the automatable constraints (CON-T01..CON-T10) from spec/constraints.py.
 # Requirement classes (guardrails, milestones) are verified by tests and review.
 import glob
 import json
@@ -109,6 +109,47 @@ def check_manifest() -> dict:
             "bad_relations": len(rel), "relations": rel}
 
 
+def parity_rows(deb: Path) -> list | None:
+    """The rows of the parity table in a tetron-wm deb, or None when it has none."""
+    import io
+    import tarfile
+    import tomllib
+    r = subprocess.run(["dpkg-deb", "--fsys-tarfile", str(deb)], capture_output=True)
+    if r.returncode != 0:
+        return None
+    with tarfile.open(fileobj=io.BytesIO(r.stdout)) as t:
+        try:
+            f = t.extractfile("./usr/share/doc/tetron-wm/parity.toml")
+        except KeyError:
+            return None
+        return tomllib.loads(f.read().decode()).get("row", []) if f else None
+
+
+def check_parity() -> dict:
+    """CON-T10: the Desktop ISO carries what tetron-wm's parity table expects."""
+    debs = [l for l in run([sys.executable, "packaging/build.py", "--list-debs"]).stdout.split() if l.startswith("tetron-wm_")]
+    lists = sorted(glob.glob("out/tetronos-desktop-*.packages"))
+    deb = Path("packaging/out") / debs[0] if debs else None
+    if not deb or not deb.exists() or not lists:
+        return {"checked": False, "ok": True, "why": "no tetron-wm deb built or no Desktop package list"}
+    rows = parity_rows(deb)
+    version = deb.name.split("_")[1]
+    if rows is None:
+        # tetron-wm ships the table from 0.15.6 on.
+        old = tuple(int(x) for x in version.split("-")[0].split(".")) < (0, 15, 6)
+        return {"checked": False, "ok": old, "why": f"{deb.name} has no parity table"}
+    have = {l.split("\t")[0] for l in Path(lists[-1]).read_text().splitlines() if l}
+    hooks = "".join(Path(h).read_text() for h in sorted(glob.glob("config/*/hooks/live/*")) if "server" not in h)
+    problems = []
+    for r in rows:
+        problems += [f"step {r['step']} ({r['what']}): package {p} not in {lists[-1]}" for p in r.get("iso_packages", []) if p not in have]
+        for u in r.get("iso_units", []):
+            stem = u.replace("@.service", "@").replace(".service", "")
+            if stem not in hooks:
+                problems.append(f"step {r['step']} ({r['what']}): unit {u} is not enabled by a Desktop hook")
+    return {"checked": True, "ok": not problems, "deb": deb.name, "list": lists[-1], "rows": len(rows), "problems": problems}
+
+
 def check_local_docs() -> dict:
     ignored = run(["git", "check-ignore", "-q", "DO-NOT-COMMIT/x"]).returncode == 0
     tracked_n = len([f for f in run(["git", "ls-files", "DO-NOT-COMMIT"]).stdout.splitlines() if f])
@@ -125,6 +166,7 @@ if __name__ == "__main__":
         "legacy_name": check_legacy_name(),
         "local_docs": check_local_docs(),
         "manifest": check_manifest(),
+        "parity": check_parity(),
     }
     print(json.dumps(ctx, indent=2))
     ok = (
@@ -137,5 +179,6 @@ if __name__ == "__main__":
         and ctx["local_docs"]["ignored"] and ctx["local_docs"]["tracked"] == 0
         and ctx["manifest"]["parsed"] and ctx["manifest"]["unpinned"] == 0
         and ctx["manifest"].get("bad_relations", 0) == 0
+        and ctx["parity"]["ok"]
     )
     sys.exit(0 if ok else 1)

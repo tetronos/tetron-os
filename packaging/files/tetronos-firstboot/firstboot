@@ -31,6 +31,21 @@ else
 	echo "operator: no user with uid 1000-59999"
 fi
 
+# Desktop: the full screen video helper on tty9 for this user (the template
+# comes with tetron-wm-desktop). An installed system has no live user, so the
+# instance the image enabled for it goes.
+fs=/usr/lib/systemd/system/tetron-wm-fullscreen@.service
+if [ -n "$user" ] && [ -f "$fs" ]; then
+	if [ "$user" != tetronos ] && ! id tetronos >/dev/null 2>&1; then
+		systemctl disable tetron-wm-fullscreen@tetronos.service 2>/dev/null || true
+	fi
+	if systemctl enable --now "tetron-wm-fullscreen@$user.service" >/dev/null 2>&1; then
+		echo "fullscreen: helper on tty9 for $user"
+	else
+		echo "fullscreen: could not enable the helper for $user"
+	fi
+fi
+
 if [ -f "$invite" ]; then
 	nm-online -q -t 60 || echo "join: network not up after 60 s, trying anyway"
 	if tetron join --invite-file "$invite" >/dev/null 2>&1; then
