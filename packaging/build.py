@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the TetronOS .debs from packaging/manifest.toml. Stdlib + dpkg-deb only.
 
-Usage: build.py [--only NAME] [--out DIR] [--list-tests]
+Usage: build.py [--only NAME] [--out DIR] [--list-tests] [--list-debs]
 """
 import argparse
 import hashlib
@@ -280,6 +280,7 @@ def main() -> None:
     ap.add_argument("--only", help="build only this package")
     ap.add_argument("--out", default=str(HERE / "out"))
     ap.add_argument("--list-tests", action="store_true", help="print 'name|smoke command' lines")
+    ap.add_argument("--list-debs", action="store_true", help="print the .deb file names this manifest makes")
     a = ap.parse_args()
     top = tomllib.loads((HERE / "manifest.toml").read_text())
     problems = pin_problems(top["package"])
@@ -288,6 +289,10 @@ def main() -> None:
     pkgs = [p for p in top["package"] if not a.only or p["name"] == a.only]
     if not pkgs:
         die(f"no such package: {a.only}")
+    if a.list_debs:
+        for p in pkgs:
+            print(deb_filename(p))
+        return
     if a.list_tests:
         for p in pkgs:
             print(f"{p['name']}|{p['version']}-{p['revision']}|{p.get('smoke', '')}")
