@@ -42,6 +42,17 @@ class DesktopToolsInImage(Requirement):
     always match the tetron-wm release in the manifest."""
 
 
+class DesktopOpencodeInSkel(Requirement):
+    """opencode, the agent of the tetron-wm Assistant, has no upstream
+    package. A Desktop chroot hook installs it the way the tetron-wm suite
+    installer does: upstream's latest stable release (x64-baseline, which
+    runs on every x86_64 CPU), checked against the sha256 digest GitHub
+    records for it, as /etc/skel/.local/bin/opencode. The live user and
+    every user an install creates own a copy in ~/.local/bin, which
+    Settings > Updates and opencode itself keep current without sudo. The
+    build fails when the release or its digest can not be read."""
+
+
 class DesktopSshOff(Requirement):
     """The desktop edition installs openssh-server but a chroot hook
     disables ssh.service and ssh.socket, so a fresh desktop (live or

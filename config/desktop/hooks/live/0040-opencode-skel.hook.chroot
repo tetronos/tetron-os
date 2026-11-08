@@ -1,0 +1,24 @@
+#!/bin/sh
+# opencode, the agent of the tetron-wm Assistant, installed the way the
+# tetron-wm suite installer does it: upstream's latest stable release,
+# checked against the sha256 digest GitHub records for it, as
+# ~/.local/bin/opencode of each user. It goes to /etc/skel, so the live user
+# and every user an install creates own their copy, and Settings > Updates
+# or opencode itself keep it current without sudo. Upstream publishes no
+# package of the CLI. The baseline build runs on every x86_64 CPU.
+set -e
+f=opencode-linux-x64-baseline.tar.gz
+set -- $(curl -fsSL https://api.github.com/repos/anomalyco/opencode/releases/latest | python3 -c '
+import json, sys
+r = json.load(sys.stdin)
+a = [x for x in r["assets"] if x["name"] == sys.argv[1]][0]
+print(r["tag_name"], a["browser_download_url"], a["digest"].split(":")[1])' "$f")
+[ -n "$3" ] || { echo "opencode: no release or digest for $f" >&2; exit 1; }
+d=$(mktemp -d)
+curl -fsSL -o "$d/$f" "$2"
+echo "$3  $d/$f" | sha256sum -c -
+tar xzf "$d/$f" -C "$d" opencode
+install -d -m 755 /etc/skel/.local /etc/skel/.local/bin
+install -m 755 "$d/opencode" /etc/skel/.local/bin/opencode
+rm -rf "$d"
+echo "opencode $1 ($f, sha256 $3) in /etc/skel/.local/bin"
