@@ -1,0 +1,7 @@
+#!/bin/sh
+# The image is built without Recommends (auto/config --apt-recommends false),
+# and live-build leaves that setting in /etc/apt/apt.conf.d/00recommends.
+# A running TetronOS behaves like Debian: apt installs Recommends, which the
+# tetron-wm app sets (metapackages of Recommends) need.
+set -e
+rm -f /etc/apt/apt.conf.d/00recommends

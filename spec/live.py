@@ -53,6 +53,14 @@ class DesktopOpencodeInSkel(Requirement):
     build fails when the release or its digest can not be read."""
 
 
+class AptRecommendsDefaultInImage(Requirement):
+    """The image is built without Recommends (auto/config), but a running
+    TetronOS, live or installed, installs Recommends like Debian: a chroot
+    hook of every edition removes /etc/apt/apt.conf.d/00recommends, which
+    live-build leaves in the image. The tetron-wm app sets are metapackages
+    of Recommends and install nothing without them."""
+
+
 class DesktopSshOff(Requirement):
     """The desktop edition installs openssh-server but a chroot hook
     disables ssh.service and ssh.socket, so a fresh desktop (live or
