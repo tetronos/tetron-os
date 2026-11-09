@@ -10,3 +10,4 @@ Server edition target: 300 MB (fungible, not a gate).
 | 2026-11-03 | D1 desktop, FIRMWARE=all (`tetronos-desktop-fw`) | 1040 MB | n/a | n/a | 553 packages, 33 firmware packages (about 540 MB of the size, see M0 row); target fungible, no target set for desktop |
 | 2026-11-04 | server + python3, python3-apt (Ansible) and tetronos-branding | 375 MB | n/a | n/a | +7.3 MB over the 2026-11-03 server ISO (368,050,176 to 375,390,208 bytes); Ansible ping, facts and apt module pass against the live VM |
 | 2026-11-08 | server, tetron 0.15.3, tetron-wm 0.15.5 | 377 MB | n/a | n/a | +2.1 MB over the 2026-11-04 server ISO (375,390,208 to 377,487,360 bytes), from newer tetron suite packages |
+| 2026-11-09 | server, tetron-wm 0.15.6 (local debs), tetronos-core 0.15.0-7 with tetronos-nerd-font-symbols | 381 MB | n/a | n/a | +3.1 MB over the 2026-11-08 server ISO (377,487,360 to 380,633,088 bytes), mostly the symbols Nerd Font now in tetronos-core |
