@@ -123,7 +123,7 @@
 <body>
 <nav><div class="wrap">
   <span class="crumb"><a class="org" href="https://tetronos.github.io/">tetronos</a><span class="sep">/</span><a class="brand" href="#top">TetronOS</a></span>
-  <span class="links"><a href="#download">download</a><a href="#inside">inside</a><a href="#editions">editions</a><a href="#yours">yours</a><a href="#get">get it</a><a href="#status">status</a></span>
+  <span class="links"><a href="#download">download</a><a href="#inside">inside</a><a href="#tetron">tetron</a><a href="#editions">editions</a><a href="#yours">yours</a><a href="#get">get it</a><a href="#status">status</a></span>
   <button class="tbtn" id="theme" type="button" aria-label="Switch between light and dark theme">light</button>
 <a href="https://github.com/tetronos/tetron-os">github</a>
 </div></nav>
@@ -167,6 +167,24 @@ sudo dd if=tetronos-desktop-fw-20261113-amd64.iso \
     <div class="win"><div class="bar"><i></i><i></i><i></i>hardware</div><div class="body"><h3>Laptop ready</h3><p>Wi-Fi, sound (PipeWire), Bluetooth, backlight and battery, CPU microcode, and all firmware on the -fw image.</p></div></div>
   </div>
   <figure class="shot"><img src="images/browser.png" alt="tetron-browser showing a Wikipedia article in the terminal" loading="lazy"><figcaption>the web, in the same terminal: tetron-browser</figcaption></figure>
+</div></section>
+
+<section id="tetron"><div class="wrap">
+  <p class="eyebrow">tetron mesh VPN</p>
+  <h2>The core: every machine you own, one private network.</h2>
+  <p class="lede"><a href="https://tetronos.github.io/tetron/">tetron</a> is the heart of TetronOS. Every edition installs it, and it connects your laptop, servers, home machines and phone into one encrypted peer-to-peer network, wherever they are: at home, at work, behind NAT, on mobile data.</p>
+  <div class="grid four">
+    <div class="win"><div class="bar"><i></i><i></i><i></i>invite</div><div class="body"><h3>Invite only</h3><p>Create a network, mint an invite key, join from the other machine. Invites are single-use and expire after 7 days by default. No account, no sign-up.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>direct</div><div class="body"><h3>Direct and encrypted</h3><p>Peers connect straight to each other over QUIC, punching through NAT with <a href="https://iroh.computer">iroh</a>. A relay only helps them find each other, or carries encrypted traffic when no direct path exists.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>address</div><div class="body"><h3>Stable addresses</h3><p>Each machine gets a stable IPv4 and IPv6 address in every network, derived from its identity. ssh, file shares, web apps: any TCP or UDP program works over it.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>separate</div><div class="body"><h3>Many networks, kept apart</h3><p>Each network gets its own interface and subnet, like a second network card. Co-coordinators keep a network running when one machine is off; Tor and self-hosted relays are options.</p></div></div>
+  </div>
+  <ul class="limits">
+    <li><b>Built into the desktop.</b> The tetron-wm tray shows your peers and how they connect, with one switch for all of tetron and Resume or Standby per network; tetron-tui is the full dashboard in a terminal.</li>
+    <li><b>Ready at first boot.</b> TetronOS makes the first user the tetron operator, and on first boot joins a network when an invite was left for it (<code>/etc/tetron/pending-invite</code>).</li>
+  </ul>
+  <figure class="shot"><img src="images/tetron-mesh.jpg" alt="Diagram: every tetron node runs the same daemon with a TUN interface; nodes talk to each other over encrypted QUIC/UDP tunnels, and iroh's shared relay only helps with discovery and NAT traversal" width="1376" height="768" loading="lazy"><figcaption>every node runs the same daemon; traffic goes directly between nodes once they have found each other</figcaption></figure>
+  <a class="btn" href="https://tetronos.github.io/tetron/">Meet tetron</a><a class="btn ghost" href="https://github.com/tetronos/tetron">tetron on GitHub</a>
 </div></section>
 
 <section id="editions"><div class="wrap">
