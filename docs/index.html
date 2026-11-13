@@ -123,7 +123,7 @@
 <body>
 <nav><div class="wrap">
   <span class="crumb"><a class="org" href="https://tetronos.github.io/">tetronos</a><span class="sep">/</span><a class="brand" href="#top">TetronOS</a></span>
-  <span class="links"><a href="#inside">inside</a><a href="#editions">editions</a><a href="#yours">yours</a><a href="#get">get it</a><a href="#status">status</a></span>
+  <span class="links"><a href="#download">download</a><a href="#inside">inside</a><a href="#editions">editions</a><a href="#yours">yours</a><a href="#get">get it</a><a href="#status">status</a></span>
   <button class="tbtn" id="theme" type="button" aria-label="Switch between light and dark theme">light</button>
 <a href="https://github.com/tetronos/tetron-os">github</a>
 </div></nav>
@@ -132,10 +132,27 @@
   <p class="eyebrow">Debian. No X11. No Wayland.</p>
   <h1>A whole computer, drawn in <em>text</em>.</h1>
   <p class="lede">TetronOS boots straight into a truecolor console with a mouse and a real desktop: windows, a taskbar, an app store, a web browser and a private mesh network to reach your other machines. Built on Debian 13, made of ordinary signed packages, small enough for old hardware and servers.</p>
-  <div class="warnbox" style="border-color:var(--accent)"><b style="color:var(--accent)">In development.</b> The Server and Desktop ISOs are built and boot on BIOS and UEFI in testing, but are not published for download yet. Every part already installs on your own Debian or Ubuntu today: see <a href="#get">get it</a>.</div>
+  <div class="warnbox" style="border-color:var(--accent)"><b style="color:var(--accent)">Desktop beta out.</b> The first TetronOS Desktop ISO is available as a beta: a live system you boot from USB or in a VM, with no installer to disk yet. <a href="#download">Download it</a>, or install the parts on your own Debian or Ubuntu: see <a href="#get">get it</a>.</div>
   <div class="pills"><span class="pill">Debian 13 trixie</span><span class="pill">kmscon console</span><span class="pill">tetron-wm desktop</span><span class="pill">tetron mesh VPN</span><span class="pill">tetron-browser</span><span class="pill">signed apt repo</span><span class="pill">amd64</span></div>
   <figure class="shot"><img src="images/desktop.png" alt="The tetron-wm desktop of TetronOS: floating windows, a taskbar and a status tray drawn as text" loading="eager"><figcaption>the TetronOS desktop: tetron-wm on the kmscon console</figcaption></figure>
 </div></header>
+
+<section id="download"><div class="wrap">
+  <p class="eyebrow">Download</p>
+  <h2>Desktop beta, v0.15.2.</h2>
+  <p class="lede">A live system: it boots into the desktop from a USB stick or in a VM. Changes stay in RAM and are gone at reboot; an installer to disk comes later. Tested booting on BIOS and UEFI.</p>
+  <a class="btn" href="https://github.com/tetronos/tetron-os/releases/download/v0.15.2/tetronos-desktop-fw-20261113-amd64.iso">Download the Desktop ISO (1.6 GB)</a><a class="btn ghost" href="https://github.com/tetronos/tetron-os/releases/tag/v0.15.2">Release notes</a>
+  <div class="two">
+    <div><h3>Check it</h3><pre>sha256sum tetronos-desktop-fw-20261113-amd64.iso
+79faa9dafa4c2e4cc755610f09030d3e
+0ce9faaa773b8a1a789876b8df76f321</pre></div>
+    <div><h3>Write it to USB</h3><pre>lsblk        # find the stick, e.g. /dev/sdX
+sudo dd if=tetronos-desktop-fw-20261113-amd64.iso \
+  of=/dev/sdX bs=4M status=progress conv=fsync</pre></div>
+  </div>
+  <p class="sub">Everything on the USB stick is erased. Ventoy works too. amd64 only. The live user is <code>tetronos</code>; tetron-wm starts on tty1.</p>
+  <figure class="shot"><img src="images/live-desktop.png" alt="The TetronOS Desktop beta just after boot: the tetron-wm desktop with its top bar over a blue wallpaper" width="1280" height="800" loading="lazy"><figcaption>the beta ISO right after boot, in a VM</figcaption></figure>
+</div></section>
 
 <section id="inside"><div class="wrap">
   <p class="eyebrow">Inside</p>
@@ -193,8 +210,8 @@
   <p class="eyebrow">Status</p>
   <h2>Where it stands.</h2>
   <ul class="limits">
-    <li><b>Done:</b> Server and Desktop live ISOs built from the packages, booting on BIOS and UEFI in test VMs; the signed apt repository; the suite on Debian, Ubuntu, Fedora, Arch and macOS.</li>
-    <li><b>Next:</b> published ISO downloads with checksums and a signature, and an installer to disk. The live ISO runs from USB until then.</li>
+    <li><b>Done:</b> the Desktop live ISO as a public beta (v0.15.2); Server and Desktop ISOs built from the packages, booting on BIOS and UEFI in test VMs; the signed apt repository; the suite on Debian, Ubuntu, Fedora, Arch and macOS.</li>
+    <li><b>Next:</b> an installer to disk, a signed checksum file, and a published Server ISO. The live ISO runs from USB until then.</li>
     <li><b>Versions:</b> the whole suite moves in step on 0.15.x; the first published ISO release brings everything to 1.0.</li>
   </ul>
 </div></section>
