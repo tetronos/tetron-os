@@ -1,5 +1,7 @@
 # TetronOS
 
+**Website: [tetronos.github.io/tetron-os](https://tetronos.github.io/tetron-os/)**
+
 A GUI-less Debian trixie live ISO and installer. kmscon console, tetron-wm desktop, tetron mesh. No X11, no Wayland.
 
 Editions are levels of one tree: `server` (ssh, no firmware) and `desktop` (hardware, sound, wifi, all firmware); `minimal` and `full` come later. `FIRMWARE=none|all` is a separate axis; `-fw` in the ISO name marks all firmware.

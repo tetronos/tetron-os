@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="images/icon.svg">
+<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<title>TetronOS: Debian with a desktop made of text</title>
+<meta name="description" content="TetronOS is a Debian 13 system with no X11 and no Wayland: a truecolor kmscon console, the tetron-wm terminal desktop, the tetron mesh VPN and a terminal web browser. Every part is a signed apt package you can rebuild and replace.">
+<style>
+  :root { --bg:#0e1116; --surface:#161b22; --surface-2:#1e252e; --fg:#e6eaf0; --muted:#98a3b1; --border:#2a323d;
+    --accent:#7ee0b0; --accent-2:#8fb8dc; --warn:#e0a96b; --bad:#e07b7b;
+    --code:#0b0e13; --nav-bg:rgba(14,17,22,.88); --us-bg:rgba(126,224,176,.07); --on-accent:#04130c; --shadow:rgba(0,0,0,.35); --shadow-lg:rgba(0,0,0,.5);
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace; --sans:system-ui,-apple-system,"Segoe UI",sans-serif; color-scheme:dark; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg:#f6f8fa; --surface:#ffffff; --surface-2:#eaeef3; --fg:#1b222c; --muted:#556170; --border:#d5dce5;
+    --accent:#14744c; --accent-2:#2a5f8f; --warn:#955510; --bad:#b83a3a;
+    --code:#ffffff; --nav-bg:rgba(246,248,250,.9); --us-bg:rgba(20,116,76,.08); --on-accent:#ffffff; --shadow:rgba(30,45,70,.14); --shadow-lg:rgba(30,45,70,.2); color-scheme:light; } }
+  :root[data-theme="light"] { --bg:#f6f8fa; --surface:#ffffff; --surface-2:#eaeef3; --fg:#1b222c; --muted:#556170; --border:#d5dce5;
+    --accent:#14744c; --accent-2:#2a5f8f; --warn:#955510; --bad:#b83a3a;
+    --code:#ffffff; --nav-bg:rgba(246,248,250,.9); --us-bg:rgba(20,116,76,.08); --on-accent:#ffffff; --shadow:rgba(30,45,70,.14); --shadow-lg:rgba(30,45,70,.2); color-scheme:light; }
+  .tbtn { background:none; color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:3px 10px; font:.75rem var(--mono); }
+  .tbtn:hover { color:var(--fg); border-color:var(--accent); }
+  :focus-visible { outline:2px solid var(--accent-2); outline-offset:2px; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 var(--sans); -webkit-font-smoothing:antialiased; }
+  a { color:var(--accent-2); }
+  .wrap { max-width:62rem; margin:0 auto; padding:0 20px; }
+  nav { position:sticky; top:0; z-index:10; background:var(--nav-bg); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); }
+  nav .wrap { display:flex; gap:18px; align-items:center; height:48px; font-family:var(--mono); font-size:.85rem; }
+  nav .brand { color:var(--accent); font-weight:700; margin-right:auto; text-decoration:none; }
+  nav .crumb { display:flex; align-items:center; gap:6px; margin-right:auto; } nav .crumb .brand { margin-right:0; } nav .crumb .sep { color:var(--muted); }
+  nav a { color:var(--muted); text-decoration:none; } nav a:hover { color:var(--fg); }
+  nav .links { display:contents; }
+  h1 { font-size:clamp(2.2rem,7vw,4rem); line-height:1.05; letter-spacing:-.03em; margin:0 0 1rem; text-wrap:balance; }
+  h1 em { font-style:normal; color:var(--accent); }
+  h2 { font-size:clamp(1.5rem,4vw,2.1rem); letter-spacing:-.02em; margin:0 0 .5rem; text-wrap:balance; }
+  .eyebrow { font:.75rem var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 1rem; }
+  .lede { font-size:1.2rem; color:var(--muted); max-width:40rem; margin:0 0 1.6rem; text-wrap:pretty; }
+  section { padding:4.5rem 0; border-top:1px solid var(--border); }
+  .hero { padding:4rem 0 3rem; border:0; }
+  .inst { font-size:clamp(1.5rem,4vw,2.2rem); font-weight:700; letter-spacing:.22em; text-align:center; margin:2.4rem 0 .9rem; color:var(--accent); }
+  .inst-sub { text-align:center; color:var(--muted); font-size:1.05rem; margin:-.5rem 0 1rem; }
+  .inspect { font:.8rem var(--mono); color:var(--muted); text-align:center; margin:.7rem auto 0; max-width:46rem; }
+  .inspect a { white-space:nowrap; }
+  .hero .install { margin-left:auto; margin-right:auto; }
+  .hero .pills { justify-content:center; }
+  .hero .sub { text-align:center; margin-left:auto; margin-right:auto; max-width:46rem; }
+  .hero .apk { justify-content:center; text-align:center; }
+  .hero .apk span { flex:0 1 auto; }
+  .install { display:flex; align-items:center; gap:10px; background:var(--code); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font:.88rem var(--mono); max-width:46rem; }
+  .install code { flex:1; overflow-x:auto; white-space:nowrap; color:var(--fg); }
+  .install .p { color:var(--accent); }
+  button { font:inherit; cursor:pointer; }
+  .copy { background:var(--surface-2); color:var(--fg); border:1px solid var(--border); border-radius:6px; padding:5px 12px; font:.8rem var(--mono); }
+  .copy:hover { border-color:var(--accent); }
+  .sub { color:var(--muted); font-size:.88rem; margin:.7rem 0 0; }
+  .shot { margin-top:2.5rem; border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 30px 80px var(--shadow-lg); }
+  .shot img { display:block; width:100%; height:auto; }
+  .pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:1.6rem; }
+  .pill { font:.78rem var(--mono); color:var(--muted); border:1px solid var(--border); border-radius:99px; padding:3px 12px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr)); gap:14px; margin-top:2rem; }
+  .win { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .win .bar { display:flex; align-items:center; gap:6px; padding:7px 12px; background:var(--surface-2); border-bottom:1px solid var(--border); font:.75rem var(--mono); color:var(--muted); }
+  .win .bar i { width:9px; height:9px; border-radius:50%; background:var(--border); } .win .bar i:first-child { background:var(--bad); }
+  .win .body { padding:14px 16px; } .win p { margin:0; color:var(--muted); font-size:.93rem; } .win h3 { margin:0 0 .3rem; font-size:1.05rem; }
+  .cmp { width:100%; border-collapse:collapse; margin-top:2rem; font-size:.93rem; }
+  .cmp th, .cmp td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .cmp th { font:.75rem var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .cmp td:first-child { color:var(--muted); } .cmp .us { background:var(--us-bg); color:var(--fg); }
+  .cmp th.us { color:var(--accent); }
+  .tablewrap { overflow-x:auto; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:2rem; }
+  .two pre { margin:0; padding:14px 16px; background:var(--code); border:1px solid var(--border); border-radius:10px; font:.82rem/1.5 var(--mono); overflow-x:auto; color:var(--muted); }
+  .two h3 { margin:0 0 .5rem; font:.78rem var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .two .good h3 { color:var(--accent); }
+  .demo { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); gap:40px; margin-top:2.5rem; align-items:start; }
+  .steps .step { min-height:60vh; display:flex; flex-direction:column; justify-content:center; opacity:.35; transition:opacity .3s; }
+  .steps .step.on { opacity:1; }
+  .step .n { font:.8rem var(--mono); color:var(--accent); }
+  .step h3 { font-size:1.5rem; margin:.2rem 0 .4rem; } .step p { color:var(--muted); margin:0; }
+  .step kbd { font:.8rem var(--mono); background:var(--surface-2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; color:var(--fg); }
+  .stage { position:sticky; top:72px; }
+  .stage .frame { position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden; aspect-ratio:var(--ar,16/10); background:var(--code); box-shadow:0 20px 60px var(--shadow); }
+  .stage img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .45s; }
+  .stage img.on { opacity:1; }
+  .cap { font:.8rem var(--mono); color:var(--muted); margin-top:.6rem; text-align:center; }
+  .themes { display:grid; grid-template-columns:repeat(auto-fit,minmax(13rem,1fr)); gap:12px; margin-top:2rem; }
+  .themes figure { margin:0; } .themes img { width:100%; display:block; border:1px solid var(--border); border-radius:8px; }
+  .themes figcaption { font:.78rem var(--mono); color:var(--muted); margin-top:.4rem; }
+  .vpn { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:40px; align-items:center; margin-top:2rem; }
+  .vpn ul { margin:0; padding:0; list-style:none; display:grid; gap:12px; }
+  .vpn li { color:var(--muted); padding-left:1.2rem; position:relative; } .vpn li b { color:var(--fg); font-weight:600; }
+  .vpn li::before { content:"\25CF"; position:absolute; left:0; color:var(--accent); font-size:.7rem; top:.35rem; }
+  .tray { background:var(--code); border:1px solid var(--border); border-radius:10px; font:.85rem/1.7 var(--mono); overflow:hidden; max-width:24rem; }
+  .tray .top { display:flex; gap:16px; padding:6px 14px; background:var(--surface-2); border-bottom:1px solid var(--border); color:var(--muted); } .tray .top .on { color:var(--accent); }
+  .tray .row { display:flex; justify-content:space-between; gap:12px; padding:2px 14px; } .tray .row span:last-child { color:var(--muted); }
+  .tray .hr { border-top:1px solid var(--border); margin:6px 0; } .tray .dir { color:var(--accent); } .tray .rel { color:var(--warn); }
+  .tray .pad { padding:8px 0; }
+  .tray .note { color:var(--muted); font-size:.72rem; padding:0 14px 8px; }
+  .btn { display:inline-block; margin-top:1.6rem; padding:10px 18px; border-radius:8px; background:var(--accent); color:var(--on-accent); font-weight:600; text-decoration:none; }
+  .btn.ghost { background:none; color:var(--fg); border:1px solid var(--border); margin-left:8px; }
+  footer { border-top:1px solid var(--border); padding:2.5rem 0 3rem; color:var(--muted); font-size:.88rem; }
+  footer a { margin-right:16px; display:inline-block; white-space:nowrap; }
+  @media (max-width:760px) {
+    .two, .demo, .vpn { grid-template-columns:1fr; }
+    .stage { position:sticky; top:48px; z-index:2; background:var(--bg); padding:8px 0; }
+    .steps .step { min-height:45vh; }
+    nav .links { display:none; }
+  }
+  @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .stage img, .steps .step { transition:none; } }
+  .install.multi { display:block; } .install.multi code { display:block; white-space:pre-wrap; overflow-wrap:anywhere; } .install.multi .copy { margin-top:10px; }
+  .grid.four { grid-template-columns:repeat(auto-fit,minmax(13rem,1fr)); }
+  .limits li { color:var(--muted); margin:.35rem 0; } .limits li b { color:var(--fg); }
+  .warnbox { border:1px solid var(--warn); border-radius:10px; padding:12px 16px; margin-top:1.6rem; color:var(--fg); background:var(--surface); }
+  .warnbox b { color:var(--warn); }
+  .files { width:100%; border-collapse:collapse; margin-top:1.4rem; font-size:.9rem; }
+  .files td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; } .files td:first-child { color:var(--muted); white-space:nowrap; }
+  .files code, .win code, .limits code, p code { font:.85em var(--mono); }
+  .shot figcaption { font:.8rem var(--mono); color:var(--muted); padding:.5rem .8rem; border-top:1px solid var(--border); background:var(--surface); }
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <span class="crumb"><a class="org" href="https://tetronos.github.io/">tetronos</a><span class="sep">/</span><a class="brand" href="#top">TetronOS</a></span>
+  <span class="links"><a href="#inside">inside</a><a href="#editions">editions</a><a href="#yours">yours</a><a href="#get">get it</a><a href="#status">status</a></span>
+  <button class="tbtn" id="theme" type="button" aria-label="Switch between light and dark theme">light</button>
+<a href="https://github.com/tetronos/tetron-os">github</a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <p class="eyebrow">Debian. No X11. No Wayland.</p>
+  <h1>A whole computer, drawn in <em>text</em>.</h1>
+  <p class="lede">TetronOS boots straight into a truecolor console with a mouse and a real desktop: windows, a taskbar, an app store, a web browser and a private mesh network to reach your other machines. Built on Debian 13, made of ordinary signed packages, small enough for old hardware and servers.</p>
+  <div class="warnbox" style="border-color:var(--accent)"><b style="color:var(--accent)">In development.</b> The Server and Desktop ISOs are built and boot on BIOS and UEFI in testing, but are not published for download yet. Every part already installs on your own Debian or Ubuntu today: see <a href="#get">get it</a>.</div>
+  <div class="pills"><span class="pill">Debian 13 trixie</span><span class="pill">kmscon console</span><span class="pill">tetron-wm desktop</span><span class="pill">tetron mesh VPN</span><span class="pill">tetron-browser</span><span class="pill">signed apt repo</span><span class="pill">amd64</span></div>
+  <figure class="shot"><img src="images/desktop.png" alt="The tetron-wm desktop of TetronOS: floating windows, a taskbar and a status tray drawn as text" loading="eager"><figcaption>the TetronOS desktop: tetron-wm on the kmscon console</figcaption></figure>
+</div></header>
+
+<section id="inside"><div class="wrap">
+  <p class="eyebrow">Inside</p>
+  <h2>Everything a desktop does, without a display server.</h2>
+  <p class="lede">The graphics stack is the terminal itself. That keeps the system small and every app usable over ssh.</p>
+  <div class="grid">
+    <div class="win"><div class="bar"><i></i><i></i><i></i>console</div><div class="body"><h3>kmscon</h3><p>The login console in truecolor with mouse support and good fonts, in place of the kernel's plain text console.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>desktop</div><div class="body"><h3><a href="https://tetronos.github.io/tetron-wm/">tetron-wm</a></h3><p>Floating windows, a taskbar, a launcher, a file manager, themes, and a Store with 600+ terminal apps. Detach and reattach like tmux.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>network</div><div class="body"><h3><a href="https://tetronos.github.io/tetron/">tetron</a></h3><p>A peer-to-peer mesh VPN: your machines reach each other directly and encrypted, wherever they are, with no account and no central server.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>web</div><div class="body"><h3><a href="https://tetronos.github.io/tetron-browser/">tetron-browser</a></h3><p>Chromium drawn in text: JavaScript, logins and images in the terminal. The desktop opens web pages in it.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>apps</div><div class="body"><h3>App collections</h3><p>The Desktop comes with the essentials and recommended collections: a file manager, editors, media players, system monitors, disk and network tools.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>hardware</div><div class="body"><h3>Laptop ready</h3><p>Wi-Fi, sound (PipeWire), Bluetooth, backlight and battery, CPU microcode, and all firmware on the -fw image.</p></div></div>
+  </div>
+  <figure class="shot"><img src="images/browser.png" alt="tetron-browser showing a Wikipedia article in the terminal" loading="lazy"><figcaption>the web, in the same terminal: tetron-browser</figcaption></figure>
+</div></section>
+
+<section id="editions"><div class="wrap">
+  <p class="eyebrow">Editions</p>
+  <h2>One tree, two sizes.</h2>
+  <p class="lede">Each edition is a package that pulls in the one below it, so a Server becomes a Desktop with one <code>apt install</code>.</p>
+  <div class="tablewrap"><table class="cmp">
+    <tr><th>Edition</th><th>For</th><th>What it adds</th><th>ISO size</th></tr>
+    <tr><td>Server<br><code>tetronos-server</code></td><td>headless machines, VMs, ssh</td><td class="us">the core (tetron, tetron-tui, tetron-wm, NetworkManager, kmscon), an SSH server, and python3 with python3-apt so Ansible can manage it</td><td>about 380 MB</td></tr>
+    <tr><td>Desktop<br><code>tetronos-desktop</code></td><td>laptops and desktops</td><td class="us">everything in Server, plus wifi, sound, Bluetooth, backlight and battery tools, microcode, tetron-browser and the essentials and recommended app collections</td><td>about 1 GB with all firmware</td></tr>
+  </table></div>
+  <p class="sub">Also in the repository: <code>tetronos-suite</code>, the core plus the recommended collection, the tetron web dashboard and its message board. Minimal and Full editions are planned.</p>
+</div></section>
+
+<section id="yours"><div class="wrap">
+  <p class="eyebrow">Yours</p>
+  <h2>You control the device, not the vendor.</h2>
+  <p class="lede">TetronOS is Debian plus a handful of small, readable packages. Nothing is hidden in an image.</p>
+  <ul class="limits">
+    <li><b>Plain packages.</b> Every TetronOS part is a <code>.deb</code> in a signed apt repository; <code>apt upgrade</code> updates the system and the suite together.</li>
+    <li><b>Run your own build.</b> Clone a project, change it (by hand or with an AI assistant), build it and run it in place of the packaged one; the package stays installed and switching back is one command. tetron-wm supports this today.</li>
+    <li><b>Open source.</b> The image recipe, the packages and every suite project are public on GitHub. Build the ISO yourself with one <code>make</code>.</li>
+    <li><b>Your network.</b> tetron connects your machines peer to peer. No account, no cloud service in the middle.</li>
+  </ul>
+  <p class="sub">Repository signing key: <code>86DF C7BD 5781 D4C5 0542 F76D 73F9 AF0F B662 5946</code></p>
+</div></section>
+
+<section id="get"><div class="wrap">
+  <p class="eyebrow">Get it</p>
+  <h2>Three ways, today.</h2>
+  <div class="grid">
+    <div class="win"><div class="bar"><i></i><i></i><i></i>installer</div><div class="body"><h3>The suite on your system</h3><p>On Debian, Ubuntu, other Linux or macOS: the installer asks for tetron or tetron-wm and sets it up.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>apt</div><div class="body"><h3>The apt repository</h3><p>Debian 12+ and Ubuntu 22.04+, amd64 and arm64: every suite and TetronOS package, upgraded by <code>apt upgrade</code>. <a href="https://tetronos.github.io/apt/">tetronos apt</a>.</p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>make iso</div><div class="body"><h3>Build the ISO</h3><p>Clone <a href="https://github.com/tetronos/tetron-os">tetron-os</a>, then <code>make vm-create</code> once and <code>make iso EDITION=desktop</code>. Builds in a Debian 13 VM, or a container with <code>RUNNER=docker</code>.</p></div></div>
+  </div>
+  <div class="install" style="margin-top:1.6rem"><span class="p">$</span><code id="cmd">curl -fsSL https://tetronos.github.io/install.sh | bash</code><button class="copy" id="copy" type="button">copy</button></div>
+  <p class="inspect" style="margin-left:0;text-align:left">Read before you run: <a href="https://tetronos.github.io/install.sh">install.sh</a></p>
+</div></section>
+
+<section id="status"><div class="wrap">
+  <p class="eyebrow">Status</p>
+  <h2>Where it stands.</h2>
+  <ul class="limits">
+    <li><b>Done:</b> Server and Desktop live ISOs built from the packages, booting on BIOS and UEFI in test VMs; the signed apt repository; the suite on Debian, Ubuntu, Fedora, Arch and macOS.</li>
+    <li><b>Next:</b> published ISO downloads with checksums and a signature, and an installer to disk. The live ISO runs from USB until then.</li>
+    <li><b>Versions:</b> the whole suite moves in step on 0.15.x; the first published ISO release brings everything to 1.0.</li>
+  </ul>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The tetron suite.</h2>
+  <p class="lede">TetronOS is the suite on a system of its own. Each part also runs on your current computer.</p>
+  <a class="btn" href="https://tetronos.github.io/tetron-wm/">tetron-wm</a><a class="btn ghost" href="https://tetronos.github.io/tetron/">tetron</a><a class="btn ghost" href="https://tetronos.github.io/tetron-browser/">tetron-browser</a><a class="btn ghost" href="https://tetronos.github.io/">all projects</a>
+</div></section>
+
+<footer><div class="wrap">
+  <a href="https://github.com/tetronos/tetron-os">GitHub</a><a href="https://github.com/tetronos/tetron-os/releases">Releases</a><a href="https://tetronos.github.io/apt/">apt repository</a><a href="https://tetronos.github.io/tetron-wm/">tetron-wm</a><a href="https://tetronos.github.io/tetron/">tetron</a><a href="https://tetronos.github.io/tetron-browser/">tetron-browser</a><a href="https://tetronos.github.io/">tetronos</a>
+  <p>Built on <a href="https://www.debian.org/">Debian</a>. Debian is a registered trademark of Software in the Public Interest, Inc.; TetronOS is not affiliated with or endorsed by the Debian project.</p>
+</div></footer>
+
+<script>
+(function () {
+  var tb = document.getElementById('theme'), root = document.documentElement, mq = window.matchMedia && matchMedia('(prefers-color-scheme: light)');
+  function eff() { var t = root.getAttribute('data-theme'); return t || (mq && mq.matches ? 'light' : 'dark'); }
+  function label() { tb.textContent = eff() === 'dark' ? 'light' : 'dark'; }
+  label();
+  tb.addEventListener('click', function () {
+    var n = eff() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', n);
+    try { localStorage.setItem('theme', n); } catch (e) {}
+    label();
+  });
+  if (mq && mq.addEventListener) mq.addEventListener('change', label);
+  var cmd = document.getElementById('cmd'), b = document.getElementById('copy');
+  b.addEventListener('click', function () {
+    var t = cmd.textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = 'copied'; }, function () {
+      var r = document.createRange(); r.selectNodeContents(cmd); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'select, ctrl+c';
+    });
+    setTimeout(function () { b.textContent = 'copy'; }, 2000);
+  });
+})();
+</script>
+</body>
+</html>
