@@ -183,7 +183,6 @@ sudo dd if=tetronos-desktop-fw-20261113-amd64.iso \
     <li><b>Built into the desktop.</b> The tetron-wm tray shows your peers and how they connect, with one switch for all of tetron and Resume or Standby per network; tetron-tui is the full dashboard in a terminal.</li>
     <li><b>Ready at first boot.</b> TetronOS makes the first user the tetron operator, and on first boot joins a network when an invite was left for it (<code>/etc/tetron/pending-invite</code>).</li>
   </ul>
-  <figure class="shot"><img src="images/tetron-mesh.jpg" alt="Diagram: every tetron node runs the same daemon with a TUN interface; nodes talk to each other over encrypted QUIC/UDP tunnels, and iroh's shared relay only helps with discovery and NAT traversal" width="1376" height="768" loading="lazy"><figcaption>every node runs the same daemon; traffic goes directly between nodes once they have found each other</figcaption></figure>
   <a class="btn" href="https://tetronos.github.io/tetron/">Meet tetron</a><a class="btn ghost" href="https://github.com/tetronos/tetron">tetron on GitHub</a>
 </div></section>
 
