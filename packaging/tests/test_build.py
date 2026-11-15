@@ -262,7 +262,7 @@ class ListDebs(unittest.TestCase):
         self.assertIn(f"tetron-wm_{wm}-1_amd64.deb", out)
         self.assertIn(f"tetron-wm-essentials_{wm}-1_all.deb", out)
         self.assertIn(f"tetron-wm-recommended_{wm}-1_all.deb", out)
-        for name in ("tetronos-firmware-wifi", "tetronos-firmware", "casttui"):
+        for name in ("tetronos-firmware-wifi", "tetronos-firmware", "tetron-stt"):
             self.assertTrue(any(f.startswith(name + "_") for f in out), name)
 
 
