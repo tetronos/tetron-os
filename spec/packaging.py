@@ -351,7 +351,7 @@ class TetronosDesktopConfig(Requirement):
 
 class TetronosFirmwareMetas(Requirement):
     """Firmware comes from two metapackages (kind meta, needs the Debian
-    non-free-firmware component, which every image has in its apt sources).
+    contrib and non-free-firmware components, which every image has in its apt sources).
     tetronos-firmware-wifi: the wifi firmware (Intel, Realtek, MediaTek,
     Atheros, Broadcom, firmware-misc-nonfree) with wpasupplicant, iw and
     wireless-regdb; tetronos-server Depends it, so every tier gets wifi and

@@ -325,7 +325,7 @@ The firmware of the common wifi chips (Intel, Realtek, MediaTek, Qualcomm
 Atheros, Broadcom, and the wifi parts of firmware-misc-nonfree) with
 wpasupplicant, iw and wireless-regdb, so NetworkManager can drive the radio.
 Part of every TetronOS tier: a laptop with only wifi has no network to fetch
-firmware from. Needs the Debian non-free-firmware component.
+firmware from. Needs the Debian contrib and non-free-firmware components.
 """
 depends = ["firmware-iwlwifi", "firmware-realtek", "firmware-mediatek", "firmware-atheros", "firmware-brcm80211",
            "firmware-misc-nonfree", "wpasupplicant", "iw", "wireless-regdb"]
