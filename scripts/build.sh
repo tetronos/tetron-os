@@ -11,6 +11,8 @@ case "$EDITION" in
 esac
 # The desktop always has firmware, so only the server edition names it.
 SUFFIX=""; [ "$FIRMWARE" = all ] && [ "$EDITION" != desktop ] && SUFFIX="-fw"
+# TAG=name (make): a test build, named tetronos-<edition>[-fw]-<name>-<date>-amd64.iso
+SUFFIX="$SUFFIX${ISO_TAG:+-$ISO_TAG}"
 SRC="${SRC:-/src}"
 WORK="${WORKROOT:-/build}/$EDITION"
 OUTDIR="${OUTDIR:-/out}"
@@ -32,6 +34,13 @@ rm -rf "$REPO"; mkdir -p "$REPO"
 for f in $(python3 "$SRC/packaging/build.py" --list-debs); do
 	[ -f "$SRC/packaging/out/$f" ] || { echo "missing packaging/out/$f; run: make debs" >&2; exit 1; }
 	cp "$SRC/packaging/out/$f" "$REPO/"
+done
+# Test builds only: extra debs (for example a kmscon built by packaging/kmscon/build.sh)
+# from packaging/extra/ join the local repository. They are not in the manifest, so a
+# release never has them; name the ISO with TAG=... (make) so it is not mistaken for one.
+for f in "$SRC"/packaging/extra/*.deb; do
+	[ -f "$f" ] || continue
+	cp "$f" "$REPO/"; echo "extra deb: $(basename "$f")"
 done
 (cd "$REPO" && apt-ftparchive packages . > Packages && apt-ftparchive release . > Release)
 python3 -m http.server 8099 --bind 127.0.0.1 --directory "$REPO" >"$WORK/repo-http.log" 2>&1 &

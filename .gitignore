@@ -5,6 +5,7 @@ out/
 *.log
 packaging/out/
 packaging/cache/
+packaging/extra/
 __pycache__/
 *.pyc
 .libspec/cache/
