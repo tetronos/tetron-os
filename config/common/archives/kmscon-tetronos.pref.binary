@@ -1,0 +1,6 @@
+# TetronOS builds kmscon without OpenGL (packaging/kmscon, manifest kind source) and publishes it in the
+# tetronos apt repository. It must win over the trixie-backports kmscon pinned at 600 in
+# kmscon-backports.pref.binary, so apt on a running system keeps it. Our version sorts above the backports one.
+Package: kmscon
+Pin: origin "tetronos.github.io"
+Pin-Priority: 700

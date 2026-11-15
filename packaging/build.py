@@ -164,6 +164,53 @@ def take_release_deb(pkg: dict, out: Path, local: Path | None = None) -> Path:
     return target
 
 
+def source_key(pkg: dict) -> str:
+    """What a source build depends on: the build directory's files and the version."""
+    d = (HERE / pkg["build"]).parent
+    h = hashlib.sha256(f"{pkg['version']}-{pkg['revision']}".encode())
+    for f in sorted(d.iterdir()):
+        if f.is_file():
+            h.update(f.name.encode()); h.update(f.read_bytes())
+    return h.hexdigest()
+
+
+def build_source(pkg: dict, out: Path) -> Path:
+    """kind = "source": a package we build from a Debian source package, in a debian:trixie
+    container (docker): `build` is a script in a directory that is mounted at /src, run with
+    VERSION and /out. The result is kept in packaging/cache/source/ (keyed by the directory's
+    files and the version), so a later run does not rebuild it. The deb's fields are checked."""
+    name = pkg["name"]
+    file = deb_filename(pkg)
+    cache = HERE / "cache" / "source"
+    cache.mkdir(parents=True, exist_ok=True)
+    key = source_key(pkg)
+    cached, stamp = cache / file, cache / (file + ".key")
+    if cached.is_file() and stamp.is_file() and stamp.read_text().strip() == key:
+        print(f"{name} {pkg['version']}-{pkg['revision']} (source build, cached)")
+    else:
+        print(f"{name} {pkg['version']}-{pkg['revision']} (source build in debian:trixie)")
+        script = HERE / pkg["build"]
+        with tempfile.TemporaryDirectory() as td:
+            r = subprocess.run(["docker", "run", "--rm", "-v", f"{script.parent}:/src:ro", "-v", f"{td}:/out",
+                                "-e", f"VERSION={pkg['version']}-{pkg['revision']}", "debian:trixie",
+                                "sh", f"/src/{script.name}"])
+            if r.returncode:
+                die(f"{name}: the source build failed (docker run exit {r.returncode})")
+            built = Path(td) / file
+            if not built.is_file():
+                die(f"{name}: the source build made no {file}")
+            bad = deb_field_mismatches(deb_fields(built), pkg)
+            if bad:
+                die(f"{name}: built deb does not match the manifest: " + "; ".join(bad))
+            shutil.copyfile(built, cached)
+            stamp.write_text(key + "\n")
+    out.mkdir(parents=True, exist_ok=True)
+    target = out / file
+    shutil.copyfile(cached, target)
+    print(f"  -> {target} ({target.stat().st_size // 1024} KiB)")
+    return target
+
+
 def extract_trees(pkg: dict, archive: Path, stage: Path) -> None:
     """Copy each [[package.trees]] src directory of a zip asset to its dst:
     regular files only, 0755 if executable in the archive, else 0644.
@@ -325,6 +372,8 @@ def main() -> None:
     for p in pkgs:
         if p.get("kind") == "deb":
             take_release_deb(p, Path(a.out), Path(a.local_debs) if a.local_debs else None)
+        elif p.get("kind") == "source":
+            build_source(p, Path(a.out))
         else:
             build_one(p, top, Path(a.out), epoch)
 

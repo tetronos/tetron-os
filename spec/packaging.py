@@ -373,3 +373,22 @@ class TetronosBranding(Requirement):
     Debian releases. A file the admin put in place of a symlink is kept.
     Removing the package removes its symlinks and restores the Debian
     files."""
+
+
+class KmsconWithoutOpenGL(Requirement):
+    """kmscon is built by TetronOS (manifest kind = "source", packaging/build.py in a
+    debian:trixie container with packaging/kmscon/build-in-container.sh) from the
+    trixie-backports source with video_drm3d and renderer_gltex disabled, as
+    10.0.4-1~bpo13+1tetronos1, which sorts above the backports 10.0.4-1~bpo13+1. It
+    needs no libgbm, libegl, libgles, mesa or LLVM (about 195 MB installed, 56 MB of
+    the compressed server ISO). tetron-wm never uses OpenGL (kmscon only renders its
+    terminal; images and video go to mpv --vo=drm), and kmscon uses its software
+    renderer unless started with --hwaccel, which is off by default and which TetronOS
+    never sets, so the stock kmscon was already rendering in software. The package is
+    attached to the tetron-os release and so reaches the tetronos apt repository; an
+    apt pin of the tetronos origin at 700 (config/common/archives/kmscon-tetronos.pref.binary)
+    keeps it above the backports kmscon at 600. All tiers use it, the desktop included
+    (mpv still pulls libgbm and mesa there, so only the server tiers get smaller). A
+    kmscon started with --hwaccel does not use 3D acceleration; it falls back to the
+    software backend. Tested: a server ISO built with it showed no slowdown (USER
+    2026-11-15)."""
