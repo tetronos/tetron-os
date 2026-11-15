@@ -30,6 +30,8 @@ printf 'Package: *\nPin: origin tetronos.github.io\nPin-Priority: -1\n' > /etc/a
 prev_names=$(for f in /prev/*.deb; do dpkg-deb -f "$f" Package; done | sort -u)
 mkdir -p /prevrepo && cp /prev/*.deb /prevrepo/
 for f in /debs/*.deb; do echo "$prev_names" | grep -qxF "$(dpkg-deb -f "$f" Package)" || cp "$f" /prevrepo/; done
+# Debs the previous release needs that this build no longer has (legacy-debs.txt).
+cp /legacy/*.deb /prevrepo/ 2>/dev/null || true
 repo /prevrepo/*.deb
 echo "== install the previous release ($(ls /prev/*.deb | wc -l) packages)"
 if apt-get install -y -qq --no-install-recommends tetronos-suite tetronos-desktop >/tmp/apt.log 2>&1; then ok "previous release installs"

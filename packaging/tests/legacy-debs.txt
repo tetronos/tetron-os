@@ -1,0 +1,6 @@
+# Debs of other repos that the previous release (the one the upgrade test starts from) still
+# depends on and that this build's manifest no longer has. The upgrade test adds them to the
+# previous release's local repository so it can install; they are not part of this build.
+# name url sha256_url
+tetron-webui https://github.com/tetronos/tetron-webui/releases/download/v0.15.1/tetron-webui_0.15.1-1_amd64.deb https://github.com/tetronos/tetron-webui/releases/download/v0.15.1/tetron-webui_0.15.1-1_amd64.deb.sha256
+tetron-messageboard https://github.com/tetronos/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb https://github.com/tetronos/tetron-messageboard/releases/download/v0.15.0/tetron-messageboard_0.15.0-1_amd64.deb.sha256
