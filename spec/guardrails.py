@@ -105,9 +105,12 @@ class EditionsAndFirmwareAxis(Requirement):
     """Editions are levels of one tree: server and desktop now, minimal and
     full later (core < server < desktop < full). EDITION selects the level.
     Firmware is a second, independent axis: FIRMWARE=none|all, default
-    none for server and all for desktop. --firmware-chroot follows
-    FIRMWARE. The ISO is named tetronos-<edition>[-fw]-<date>-amd64.iso,
-    with -fw whenever FIRMWARE=all."""
+    none for server and all for desktop. FIRMWARE=all adds the
+    tetronos-firmware package to a server (live-build --firmware-chroot is
+    always off; the desktop gets the package from tetronos-desktop). The ISO
+    is named tetronos-<edition>[-fw]-<date>-amd64.iso, with -fw whenever
+    FIRMWARE=all on the server edition; the desktop has firmware always and
+    no suffix (tetronos-desktop-<date>-amd64.iso)."""
 
 
 class BuildOutputsNeverOverwritten(Requirement):

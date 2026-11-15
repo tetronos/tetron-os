@@ -9,11 +9,11 @@ VM      := scripts/vm.sh
 .PHONY: iso iso-build vm-create vm-start vm-stop vm-shell vm-destroy docker-image clean distclean
 
 # Whole build output to the terminal and out/logs/ (BuildLogsInOut); the
-# exit status is the build's, not tee's. -fw follows build.sh: FIRMWARE=all,
-# or FIRMWARE unset on the desktop edition.
+# exit status is the build's, not tee's. -fw follows build.sh: FIRMWARE=all on the
+# server edition (the desktop has firmware always and no suffix).
 iso:
 	@mkdir -p out/logs; \
-	fw=; case "$(FIRMWARE)/$(EDITION)" in all/*|/desktop) fw=-fw ;; esac; \
+	fw=; case "$(FIRMWARE)/$(EDITION)" in all/server) fw=-fw ;; esac; \
 	log=out/logs/make-iso-$(EDITION)$$fw-$$(date +%Y%m%d-%H%M%S).log; st=$$(mktemp); \
 	echo "log: $$log"; \
 	{ $(MAKE) --no-print-directory iso-build; echo $$? > $$st; } 2>&1 | tee $$log; \

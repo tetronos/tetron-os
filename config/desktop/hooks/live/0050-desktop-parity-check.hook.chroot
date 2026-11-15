@@ -1,0 +1,8 @@
+#!/bin/sh
+# Fails the build when tetronos-desktop-config did not make the machine a
+# Desktop: ssh must not start at boot, the tetron-wm app server must be enabled
+# for every user, opencode must be in /etc/skel.
+set -e
+if systemctl is-enabled --quiet ssh.service 2>/dev/null; then echo "desktop: ssh.service is enabled" >&2; exit 1; fi
+systemctl --global is-enabled --quiet tetron-wm-apphost.service || { echo "desktop: tetron-wm-apphost.service is not enabled" >&2; exit 1; }
+[ -x /etc/skel/.local/bin/opencode ] || { echo "desktop: opencode is not in /etc/skel" >&2; exit 1; }

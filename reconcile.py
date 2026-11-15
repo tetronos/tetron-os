@@ -68,7 +68,8 @@ def check_editions() -> dict:
     return {
         "server": "server)" in t,
         "desktop": "desktop)" in t,
-        "firmware_axis": "FIRMWARE" in t and 'FW=false' in t and 'FW=true' in t and '--firmware-chroot "$FW"' in t,
+        "firmware_axis": "FIRMWARE" in t and "none|all" in t and "--firmware-chroot false" in t
+        and "tetronos-firmware" in Path("scripts/build.sh").read_text(),
     }
 
 
@@ -139,14 +140,14 @@ def check_parity() -> dict:
         old = tuple(int(x) for x in version.split("-")[0].split(".")) < (0, 15, 6)
         return {"checked": False, "ok": old, "why": f"{deb.name} has no parity table"}
     have = {l.split("\t")[0] for l in Path(lists[-1]).read_text().splitlines() if l}
-    hooks = "".join(Path(h).read_text() for h in sorted(glob.glob("config/*/hooks/live/*")) if "server" not in h)
+    hooks = "".join(Path(h).read_text() for h in sorted(glob.glob("config/*/hooks/live/*") + glob.glob("packaging/files/tetronos-desktop-config/postinst")) if "server" not in h)
     problems = []
     for r in rows:
         problems += [f"step {r['step']} ({r['what']}): package {p} not in {lists[-1]}" for p in r.get("iso_packages", []) if p not in have]
         for u in r.get("iso_units", []):
             stem = u.replace("@.service", "@").replace(".service", "")
             if stem not in hooks:
-                problems.append(f"step {r['step']} ({r['what']}): unit {u} is not enabled by a Desktop hook")
+                problems.append(f"step {r['step']} ({r['what']}): unit {u} is not enabled by a Desktop hook or the tetronos-desktop-config postinst")
     return {"checked": True, "ok": not problems, "deb": deb.name, "list": lists[-1], "rows": len(rows), "problems": problems}
 
 

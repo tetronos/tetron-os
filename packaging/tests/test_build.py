@@ -258,9 +258,12 @@ class ListDebs(unittest.TestCase):
                              capture_output=True, text=True, check=True).stdout.split()
         pkgs = tomllib.loads((build.HERE / "manifest.toml").read_text())["package"]
         self.assertEqual(out, [build.deb_filename(p) for p in pkgs])
-        self.assertIn("tetron-wm_0.15.7-1_amd64.deb", out)
-        self.assertIn("tetron-wm-essentials_0.15.7-1_all.deb", out)
-        self.assertIn("tetron-wm-recommended_0.15.7-1_all.deb", out)
+        wm = next(p["version"] for p in pkgs if p["name"] == "tetron-wm")
+        self.assertIn(f"tetron-wm_{wm}-1_amd64.deb", out)
+        self.assertIn(f"tetron-wm-essentials_{wm}-1_all.deb", out)
+        self.assertIn(f"tetron-wm-recommended_{wm}-1_all.deb", out)
+        for name in ("tetronos-firmware-wifi", "tetronos-firmware", "casttui"):
+            self.assertTrue(any(f.startswith(name + "_") for f in out), name)
 
 
 class LocalDebs(unittest.TestCase):
