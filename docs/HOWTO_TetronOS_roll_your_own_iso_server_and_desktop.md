@@ -17,11 +17,11 @@ Check that KVM works (the command must print `KVM acceleration can be used`):
 The ISO packages the released `.deb` files of the components, so the component repos are only needed to check versions. Put them all side by side in one folder, for example `~/code`.
 
     mkdir -p ~/code && cd ~/code
-    for r in tetron-os tetron tetron-tui tetron-wm tetron-webui tetron-messageboard tetron-browser tetron-appstore tetron-packaging tetronos-apt; do git clone https://github.com/tetronos/$r; done
+    for r in tetron-os tetron tetron-tui tetron-wm tetron-browser tetron-appstore tetron-packaging tetronos-apt; do git clone https://github.com/tetronos/$r; done
 
 Already cloned? Update them instead:
 
-    for r in tetron-os tetron tetron-tui tetron-wm tetron-webui tetron-messageboard tetron-browser tetron-appstore tetron-packaging tetronos-apt; do git -C ~/code/$r pull --ff-only; done
+    for r in tetron-os tetron tetron-tui tetron-wm tetron-browser tetron-appstore tetron-packaging tetronos-apt; do git -C ~/code/$r pull --ff-only; done
 
 ## 3. Check each repository is clean and in sync
 
@@ -39,13 +39,13 @@ Do the same for any component with `git -C ~/code/tetron-wm status -sb`. Work on
 
 The ISO takes the newest published release of each component, tagged `vMAJOR.MINOR.PATCH`. The repos are public, so git can list the tags without any login. Pre-release tags (with a `-` suffix) are skipped.
 
-    for r in tetron tetron-tui tetron-wm tetron-webui tetron-messageboard tetron-browser tetron-appstore; do echo "$r: $(git ls-remote --tags --refs https://github.com/tetronos/$r 'v[0-9]*' | sed 's#.*refs/tags/##' | grep -v -- '-' | sort -V | tail -1)"; done
+    for r in tetron tetron-tui tetron-wm tetron-browser tetron-appstore; do echo "$r: $(git ls-remote --tags --refs https://github.com/tetronos/$r 'v[0-9]*' | sed 's#.*refs/tags/##' | grep -v -- '-' | sort -V | tail -1)"; done
 
 ## 5. Check the pinned versions match
 
 `packaging/manifest.toml` is the single list of which `.deb` goes into the ISO. Show what it pins:
 
-    grep -E '^(name|version) =' packaging/manifest.toml | paste - - | grep -E 'tetron(-tui|-wm|-webui|-messageboard|-browser|-appstore)?"'
+    grep -E '^(name|version) =' packaging/manifest.toml | paste - - | grep -E 'tetron(-tui|-wm|-browser|-appstore)?"'
 
 Compare each version with step 4. The `tetron-wm` family (`tetron-wm`, `-desktop`, `-essentials`, `-recommended`, `-extras`) must all carry the same version. Where a pin is old, change the version in its `version =` line and in both URLs of its `[package.source]` block (`url` and `sha256_url`). Example, tetron-wm 0.15.7 to 0.15.13 in one command:
 
