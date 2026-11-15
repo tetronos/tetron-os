@@ -40,6 +40,8 @@ done
 # release never has them; name the ISO with TAG=... (make) so it is not mistaken for one.
 for f in "$SRC"/packaging/extra/*.deb; do
 	[ -f "$f" ] || continue
+	# Only a tagged test build (make iso TAG=name) takes them; a release build never does.
+	[ -n "${ISO_TAG:-}" ] || { echo "skipping extra deb (no TAG, not a test build): $(basename "$f")"; continue; }
 	cp "$f" "$REPO/"; echo "extra deb: $(basename "$f")"
 done
 (cd "$REPO" && apt-ftparchive packages . > Packages && apt-ftparchive release . > Release)
