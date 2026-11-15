@@ -48,6 +48,11 @@ if [ "$EDITION" = desktop ]; then
 			> config/package-lists/tetron-wm-$set-apps.list.chroot
 	done
 fi
+# With firmware (the hardware image) NetworkManager needs wpasupplicant to drive wifi
+# (the desktop edition gets them from tetronos-desktop); the plain server stays small.
+if [ "$FIRMWARE" = all ]; then
+	printf 'wpasupplicant\niw\nwireless-regdb\n' > config/package-lists/wifi.list.chroot
+fi
 export EDITION FIRMWARE
 # Drop stage stamps, chroot and binary of an earlier build (the download cache stays).
 lb clean
