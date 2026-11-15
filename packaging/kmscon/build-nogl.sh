@@ -18,8 +18,7 @@ mkdir -p "$OUT"
 "$VM" ssh 'set -e
 sudo apt-get install -y -q dpkg-dev devscripts fakeroot >/dev/null
 rm -rf ~/kms && mkdir ~/kms && cd ~/kms
-apt-get source -t trixie-backports kmscon >/dev/null 2>&1 || true
-dpkg-source --no-check -x kmscon_*.dsc >/dev/null
+apt-get source -t trixie-backports kmscon >/dev/null 2>&1
 cd kmscon-*/
 sudo apt-get build-dep -y -q -t trixie-backports kmscon >/dev/null
 patch -p1 < ~/src/packaging/kmscon/nogl-rules.patch
