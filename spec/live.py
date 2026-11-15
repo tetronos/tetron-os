@@ -71,3 +71,15 @@ class DesktopSshOff(Requirement):
     desktop (live or installed from it) does not listen for ssh. A server
     that is running sshd when it is upgraded to desktop keeps it enabled, so
     a remote upgrade does not lock the machine out at the next boot."""
+
+
+class DesktopSttModelsPreseeded(Requirement):
+    """The tetron-stt deb carries no models (about 0.96 GB, NVIDIA, CC-BY-4.0).
+    The Desktop image fetches them at build time with tetron-stt models
+    download into /usr/share/tetron-stt/models (chroot hook 0060), with a
+    NOTICE.txt naming the licence, and tetron-stt reads that directory before
+    the per-user one, so speech input works offline on the live and installed
+    Desktop. The build fails when a model can not be fetched or verified. A
+    system upgraded to Desktop with apt has no models and downloads them on
+    first use; that is the one place where an upgraded system differs from
+    the ISO."""

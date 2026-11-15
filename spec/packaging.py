@@ -217,7 +217,8 @@ class PackagingConsumesReleaseDebs(Requirement):
 class SuiteDebsFromReleases(Requirement):
     """The manifest takes tetron, tetron-tui, tetron-wm, tetron-wm-desktop,
     tetron-wm-essentials, tetron-wm-recommended, tetron-wm-extras,
-    tetron-browser and tetron-appstore from their published release debs,
+    tetron-browser, tetron-appstore, casttui and tetron-stt from their published
+    release debs,
     all at the same tetron minor. The four tetron-wm set packages are
     Architecture: all metapackages; packaging/tests installs them without
     Recommends. For test builds only, build.py --local-debs DIR (make
@@ -327,7 +328,7 @@ class TetronosDesktopMeta(Requirement):
     through tetronos-server), pipewire, pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
     brightnessctl, upower, rtkit (realtime scheduling for PipeWire),
     intel-microcode, amd64-microcode, tetron-browser (the web
-    browser, >= 0.15), tetron-appstore and casttui (>= 0.15).
+    browser, >= 0.15), tetron-appstore, casttui (>= 0.15) and tetron-stt (>= 0.15.1).
     Installing
     it on a server with apt (Recommends on) also brings the tools and apps
     of the three tetron-wm sets."""
