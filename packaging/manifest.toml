@@ -112,6 +112,18 @@ url = "https://github.com/tetronos/tetron-appstore/releases/download/v0.15.0/tet
 sha256_url = "https://github.com/tetronos/tetron-appstore/releases/download/v0.15.0/tetron-appstore_0.15.0-1_amd64.deb.sha256"
 
 [[package]]
+name = "tetron-stt"
+kind = "deb"
+version = "0.15.1"
+revision = "1"
+arch = "amd64"
+smoke = "tetron-stt --version"
+
+[package.source]
+url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.1/tetron-stt_0.15.1-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.1/tetron-stt_0.15.1-1_amd64.deb.sha256"
+
+[[package]]
 name = "casttui"
 kind = "deb"
 version = "0.15.0"
@@ -395,7 +407,7 @@ postinst = "files/tetronos-desktop-config/postinst"
 name = "tetronos-desktop"
 kind = "meta"
 version = "0.15.0"
-revision = "10"
+revision = "11"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Desktop edition package set"
@@ -415,7 +427,7 @@ depends = ["tetronos-server (>= 0.15.0-6)", "tetronos-server (<< 0.16)", "tetron
            "tetron-wm-essentials (>= 0.15.6)", "tetron-wm-recommended (>= 0.15.6)", "polkitd", "libpam-systemd", "dbus-user-session",
            "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
-           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)", "tetron-appstore (>= 0.15)", "casttui (>= 0.15)"]
+           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)", "tetron-appstore (>= 0.15)", "casttui (>= 0.15)", "tetron-stt (>= 0.15.1)"]
 
 [[package]]
 name = "tetronos-suite"
