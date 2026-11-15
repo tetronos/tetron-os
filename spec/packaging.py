@@ -323,11 +323,11 @@ class TetronosDesktopMeta(Requirement):
     (same version), tetronos-desktop-config, tetron-wm-essentials and
     tetron-wm-recommended (>= 0.15.6; they pull tetron-wm-desktop), polkitd,
     libpam-systemd and dbus-user-session (a logind session and a user bus
-    for the console login), wpasupplicant, wireless-regdb, iw, pipewire,
-    pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
+    for the console login), tetronos-firmware (hardware firmware, wifi
+    through tetronos-server), pipewire, pipewire-alsa, pipewire-pulse, wireplumber, alsa-utils, bluez,
     brightnessctl, upower, rtkit (realtime scheduling for PipeWire),
-    intel-microcode, amd64-microcode and tetron-browser (the web
-    browser, >= 0.15).
+    intel-microcode, amd64-microcode, tetron-browser (the web
+    browser, >= 0.15), tetron-appstore and casttui (>= 0.15).
     Installing
     it on a server with apt (Recommends on) also brings the tools and apps
     of the three tetron-wm sets."""
@@ -340,7 +340,24 @@ class TetronosDesktopConfig(Requirement):
     hibernate. kmscon runs the login on a pts, so the session is not an
     active seat session and polkit's allow_active defaults do not apply.
     Bluetooth access comes from bluez's own D-Bus policy for the bluetooth
-    group."""
+    group. On the first install its postinst also makes the machine behave
+    as the Desktop ISO does (see DesktopSshOff and DesktopOpencodeInSkel):
+    ssh is disabled unless running, tetron-wm-apphost.service is enabled
+    for every user (systemctl --global), and opencode is installed. It
+    Depends polkitd, openssh-server, tetron-wm-desktop, curl and python3."""
+
+
+class TetronosFirmwareMetas(Requirement):
+    """Firmware comes from two metapackages (kind meta, needs the Debian
+    non-free-firmware component, which every image has in its apt sources).
+    tetronos-firmware-wifi: the wifi firmware (Intel, Realtek, MediaTek,
+    Atheros, Broadcom, firmware-misc-nonfree) with wpasupplicant, iw and
+    wireless-regdb; tetronos-server Depends it, so every tier gets wifi and
+    a laptop with only wifi can get online. tetronos-firmware: Depends
+    tetronos-firmware-wifi and the rest of the hardware firmware (graphics,
+    network cards, sound, USB adapters, CPU microcode); tetronos-desktop
+    Depends it, and a Server upgrades to Server with firmware with
+    apt install tetronos-firmware."""
 
 
 class TetronosBranding(Requirement):

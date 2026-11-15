@@ -1,6 +1,7 @@
 #!/bin/sh
 # live-build config for TetronOS. EDITION selects the level (server|desktop);
-# FIRMWARE (none|all) is set by scripts/build.sh from the edition default.
+# FIRMWARE (none|all) is set by scripts/build.sh from the edition default. Firmware
+# comes from the tetronos-firmware package (scripts/build.sh), not from live-build.
 set -e
 EDITION="${EDITION:-server}"
 : "${FIRMWARE:?FIRMWARE must be none or all (set by scripts/build.sh)}"
@@ -12,8 +13,7 @@ case "$EDITION" in
 	*) echo "unknown EDITION: $EDITION" >&2; exit 1 ;;
 esac
 case "$FIRMWARE" in
-	none) FW=false ;;
-	all)  FW=true ;;
+	none|all) ;;
 	*) echo "unknown FIRMWARE: $FIRMWARE" >&2; exit 1 ;;
 esac
 
@@ -21,7 +21,7 @@ lb config noauto \
 	--distribution trixie --architectures amd64 \
 	--archive-areas "main contrib non-free-firmware" \
 	--binary-images iso-hybrid --bootloaders "grub-efi,syslinux" \
-	--debian-installer none --firmware-chroot "$FW" --memtest none --backports true \
+	--debian-installer none --firmware-chroot false --memtest none --backports true \
 	--debootstrap-options "--variant=minbase" \
 	--apt-indices false --apt-recommends false \
 	--iso-application TetronOS --iso-volume "TETRONOS" --iso-publisher TetronOS \

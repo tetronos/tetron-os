@@ -112,6 +112,17 @@ url = "https://github.com/tetronos/tetron-appstore/releases/download/v0.15.0/tet
 sha256_url = "https://github.com/tetronos/tetron-appstore/releases/download/v0.15.0/tetron-appstore_0.15.0-1_amd64.deb.sha256"
 
 [[package]]
+name = "casttui"
+kind = "deb"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+
+[package.source]
+url = "https://github.com/tetronos/casttui/releases/download/v0.15.0/casttui_0.15.0-1_all.deb"
+sha256_url = "https://github.com/tetronos/casttui/releases/download/v0.15.0/casttui_0.15.0-1_all.deb.sha256"
+
+[[package]]
 name = "tetron-browser"
 kind = "deb"
 version = "0.15.5"
@@ -289,61 +300,122 @@ depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "kmscon (>= 10)"]
 
 [[package]]
+name = "tetronos-firmware-wifi"
+kind = "meta"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "metapackages"
+description = "TetronOS wifi firmware and wifi stack"
+long_description = """
+The firmware of the common wifi chips (Intel, Realtek, MediaTek, Qualcomm
+Atheros, Broadcom, and the wifi parts of firmware-misc-nonfree) with
+wpasupplicant, iw and wireless-regdb, so NetworkManager can drive the radio.
+Part of every TetronOS tier: a laptop with only wifi has no network to fetch
+firmware from. Needs the Debian non-free-firmware component.
+"""
+depends = ["firmware-iwlwifi", "firmware-realtek", "firmware-mediatek", "firmware-atheros", "firmware-brcm80211",
+           "firmware-misc-nonfree", "wpasupplicant", "iw", "wireless-regdb"]
+
+[[package]]
+name = "tetronos-firmware"
+kind = "meta"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "metapackages"
+description = "TetronOS hardware firmware set"
+long_description = """
+The rest of the hardware firmware on top of tetronos-firmware-wifi: graphics
+(AMD, Intel, Nvidia), network cards, sound (SOF, Cirrus), USB wifi and TV
+adapters, and CPU microcode. Install it on a Server to get the Server with
+firmware tier: sudo apt install tetronos-firmware. Needs the Debian
+non-free-firmware component.
+"""
+depends = ["tetronos-firmware-wifi (>= 0.15.0-1)", "tetronos-firmware-wifi (<< 0.16)",
+           "firmware-amd-graphics", "firmware-intel-graphics", "firmware-nvidia-graphics", "firmware-nvidia-tesla-535-gsp",
+           "firmware-intel-misc", "firmware-intel-sound", "firmware-sof-signed", "firmware-cirrus",
+           "firmware-bnx2", "firmware-bnx2x", "firmware-cavium", "firmware-marvell-prestera", "firmware-myricom",
+           "firmware-netronome", "firmware-netxen", "firmware-qlogic",
+           "firmware-ath9k-htc", "firmware-carl9170", "firmware-libertas", "firmware-ipw2x00", "firmware-zd1211",
+           "firmware-b43-installer", "firmware-b43legacy-installer", "firmware-siano", "firmware-ivtv", "firmware-ast",
+           "firmware-linux-free", "intel-microcode", "amd64-microcode"]
+
+[[package]]
 name = "tetronos-server"
 kind = "meta"
 version = "0.15.0"
-revision = "6"
+revision = "7"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Server edition package set"
 long_description = """
-Installs tetronos-core, an SSH server, and python3 with python3-apt so
-Ansible can manage the machine.
+Installs tetronos-core, an SSH server, python3 with python3-apt so
+Ansible can manage the machine, and the wifi firmware and wifi stack
+(tetronos-firmware-wifi), so a laptop with only wifi can get online.
 """
-depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "openssh-server", "python3", "python3-apt"]
+depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "tetronos-firmware-wifi (>= 0.15.0-1)", "tetronos-firmware-wifi (<< 0.16)",
+           "openssh-server", "python3", "python3-apt"]
 
 [[package]]
 name = "tetronos-desktop-config"
 kind = "local"
 version = "0.15.0"
-revision = "1"
+revision = "2"
 arch = "all"
 section = "admin"
-description = "TetronOS desktop: polkit rules for console logins"
+description = "TetronOS desktop: polkit rules for console logins and the desktop defaults"
 long_description = """
 kmscon runs the login on a pseudo terminal, so the session is not an
 active seat session. These polkit rules let members of netdev manage
 NetworkManager and members of users power off, reboot and suspend.
+The first install also makes the machine behave as the Desktop ISO does:
+the ssh server is installed but not enabled at boot (left alone when it is
+running), the tetron-wm app server runs as a user service for every user,
+and opencode, the agent of the tetron-wm Assistant, is installed into
+/etc/skel and into home directories that lack it (upstream release, sha256
+checked; a failed download only warns, Settings > Updates fetches it later).
 """
-depends = ["polkitd"]
+depends = ["polkitd", "openssh-server", "tetron-wm-desktop (>= 0.15.6)", "curl", "python3"]
 
 [[package.files]]
 src = "files/tetronos-desktop-config/50-tetronos-desktop.rules"
 dst = "usr/share/polkit-1/rules.d/50-tetronos-desktop.rules"
 mode = "0644"
 
+[[package.files]]
+src = "files/tetronos-desktop-config/desktop-opencode"
+dst = "usr/libexec/tetronos/desktop-opencode"
+mode = "0755"
+
+[package.scripts]
+postinst = "files/tetronos-desktop-config/postinst"
+
 [[package]]
 name = "tetronos-desktop"
 kind = "meta"
 version = "0.15.0"
-revision = "9"
+revision = "10"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Desktop edition package set"
 long_description = """
 Installs tetronos-server plus what a laptop or desktop needs: polkit and
-a logind session for the console login, wifi (wpasupplicant), sound
+a logind session for the console login, the hardware firmware
+(tetronos-firmware), sound
 (PipeWire), bluetooth, backlight and battery tools, CPU microcode, and
 tetron-wm with the tools its features use and the Essentials and
-Recommended app sets (tetron-wm-essentials, tetron-wm-recommended). The
+Recommended app sets (tetron-wm-essentials, tetron-wm-recommended), the
+browser, the app store and casttui. The
 SSH server is
 installed; a fresh Desktop install leaves it off.
 """
-depends = ["tetronos-server (>= 0.15.0-6)", "tetronos-server (<< 0.16)", "tetronos-desktop-config (>= 0.15.0-1)", "tetronos-desktop-config (<< 0.16)",
+depends = ["tetronos-server (>= 0.15.0-6)", "tetronos-server (<< 0.16)", "tetronos-desktop-config (>= 0.15.0-2)", "tetronos-desktop-config (<< 0.16)",
+           "tetronos-firmware (>= 0.15.0-1)", "tetronos-firmware (<< 0.16)",
            "tetron-wm-essentials (>= 0.15.6)", "tetron-wm-recommended (>= 0.15.6)", "polkitd", "libpam-systemd", "dbus-user-session",
-           "wpasupplicant", "wireless-regdb", "iw", "pipewire", "pipewire-alsa",
+           "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
-           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)"]
+           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)", "tetron-appstore (>= 0.15)", "casttui (>= 0.15)"]
 
 [[package]]
 name = "tetronos-suite"

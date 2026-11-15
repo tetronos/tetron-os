@@ -115,7 +115,7 @@ class P4IsoIntegration(Requirement):
 
 class D1DesktopIso(Requirement):
     """Milestone D1 acceptance: make iso EDITION=desktop builds
-    tetronos-desktop-fw-*.iso with all firmware; tests/boot-live.sh boots it
+    tetronos-desktop-*.iso with all firmware; tests/boot-live.sh boots it
     in BIOS and UEFI to tetron-wm; in the VM the live user can list and
     change NetworkManager connections without sudo (nmcli), sees a
     pipewire audio sink on an emulated sound card, and sshd is not

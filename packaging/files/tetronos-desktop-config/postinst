@@ -1,0 +1,20 @@
+#!/bin/sh
+# First install: make the machine behave as the Desktop ISO does.
+set -e
+if [ "$1" = configure ]; then
+	if [ -z "$2" ]; then
+		# A laptop does not accept ssh until the user turns it on. A running ssh
+		# server (a remote upgrade from Server) is left alone, so the machine
+		# stays reachable after the next boot.
+		if ! systemctl is-active --quiet ssh.service 2>/dev/null; then
+			systemctl disable ssh.service 2>/dev/null || true
+			systemctl disable ssh.socket 2>/dev/null || true
+		fi
+		# The tetron-wm app server runs as a user service for every user, so apps
+		# live through UI reloads and updates.
+		systemctl --global enable tetron-wm-apphost.service 2>/dev/null || true
+	fi
+	/usr/libexec/tetronos/desktop-opencode ||
+		echo "tetronos-desktop-config: opencode not installed; Settings > Updates fetches it later" >&2
+fi
+exit 0

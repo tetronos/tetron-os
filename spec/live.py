@@ -44,13 +44,17 @@ class DesktopToolsInImage(Requirement):
 
 class DesktopOpencodeInSkel(Requirement):
     """opencode, the agent of the tetron-wm Assistant, has no upstream
-    package. A Desktop chroot hook installs it the way the tetron-wm suite
-    installer does: upstream's latest stable release (x64-baseline, which
+    package. tetronos-desktop-config (postinst, script
+    /usr/libexec/tetronos/desktop-opencode) installs it the way the tetron-wm
+    suite installer does: upstream's latest stable release (x64-baseline, which
     runs on every x86_64 CPU), checked against the sha256 digest GitHub
     records for it, as /etc/skel/.local/bin/opencode. The live user and
     every user an install creates own a copy in ~/.local/bin, which
-    Settings > Updates and opencode itself keep current without sudo. The
-    build fails when the release or its digest can not be read."""
+    Settings > Updates and opencode itself keep current without sudo. A
+    system upgraded from Server also gets a copy in each existing user's
+    home that lacks one. On a running system a failed download only warns;
+    the Desktop build fails (hook 0050 checks the result).
+    """
 
 
 class AptRecommendsDefaultInImage(Requirement):
@@ -62,7 +66,8 @@ class AptRecommendsDefaultInImage(Requirement):
 
 
 class DesktopSshOff(Requirement):
-    """The desktop edition installs openssh-server but a chroot hook
-    disables ssh.service and ssh.socket, so a fresh desktop (live or
-    installed from it) does not listen for ssh. A server upgraded to
-    desktop keeps its sshd state."""
+    """The desktop edition installs openssh-server but the first install of
+    tetronos-desktop-config disables ssh.service and ssh.socket, so a fresh
+    desktop (live or installed from it) does not listen for ssh. A server
+    that is running sshd when it is upgraded to desktop keeps it enabled, so
+    a remote upgrade does not lock the machine out at the next boot."""
