@@ -1,0 +1,10 @@
+--- a/debian/rules
++++ b/debian/rules
+@@ -17,6 +17,7 @@
+ 	dh_auto_configure -- --auto-features=enabled \
+ 	                     -Ddocs=$(if $(filter nodoc,$(DEB_BUILD_OPTIONS) $(DEB_BUILD_PROFILES)),disabled,enabled) \
+ 	                     -Dwerror=false \
++	                     -Dvideo_drm3d=disabled -Drenderer_gltex=disabled \
+ 	                     $(empty)
+ 
+ # The tests are all interactive and/or require root privileges

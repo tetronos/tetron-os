@@ -1,9 +1,10 @@
 EDITION ?= server
 FIRMWARE ?=
+TAG     ?=
 RUNNER  ?= vm
 IMAGE   := tetronos-builder
 RUN     := docker run --rm --privileged -v $(CURDIR):/src:ro -v $(CURDIR)/build:/build -v $(CURDIR)/out:/out \
-           -e EDITION=$(EDITION) -e FIRMWARE=$(FIRMWARE) -e HOST_UID=$(shell id -u) -e HOST_GID=$(shell id -g)
+           -e EDITION=$(EDITION) -e FIRMWARE=$(FIRMWARE) -e ISO_TAG=$(TAG) -e HOST_UID=$(shell id -u) -e HOST_GID=$(shell id -g)
 VM      := scripts/vm.sh
 
 .PHONY: iso iso-build vm-create vm-start vm-stop vm-shell vm-destroy docker-image clean distclean
@@ -14,7 +15,7 @@ VM      := scripts/vm.sh
 iso:
 	@mkdir -p out/logs; \
 	fw=; case "$(FIRMWARE)/$(EDITION)" in all/server) fw=-fw ;; esac; \
-	log=out/logs/make-iso-$(EDITION)$$fw-$$(date +%Y%m%d-%H%M%S).log; st=$$(mktemp); \
+	log=out/logs/make-iso-$(EDITION)$$fw$(if $(TAG),-$(TAG))-$$(date +%Y%m%d-%H%M%S).log; st=$$(mktemp); \
 	echo "log: $$log"; \
 	{ $(MAKE) --no-print-directory iso-build; echo $$? > $$st; } 2>&1 | tee $$log; \
 	rc=$$(cat $$st); rm -f $$st; echo "log: $$log"; exit $$rc
@@ -23,7 +24,7 @@ iso-build: debs
 ifeq ($(RUNNER),vm)
 	$(VM) start
 	$(VM) sync
-	$(VM) ssh 'sudo env EDITION=$(EDITION) FIRMWARE=$(FIRMWARE) SRC=/home/builder/src WORKROOT=/var/tmp/build OUTDIR=/home/builder/out HOST_UID=$$(id -u) HOST_GID=$$(id -g) /home/builder/src/scripts/build.sh'
+	$(VM) ssh 'sudo env EDITION=$(EDITION) FIRMWARE=$(FIRMWARE) ISO_TAG=$(TAG) SRC=/home/builder/src WORKROOT=/var/tmp/build OUTDIR=/home/builder/out HOST_UID=$$(id -u) HOST_GID=$$(id -g) /home/builder/src/scripts/build.sh'
 	$(VM) pull
 	scripts/out-report.sh out
 else
