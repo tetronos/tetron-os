@@ -124,6 +124,12 @@ The desktop ISO, larger because it carries the desktop and firmware.
 
     make iso EDITION=desktop
 
+The server edition with all firmware baked in, for real hardware (wifi cards, network cards, graphics). The name carries `-fw`, `tetronos-server-fw-YYYYMMDD-amd64.iso`, and the ISO is about 910 MB. Because wifi needs a driver for the radio, this build also installs `wpasupplicant`, `iw` and `wireless-regdb`, so NetworkManager (`nmtui`) lists the wifi device. The plain server ISO leaves them out to stay small.
+
+    make iso EDITION=server FIRMWARE=all
+
+The desktop edition always has the firmware and the wifi packages, no extra setting is needed.
+
 Same-name ISOs are never overwritten, the older one is moved to `out/archive/`.
 
 ## 9. Check the result
