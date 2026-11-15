@@ -101,6 +101,11 @@ def check_manifest() -> dict:
         src = pkg.get("source", {})
         if pkg.get("kind", "release") in ("meta", "local"):
             continue
+        if pkg.get("kind") == "source":
+            # Built here from a Debian source package: pinned by its version and its build directory.
+            if not (pkg.get("version") and pkg.get("revision") and pkg.get("build") and (Path("packaging") / pkg["build"]).is_file()):
+                bad.append(pkg.get("name", "?"))
+            continue
         if not (pkg.get("version") and src.get("url") and (src.get("sha256") or src.get("sha256_url"))):
             bad.append(pkg.get("name", "?"))
     sys.path.insert(0, str(Path("packaging").resolve()))
