@@ -31,8 +31,15 @@ if [ -n "$tag" ] && { [ -f "$PREV/ok" ] || {
 	mkdir -p "$PREV" && curl -fsSL -o "$PREV/SHA256SUMS" "$REL/download/$tag/SHA256SUMS" &&
 	for f in $(awk '{print $2}' "$PREV/SHA256SUMS"); do curl -fsSL -o "$PREV/$f" "$REL/download/$tag/$f" || break; done &&
 	(cd "$PREV" && sha256sum -c --quiet SHA256SUMS) && touch "$PREV/ok"; }; }; then
+	# Debs the previous release needs that the manifest no longer has (legacy-debs.txt), checked.
+	LEG="$PKG/cache/legacy-debs"; mkdir -p "$LEG"
+	grep -v '^#' "$HERE/legacy-debs.txt" | while read -r name url shaurl; do
+		f="$LEG/$(basename "$url")"
+		[ -f "$f" ] || { curl -fsSL -o "$f" "$url" && want=$(curl -fsSL "$shaurl" | awk '{print $1}') &&
+			[ "$(sha256sum "$f" | awk '{print $1}')" = "$want" ] || { rm -f "$f"; echo "FAIL legacy deb $name" >&2; exit 1; }; }
+	done || exit 1
 	echo "== upgrade test from $tag"
-	docker run --rm -v "$DEBS:/debs:ro" -v "$PREV:/prev:ro" -v "$HERE/upgrade-in-container.sh:/upgrade-in-container.sh:ro" \
+	docker run --rm -v "$DEBS:/debs:ro" -v "$PREV:/prev:ro" -v "$LEG:/legacy:ro" -v "$HERE/upgrade-in-container.sh:/upgrade-in-container.sh:ro" \
 		-v "$PIN:/kmscon-backports.pref:ro" debian:trixie sh /upgrade-in-container.sh
 elif [ "${REQUIRE_UPGRADE_TEST:-0}" = 1 ]; then
 	echo "FAIL upgrade test: could not get the previous release" >&2; exit 1
