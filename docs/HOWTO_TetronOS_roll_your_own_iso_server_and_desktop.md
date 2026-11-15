@@ -124,11 +124,11 @@ The desktop ISO, larger because it carries the desktop and firmware.
 
     make iso EDITION=desktop
 
-The server edition with all firmware baked in, for real hardware (wifi cards, network cards, graphics). The name carries `-fw`, `tetronos-server-fw-YYYYMMDD-amd64.iso`, and the ISO is about 910 MB. Because wifi needs a driver for the radio, this build also installs `wpasupplicant`, `iw` and `wireless-regdb`, so NetworkManager (`nmtui`) lists the wifi device. The plain server ISO leaves them out to stay small.
+The server edition with all firmware baked in, for real hardware (graphics, network cards, sound). The name carries `-fw`, `tetronos-server-fw-YYYYMMDD-amd64.iso`, and the ISO is about 910 MB. The plain server already has the wifi firmware and the wifi stack (`tetronos-firmware-wifi`), so a laptop with only wifi can get online. `FIRMWARE=all` adds the rest of the firmware (`tetronos-firmware`).
 
     make iso EDITION=server FIRMWARE=all
 
-The desktop edition always has the firmware and the wifi packages, no extra setting is needed.
+The desktop edition always has all firmware, so its name has no `-fw`: `tetronos-desktop-YYYYMMDD-amd64.iso`.
 
 Same-name ISOs are never overwritten, the older one is moved to `out/archive/`.
 
@@ -164,6 +164,18 @@ To write it to a USB stick (replace `/dev/sdX` with the stick, check with `lsblk
     scripts/roll-iso.sh                 # server and desktop
     scripts/roll-iso.sh server          # one edition
     CODE=$HOME/src scripts/roll-iso.sh  # repos live elsewhere
+
+## Upgrade a running system to the next tier
+
+The tiers are cumulative metapackages from the tetronos apt repository, so one command moves a system up. Server to server with firmware:
+
+    sudo apt install tetronos-firmware
+
+Server or server with firmware to desktop (adds the desktop, the browser, the app store, casttui, polkit, sound and the desktop defaults):
+
+    sudo apt install tetronos-desktop
+
+A running ssh server stays enabled during the upgrade, so a remote machine stays reachable.
 
 ## Troubleshooting
 
