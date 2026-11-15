@@ -217,7 +217,7 @@ class PackagingConsumesReleaseDebs(Requirement):
 class SuiteDebsFromReleases(Requirement):
     """The manifest takes tetron, tetron-tui, tetron-wm, tetron-wm-desktop,
     tetron-wm-essentials, tetron-wm-recommended, tetron-wm-extras,
-    tetron-webui and tetron-messageboard from their published release debs,
+    tetron-browser and tetron-appstore from their published release debs,
     all at the same tetron minor. The four tetron-wm set packages are
     Architecture: all metapackages; packaging/tests installs them without
     Recommends. For test builds only, build.py --local-debs DIR (make
@@ -253,8 +253,9 @@ class TetronosCoreMeta(Requirement):
 class TetronosSuiteMeta(Requirement):
     """tetronos-suite is the full suite: it Depends on tetronos-core,
     tetron-wm-recommended (which pulls tetron-wm-essentials and
-    tetron-wm-desktop, each with its app list as Recommends), tetron-webui
-    and tetron-messageboard. tetron-sync-receiver
+    tetron-wm-desktop, each with its app list as Recommends). The GUI
+    components tetron-webui and tetron-messageboard are not part of it, and
+    not in the manifest. tetron-sync-receiver
     and tetron-scripts are added when they publish release debs.
     tetron-hosts and tetron-systray are not part of it."""
 
