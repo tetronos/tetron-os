@@ -147,5 +147,10 @@ A build that fails prints the last lines of the log. Find the first real error i
 
 - `Package X has no installation candidate`: a component now needs a package the manifest does not carry. See step 5.
 - `HTTP Error 504` that ends the build: run it again, downloads are retried but GitHub can stay down for a while.
+- `rm: cannot remove 'chroot/dev/pts/...': Operation not permitted` on the next build: the failed build left mounts in the VM. Unmount them and clear that edition's work folder (replace `desktop` as needed):
+
+      scripts/vm.sh ssh 'mount | grep /var/tmp/build/desktop | awk "{print \$3}" | sort -r | while read m; do sudo umount -l "$m"; done'
+      make clean EDITION=desktop
+
 - `VM does not start`: check `kvm-ok` and that port 2222 is free, or set `VM_PORT=2223`.
 - Disk full: `scripts/out-report.sh out` shows sizes. Old ISOs in `out/archive/` can be removed by hand, nothing is deleted for you.
