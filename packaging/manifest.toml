@@ -2,6 +2,8 @@
 # kind = "deb": the component's release .deb, verified and used unchanged.
 # kind = "meta": a metapackage built here from the entry alone (no download).
 # kind = "local": built here from files under packaging/files/<name>/ (no download).
+# kind = "source": built here from a Debian source package in a debian:trixie container (docker);
+#   `build` is a script in a directory that is mounted at /src (packaging/kmscon/). Cached.
 # Other packages are built here from a release binary (none at the moment);
 # their Maintainer is the placeholder below until USER decides (plan open item 6).
 #
@@ -146,6 +148,15 @@ smoke = "tetron-browser --version"
 [package.source]
 url = "https://github.com/tetronos/tetron-browser/releases/download/v0.15.5/tetron-browser_0.15.5-1_amd64.deb"
 sha256_url = "https://github.com/tetronos/tetron-browser/releases/download/v0.15.5/tetron-browser_0.15.5-1_amd64.deb.sha256"
+
+[[package]]
+name = "kmscon"
+kind = "source"
+version = "10.0.4"
+revision = "1~bpo13+1tetronos1"
+arch = "amd64"
+smoke = "kmscon --version"
+build = "kmscon/build-in-container.sh"
 
 [[package]]
 name = "tetronos-nerd-font-symbols"

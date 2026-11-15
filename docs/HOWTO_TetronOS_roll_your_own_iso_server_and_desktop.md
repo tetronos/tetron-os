@@ -20,7 +20,7 @@ Your user must be in the `kvm` group (log out and in again after this):
 
     sudo usermod -aG kvm $USER
 
-Docker is only needed for the optional `make test-debs` in step 6.
+Install Docker too (`sudo apt install docker.io`, then `sudo usermod -aG docker $USER` and log in again). It builds kmscon, our console program, from its Debian source in step 6, and it runs the optional `make test-debs`.
 
 ## 2. Get the repository
 
@@ -51,6 +51,7 @@ Work on a branch, never directly on `main`:
 - `kind = "deb"`: a component built and published by its own repository (tetron, tetron-tui, tetron-wm, tetron-browser, tetron-appstore, tetron-stt). The block gives the release `url` and a `sha256_url`. The build downloads the file, checks the checksum and uses it unchanged.
 - `kind = "meta"`: a metapackage made here from the block alone, no download. It only carries `depends` and a description, for example `tetronos-server`, `tetronos-firmware` and `tetronos-desktop`.
 - `kind = "local"`: a package made here from the files under `packaging/files/<name>/`, for example `tetronos-branding` and `tetronos-live-config`.
+- `kind = "source"`: a package built here from a Debian source package inside a throwaway `debian:trixie` container, for example `kmscon` (built without OpenGL, so the console needs no graphics libraries). The first build takes a few minutes, the result is kept in `packaging/cache/source/`.
 
 The fields you will touch most:
 
@@ -90,7 +91,7 @@ If a new release needs a package the manifest does not have, the build fails lat
 
 ## 6. Check the packaging
 
-This downloads every pinned `.deb`, verifies its checksum, and builds the TetronOS metapackages into `packaging/out/`. A `HTTP Error 504` retry line is normal, GitHub is sometimes slow.
+This downloads every pinned `.deb`, verifies its checksum, builds the TetronOS metapackages and builds kmscon from its source in a container into `packaging/out/`. The kmscon build takes a few minutes the first time. A `HTTP Error 504` retry line is normal, GitHub is sometimes slow.
 
     python3 packaging/build.py
 
