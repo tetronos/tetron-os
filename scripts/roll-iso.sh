@@ -1,43 +1,40 @@
 #!/bin/sh
-# Roll TetronOS ISOs: check the repos, check the pins, test packaging, build.
-# Usage: scripts/roll-iso.sh [edition ...]   (default: server desktop)
-# Run from anywhere; sibling component repos are expected next to this one.
+# Roll TetronOS ISOs: check the repo, check the pins, test packaging, build.
+# Usage: scripts/roll-iso.sh [edition ...]
+#   editions: server, server-fw (server with all firmware), desktop
+#   default:  server server-fw desktop
 set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-CODE="${CODE:-$(dirname "$ROOT")}"
-ORG="${ORG:-tetronos}"
-EDITIONS="${*:-server desktop}"
-COMPONENTS="tetron tetron-tui tetron-wm tetron-browser tetron-appstore"
+EDITIONS="${*:-server server-fw desktop}"
 cd "$ROOT"
 fail=0
 
-echo "== 1. repos clean and in sync with origin"
-for r in tetron-os $COMPONENTS tetron-packaging tetronos-apt; do
-	d="$CODE/$r"; [ -d "$d/.git" ] || { echo "MISSING $d"; fail=1; continue; }
-	git -C "$d" fetch -q || { echo "FETCH FAILED $r"; fail=1; continue; }
-	dirty=$(git -C "$d" status --porcelain | wc -l)
-	lr=$(git -C "$d" rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "? ?")
-	echo "$r branch=$(git -C "$d" branch --show-current) dirty=$dirty ahead/behind=$lr"
-	[ "$dirty" = 0 ] || fail=1
-done
+echo "== 1. this repository is clean and in sync with origin"
+git fetch -q || { echo "git fetch failed"; fail=1; }
+dirty=$(git status --porcelain | wc -l)
+lr=$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "no-upstream")
+echo "branch=$(git branch --show-current) uncommitted=$dirty ahead/behind=$lr"
+[ "$dirty" = 0 ] || { echo "Uncommitted changes: commit or stash them."; fail=1; }
 
 echo "== 2. manifest pins match the latest published releases"
-for r in $COMPONENTS; do
-	pin=$(awk -v n="$r" '$0 == "name = \"" n "\"" {f=1} f && /^version/ {gsub(/[^0-9.]/, "", $3); print $3; exit}' packaging/manifest.toml)
-	latest=$(git ls-remote --tags --refs "https://github.com/$ORG/$r" 'v[0-9]*' 2>/dev/null | sed 's#.*refs/tags/v##' | grep -v -- '-' | sort -V | tail -1)
-	if [ "$pin" = "$latest" ]; then echo "ok    $r $pin"; else echo "DIFF  $r pinned=$pin latest=$latest"; fail=1; fi
-done
+python3 scripts/pins.py check || fail=1
 
-[ "$fail" = 0 ] || { echo "Checks failed. Fix the lines above (update packaging/manifest.toml, commit, pull) and run again."; exit 1; }
+[ "$fail" = 0 ] || { echo "Checks failed. Fix the lines above (python3 scripts/pins.py update, review git diff, commit) and run again."; exit 1; }
 
 echo "== 3. packaging: build the debs and run the unit tests"
 python3 packaging/build.py
 python3 packaging/tests/test_build.py
 
 echo "== 4. spec constraints"
-python3 reconcile.py
+python3 reconcile.py > /dev/null
 
 echo "== 5. build the ISOs"
 [ -d build/vm ] || make vm-create
-for e in $EDITIONS; do make iso EDITION="$e"; done
+for e in $EDITIONS; do
+	case "$e" in
+		server-fw) make iso EDITION=server FIRMWARE=all ;;
+		server|desktop) make iso EDITION="$e" ;;
+		*) echo "unknown edition: $e (server, server-fw, desktop)" >&2; exit 1 ;;
+	esac
+done
 ls -lh out/*"$(date +%Y%m%d)"*.iso
