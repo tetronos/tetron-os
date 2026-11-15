@@ -1,0 +1,7 @@
+# A kmscon in the local repository (test builds only: packaging/extra/, for example the
+# kmscon built without OpenGL by packaging/kmscon/build-nogl.sh) must win over the
+# backports one pinned at 600 in kmscon-backports.pref.chroot. A release has no kmscon
+# in the local repository, so this changes nothing there.
+Package: kmscon
+Pin: origin "127.0.0.1"
+Pin-Priority: 700
