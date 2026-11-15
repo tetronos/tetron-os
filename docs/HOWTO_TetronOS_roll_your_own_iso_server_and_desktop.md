@@ -48,7 +48,7 @@ Work on a branch, never directly on `main`:
 
 `packaging/manifest.toml` is the single list of every `.deb` the ISO is made from. Nothing else decides which version of a component goes in. Each package is one `[[package]]` block with a `kind` that says where it comes from.
 
-- `kind = "deb"`: a component built and published by its own repository (tetron, tetron-tui, tetron-wm, tetron-browser, tetron-appstore, casttui). The block gives the release `url` and a `sha256_url`. The build downloads the file, checks the checksum and uses it unchanged.
+- `kind = "deb"`: a component built and published by its own repository (tetron, tetron-tui, tetron-wm, tetron-browser, tetron-appstore, tetron-stt). The block gives the release `url` and a `sha256_url`. The build downloads the file, checks the checksum and uses it unchanged.
 - `kind = "meta"`: a metapackage made here from the block alone, no download. It only carries `depends` and a description, for example `tetronos-server`, `tetronos-firmware` and `tetronos-desktop`.
 - `kind = "local"`: a package made here from the files under `packaging/files/<name>/`, for example `tetronos-branding` and `tetronos-live-config`.
 
@@ -172,7 +172,7 @@ The tiers are cumulative metapackages from the tetronos apt repository, so one c
 
     sudo apt install tetronos-firmware
 
-Server or server with firmware to desktop (adds the desktop, the browser, the app store, casttui, polkit, sound and the desktop defaults):
+Server or server with firmware to desktop (adds the desktop, the browser, the app store, speech to text, polkit, sound and the desktop defaults):
 
     sudo apt install tetronos-desktop
 

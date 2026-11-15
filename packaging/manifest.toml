@@ -124,17 +124,6 @@ url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.1/tetron-s
 sha256_url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.1/tetron-stt_0.15.1-1_amd64.deb.sha256"
 
 [[package]]
-name = "casttui"
-kind = "deb"
-version = "0.15.0"
-revision = "1"
-arch = "all"
-
-[package.source]
-url = "https://github.com/tetronos/casttui/releases/download/v0.15.0/casttui_0.15.0-1_all.deb"
-sha256_url = "https://github.com/tetronos/casttui/releases/download/v0.15.0/casttui_0.15.0-1_all.deb.sha256"
-
-[[package]]
 name = "tetron-browser"
 kind = "deb"
 version = "0.15.5"
@@ -407,7 +396,7 @@ postinst = "files/tetronos-desktop-config/postinst"
 name = "tetronos-desktop"
 kind = "meta"
 version = "0.15.0"
-revision = "11"
+revision = "12"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Desktop edition package set"
@@ -418,16 +407,16 @@ a logind session for the console login, the hardware firmware
 (PipeWire), bluetooth, backlight and battery tools, CPU microcode, and
 tetron-wm with the tools its features use and the Essentials and
 Recommended app sets (tetron-wm-essentials, tetron-wm-recommended), the
-browser, the app store and casttui. The
-SSH server is
-installed; a fresh Desktop install leaves it off.
+browser, the app store and tetron-stt (speech to text; the Desktop image has
+its models pre-seeded, a system upgraded with apt downloads them on first use).
+The SSH server is installed; a fresh Desktop install leaves it off.
 """
 depends = ["tetronos-server (>= 0.15.0-6)", "tetronos-server (<< 0.16)", "tetronos-desktop-config (>= 0.15.0-3)", "tetronos-desktop-config (<< 0.16)",
            "tetronos-firmware (>= 0.15.0-1)", "tetronos-firmware (<< 0.16)",
            "tetron-wm-essentials (>= 0.15.6)", "tetron-wm-recommended (>= 0.15.6)", "polkitd", "libpam-systemd", "dbus-user-session",
            "pipewire", "pipewire-alsa",
            "pipewire-pulse", "wireplumber", "alsa-utils", "bluez", "brightnessctl",
-           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)", "tetron-appstore (>= 0.15)", "casttui (>= 0.15)", "tetron-stt (>= 0.15.1)"]
+           "upower", "rtkit", "intel-microcode", "amd64-microcode", "tetron-browser (>= 0.15)", "tetron-appstore (>= 0.15)", "tetron-stt (>= 0.15.1)"]
 
 [[package]]
 name = "tetronos-suite"
