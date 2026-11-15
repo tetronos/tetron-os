@@ -13,6 +13,8 @@ echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources
 cp /kmscon-backports.pref /etc/apt/preferences.d/kmscon-backports.pref
 # CPU microcode and firmware (tetronos-desktop, tetronos-firmware) are in non-free-firmware and contrib, like on the ISO.
 sed -i 's/^Components: main$/Components: main contrib non-free-firmware/' /etc/apt/sources.list.d/debian.sources
+# Two firmware packages of tetronos-firmware ask to accept a licence; the ISO build answers them (config/common/preseed).
+printf '%s\n' 'firmware-ivtv firmware-ivtv/license/accepted boolean true' 'firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true' | debconf-set-selections
 apt-get update -qq >/dev/null
 apt-get install -y -qq --no-install-recommends apt-utils >/dev/null 2>&1 || { echo "FAIL apt-utils"; exit 1; }
 mkdir -p /repo && cp /debs/*.deb /repo/
