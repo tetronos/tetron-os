@@ -7,7 +7,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CODE="${CODE:-$(dirname "$ROOT")}"
 ORG="${ORG:-tetronos}"
 EDITIONS="${*:-server desktop}"
-COMPONENTS="tetron tetron-tui tetron-wm tetron-webui tetron-messageboard tetron-browser tetron-appstore"
+COMPONENTS="tetron tetron-tui tetron-wm tetron-browser tetron-appstore"
 cd "$ROOT"
 fail=0
 
