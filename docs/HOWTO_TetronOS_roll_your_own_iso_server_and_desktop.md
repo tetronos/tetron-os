@@ -41,6 +41,32 @@ The ISO takes the newest published release of each component, tagged `vMAJOR.MIN
 
     for r in tetron tetron-tui tetron-wm tetron-browser tetron-appstore; do echo "$r: $(git ls-remote --tags --refs https://github.com/tetronos/$r 'v[0-9]*' | sed 's#.*refs/tags/##' | grep -v -- '-' | sort -V | tail -1)"; done
 
+## About the manifest
+
+`packaging/manifest.toml` is the single list of every `.deb` the ISO is made from. Nothing else decides which version of a component goes in. Each package is one `[[package]]` block with a `kind` that says where it comes from.
+
+- `kind = "deb"`: a component built and published by its own repo (tetron, tetron-tui, tetron-wm, tetron-browser, tetron-appstore). The block gives the release `url` and a `sha256_url`; the build downloads the file, checks the checksum and uses it unchanged.
+- `kind = "meta"`: a metapackage made here from the block alone, no download. It only carries `depends` and a description, for example `tetronos-server` and `tetronos-suite`.
+- `kind = "local"`: a package made here from the files under `packaging/files/<name>/`, for example `tetronos-branding` and `tetronos-live-config`.
+
+The fields you will touch most:
+
+- `version` and `revision`: the deb is `name_version-revision`. For a release deb the version is the release tag without the `v`, and the revision is almost always `1`.
+- `url` and `sha256_url`: both contain the tag and the file name, so a version bump changes the `version` line and both URLs.
+- `depends`: relations between packages built here. Write `"name (>= FLOOR)"` and `"name (<< NEXT_MINOR)"`, never `=`. The floor is the lowest revision that has what the dependent needs, the ceiling keeps one minor release (0.15.x) together.
+- `smoke`: a command run after install to prove the binary works, for example `tetron --version`.
+
+Rules to remember:
+
+- A package built here (kind `meta` or `local`) gets a new `revision` with every change, because the apt repository holds one `.deb` per version.
+- The tetron core and its add-ons use the same minor version (0.15.x). Upstream version numbers of other software do not matter.
+- Check the pins in step 5 against the releases from step 4 before every build.
+- Read the comment at the top of the manifest for the full rules, including `breaks` and `replaces` when a file moves between packages.
+
+See what the manifest currently builds, without building:
+
+    python3 packaging/build.py --list-debs
+
 ## 5. Check the pinned versions match
 
 `packaging/manifest.toml` is the single list of which `.deb` goes into the ISO. Show what it pins:
