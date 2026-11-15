@@ -6,11 +6,7 @@ Each step is a short explanation followed by the command. Run everything from th
 
 A Linux machine with about 40 GB free disk, 8 GB spare RAM, KVM, and these tools. The ISO is built inside a throwaway Debian 13 VM, so your own system stays untouched.
 
-    sudo apt install git make python3 qemu-system-x86 qemu-utils genisoimage openssh-client curl gh
-
-`gh` is the GitHub CLI, used read-only to look up the latest releases. Log in once (the public releases need no special rights):
-
-    gh auth login
+    sudo apt install git make python3 qemu-system-x86 qemu-utils genisoimage openssh-client curl
 
 Check that KVM works (the command must print `KVM acceleration can be used`):
 
@@ -41,11 +37,9 @@ Do the same for any component with `git -C ~/code/tetron-wm status -sb`. Work on
 
 ## 4. Find the latest released version of each component
 
-The ISO takes the newest published release of each component, never a pre-release. List the newest releases:
+The ISO takes the newest published release of each component, tagged `vMAJOR.MINOR.PATCH`. The repos are public, so git can list the tags without any login. Pre-release tags (with a `-` suffix) are skipped.
 
-    for r in tetron tetron-tui tetron-wm tetron-webui tetron-messageboard tetron-browser tetron-appstore; do echo "$r: $(gh release list -R tetronos/$r -L 1 | head -1)"; done
-
-The line should say `Latest`. A row marked `Pre-release` (such as a debug APK) is not used.
+    for r in tetron tetron-tui tetron-wm tetron-webui tetron-messageboard tetron-browser tetron-appstore; do echo "$r: $(git ls-remote --tags --refs https://github.com/tetronos/$r 'v[0-9]*' | sed 's#.*refs/tags/##' | grep -v -- '-' | sort -V | tail -1)"; done
 
 ## 5. Check the pinned versions match
 
@@ -133,7 +127,7 @@ To write it to a USB stick (replace `/dev/sdX` with the stick, check with `lsblk
 
 ## 11. All of it in one script
 
-`scripts/roll-iso.sh` runs steps 3 to 8 and stops at the first problem. It checks the repos are clean and in sync, checks every pin against the latest release, builds the debs, runs the tests, then builds the ISOs. It never changes a pin for you, a failed check prints what differs and you fix it as in step 5.
+`scripts/roll-iso.sh` runs steps 3 to 8 and stops at the first problem. It checks the repos are clean and in sync, checks every pin against the latest release tag, builds the debs, runs the tests, then builds the ISOs. It never changes a pin for you, a failed check prints what differs and you fix it as in step 5.
 
     scripts/roll-iso.sh                 # server and desktop
     scripts/roll-iso.sh server          # one edition
