@@ -16,7 +16,7 @@ WORK="${WORKROOT:-/build}/$EDITION"
 OUTDIR="${OUTDIR:-/out}"
 mkdir -p "$WORK"
 cd "$WORK"
-rm -rf auto config/package-lists config/includes.chroot config/hooks config/archives config/packages.chroot config/bootloaders
+rm -rf auto config/package-lists config/preseed config/includes.chroot config/hooks config/archives config/packages.chroot config/bootloaders
 mkdir -p config
 cp -a "$SRC/auto" .
 for d in "$SRC/config/common" "$SRC/config/$EDITION"; do

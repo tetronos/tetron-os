@@ -1,0 +1,4 @@
+# The licence questions of two firmware packages in tetronos-firmware. live-build
+# answered them itself with --firmware-chroot, which TetronOS no longer uses.
+firmware-ivtv firmware-ivtv/license/accepted boolean true
+firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true
