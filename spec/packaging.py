@@ -217,7 +217,7 @@ class PackagingConsumesReleaseDebs(Requirement):
 class SuiteDebsFromReleases(Requirement):
     """The manifest takes tetron, tetron-tui, tetron-wm, tetron-wm-desktop,
     tetron-wm-essentials, tetron-wm-recommended, tetron-wm-extras,
-    tetron-browser, tetron-appstore and tetron-stt from their published
+    tetron-browser, tetron-appstore, tetron-stt and tetron-aimode from their published
     release debs,
     all at the same tetron minor. The four tetron-wm set packages are
     Architecture: all metapackages; packaging/tests installs them without
