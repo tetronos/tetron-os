@@ -29,6 +29,7 @@ tag=$(curl -fsSLo /dev/null -w '%{url_effective}' "$REL/latest" 2>/dev/null | se
 PREV="$PKG/cache/prev-release/$tag"
 if [ -n "$tag" ] && { [ -f "$PREV/ok" ] || {
 	mkdir -p "$PREV" && curl -fsSL -o "$PREV/SHA256SUMS" "$REL/download/$tag/SHA256SUMS" &&
+	sed -i 's/~/./g' "$PREV/SHA256SUMS" &&   # GitHub stores a "~" in an asset name as "." (older releases list the "~" name)
 	for f in $(awk '{print $2}' "$PREV/SHA256SUMS"); do curl -fsSL -o "$PREV/$f" "$REL/download/$tag/$f" || break; done &&
 	(cd "$PREV" && sha256sum -c --quiet SHA256SUMS) && touch "$PREV/ok"; }; }; then
 	# Debs the previous release needs that the manifest no longer has (legacy-debs.txt), checked.
