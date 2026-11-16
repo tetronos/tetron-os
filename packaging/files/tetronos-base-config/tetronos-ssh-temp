@@ -8,8 +8,9 @@
 #
 # The password is typed at the passwd prompt in the terminal, never on a command line. Only that
 # one account may log in with a password (a "Match User" block in an sshd drop-in), other accounts
-# and their keys are not touched. A name that does not exist is created as a plain account (no
-# sudo) and removed again by "off", its home folder is kept. An existing normal account keeps its
+# and their keys are not touched. A name that does not exist is created as a normal account, by
+# default in the sudo group (asked first; sudo asks for its password) and removed again by "off"
+# with its sudo rights, its home folder is kept. An existing normal account keeps its
 # own password: the old hash is saved and put back by "off". Nothing is enabled at boot, so a reboot
 # ends it; the cleanup at boot removes what a crash or a power cut left behind.
 set -u
@@ -69,6 +70,9 @@ connect_info() {
 	if [ -n "$ips" ]; then for ip in $ips; do echo "    ssh $user@$ip"; done
 	else echo "    ssh $user@<this computer's address>   (no network address found)"; fi
 	echo "Only $user can log in with a password. sshd listens on all networks while this is on."
+	if id -nG "$user" 2>/dev/null | tr ' ' '\n' | grep -qx sudo; then
+		echo "$user can use sudo with its password: anyone who has it can become root on this machine."
+	fi
 }
 
 cmd_on() {
@@ -82,7 +86,7 @@ cmd_on() {
 		''|[!a-z_]*|*[!a-z0-9_-]*) die "a username is lowercase letters, digits, - and _, starting with a letter" ;;
 	esac
 	[ "${#user}" -le 32 ] || die "that username is too long"
-	created=0; oldhash=
+	created=0; oldhash=; wants_sudo=0
 	if id "$user" >/dev/null 2>&1; then
 		uid=$(id -u "$user")
 		{ [ "$uid" -ge 1000 ] && [ "$uid" -lt 60000 ]; } || die "$user is a system account; pick another name"
@@ -90,6 +94,11 @@ cmd_on() {
 		echo "$user exists: its password changes now and is put back when this ends."
 	else
 		created=1
+		if [ -x /usr/bin/sudo ] && getent group sudo >/dev/null; then
+			printf 'Allow sudo for %s? Anyone with its password can then become root. [Y/n]: ' "$user"
+			read -r ans || ans=
+			case $ans in [nN]*) ;; *) wants_sudo=1 ;; esac
+		fi
 	fi
 	was_active=0; was_enabled=0
 	systemctl is-active --quiet ssh.service && was_active=1
@@ -98,6 +107,7 @@ cmd_on() {
 	save_state "$user" "$created" "$oldhash" "$was_active" "$was_enabled"
 	if [ "$created" = 1 ]; then
 		useradd -m -s /bin/bash -c "TetronOS temporary remote login" "$user" || { rm -f "$STATE"; die "could not create $user"; }
+		if [ "$wants_sudo" = 1 ]; then usermod -aG sudo "$user" || echo "tetronos-ssh-temp: could not add $user to the sudo group" >&2; fi
 	fi
 	echo "Type the password for $user (twice). It is not shown and not stored anywhere else."
 	if ! passwd "$user"; then
