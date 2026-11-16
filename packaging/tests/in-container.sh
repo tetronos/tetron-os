@@ -30,7 +30,7 @@ while IFS='|' read -r name version smoke; do
 		echo "$out" | grep -q "${version%-*}" && ok "smoke: $smoke -> $out" || bad "smoke: $smoke -> $out"
 	fi
 	for u in $(dpkg -L "$name" | grep '^/usr/lib/systemd/system/.*\.service$'); do
-		check "systemd-analyze verify $u" systemd-analyze verify "$u"
+		check "systemd-analyze verify $u" systemd-analyze verify --man=no "$u"
 		check "unit not enabled by package" sh -c "! [ -e /etc/systemd/system/multi-user.target.wants/$(basename "$u") ]"
 	done
 	[ "$name" = tetron ] && {
