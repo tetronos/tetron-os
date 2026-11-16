@@ -36,7 +36,9 @@ jobs:
                   print(f)
           PY
           cat release-files.txt
-          cd packaging/out && sha256sum $(sed 's#packaging/out/##' ../../release-files.txt) > SHA256SUMS && cat SHA256SUMS
+          # GitHub stores a "~" in an asset name as "."; list the name the asset has, so the apt repository and
+          # the next release's upgrade test find and verify it (kmscon_10.0.4-1~bpo13+1tetronos1).
+          cd packaging/out && sha256sum $(sed 's#packaging/out/##' ../../release-files.txt) | sed 's/~/./g' > SHA256SUMS && cat SHA256SUMS
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
