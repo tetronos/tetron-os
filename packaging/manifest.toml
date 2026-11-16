@@ -227,7 +227,7 @@ postrm = "files/tetronos-branding/postrm"
 name = "tetronos-base-config"
 kind = "local"
 version = "0.15.0"
-revision = "3"
+revision = "4"
 arch = "all"
 section = "admin"
 description = "TetronOS config shared by every edition"
@@ -237,11 +237,24 @@ new user (and the live user) has the folders the tetron-wm Files app expects and
 ~/code, and lets every
 user ping (ICMP datagram sockets, net.ipv4.ping_group_range). Removing the
 package deletes those folders from /etc/skel when they are empty.
+tetronos-ssh-temp gives temporary ssh access with a username and a password
+you enter, until the next reboot (the Settings row in tetron-wm runs it); a
+systemd unit ends a leftover one at boot.
 """
 
 [[package.files]]
 src = "files/tetronos-base-config/50-tetronos-ping.conf"
 dst = "usr/lib/sysctl.d/50-tetronos-ping.conf"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-base-config/tetronos-ssh-temp"
+dst = "usr/bin/tetronos-ssh-temp"
+mode = "0755"
+
+[[package.files]]
+src = "files/tetronos-base-config/tetronos-ssh-temp-cleanup.service"
+dst = "usr/lib/systemd/system/tetronos-ssh-temp-cleanup.service"
 mode = "0644"
 
 [package.scripts]
@@ -320,7 +333,7 @@ tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-branding (>= 0.15.0-1)", "tetronos-branding (<< 0.16)", "tetronos-firstboot (>= 0.15.0-2)", "tetronos-firstboot (<< 0.16)",
-           "tetronos-base-config (>= 0.15.0-3)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
+           "tetronos-base-config (>= 0.15.0-4)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
            "tetronos-nerd-font-symbols (>= 0.15.0-1)", "tetronos-nerd-font-symbols (<< 0.16)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)"]
 

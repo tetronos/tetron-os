@@ -33,7 +33,10 @@ while IFS='|' read -r name version smoke; do
 	fi
 	for u in $(dpkg -L "$name" | grep '^/usr/lib/systemd/system/.*\.service$'); do
 		check "systemd-analyze verify $u" systemd-analyze verify --man=no "$u"
-		check "unit not enabled by package" sh -c "! [ -e /etc/systemd/system/multi-user.target.wants/$(basename "$u") ]"
+		# The cleanup of a leftover temporary ssh login must run at every boot: it is enabled on purpose
+		# (and does nothing unless a state file is there).
+		[ "$(basename "$u")" = tetronos-ssh-temp-cleanup.service ] ||
+			check "unit not enabled by package" sh -c "! [ -e /etc/systemd/system/multi-user.target.wants/$(basename "$u") ]"
 	done
 	[ "$name" = tetron ] && {
 		check "group tetron created" getent group tetron
@@ -56,6 +59,9 @@ while IFS='|' read -r name version smoke; do
 	[ "$name" = tetronos-base-config ] && {
 		for d in Desktop Documents Downloads Pictures code; do check "/etc/skel/$d created" test -d /etc/skel/$d; done
 		check "ping sysctl drop-in installed" grep -q '^net.ipv4.ping_group_range = 0 2147483647$' /usr/lib/sysctl.d/50-tetronos-ping.conf
+		check "tetronos-ssh-temp installed and says off" sh -c 'tetronos-ssh-temp status | grep -qx off && tetronos-ssh-temp status --json | grep -q "\"on\":false"'
+		check "ssh-temp cleanup unit enabled" test -e /etc/systemd/system/multi-user.target.wants/tetronos-ssh-temp-cleanup.service
+		check "ssh-temp usage on a bad command" sh -c 'tetronos-ssh-temp bogus 2>&1 | grep -q usage'
 	}
 	[ "$name" = tetronos-live-config ] && {
 		check "live-ssh-password writes no while an account has the live password" sh -c 'useradd -p "$(perl -e "print crypt(q(live), q(8A))")" livetest && /usr/libexec/tetronos/live-ssh-password >/dev/null && grep -q "^PasswordAuthentication no" /etc/ssh/sshd_config.d/40-tetronos-live-password.conf'
