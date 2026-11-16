@@ -153,7 +153,7 @@ sha256_url = "https://github.com/tetronos/tetron-browser/releases/download/v0.15
 name = "kmscon"
 kind = "source"
 version = "10.0.4"
-revision = "1~bpo13+1tetronos2"
+revision = "1~bpo13+1tetronos3"
 arch = "amd64"
 smoke = "kmscon --version"
 build = "kmscon/build-in-container.sh"
@@ -227,13 +227,14 @@ postrm = "files/tetronos-branding/postrm"
 name = "tetronos-base-config"
 kind = "local"
 version = "0.15.0"
-revision = "2"
+revision = "3"
 arch = "all"
 section = "admin"
 description = "TetronOS config shared by every edition"
 long_description = """
-Creates Desktop, Documents, Downloads and Pictures in /etc/skel so every
-new user has the folders the tetron-wm Files app expects, and lets every
+Creates Desktop, Documents, Downloads, Pictures and code in /etc/skel so every
+new user (and the live user) has the folders the tetron-wm Files app expects and
+~/code, and lets every
 user ping (ICMP datagram sockets, net.ipv4.ping_group_range). Removing the
 package deletes those folders from /etc/skel when they are empty.
 """
@@ -319,7 +320,7 @@ tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-branding (>= 0.15.0-1)", "tetronos-branding (<< 0.16)", "tetronos-firstboot (>= 0.15.0-2)", "tetronos-firstboot (<< 0.16)",
-           "tetronos-base-config (>= 0.15.0-2)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
+           "tetronos-base-config (>= 0.15.0-3)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
            "tetronos-nerd-font-symbols (>= 0.15.0-1)", "tetronos-nerd-font-symbols (<< 0.16)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)"]
 

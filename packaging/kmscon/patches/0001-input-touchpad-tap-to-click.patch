@@ -1,29 +1,29 @@
-From f6557e0d6f291bba5e28eeba68b40fee67f8a7c7 Mon Sep 17 00:00:00 2001
+From d63232d7174ed4e5bd99678863205c431739fb9f Mon Sep 17 00:00:00 2001
 From: erikallankincaid <ErikAllanKincaid@gmail.com>
 Date: Sun, 15 Nov 2026 18:56:16 -0800
 Subject: [PATCH] input: touchpad tap-to-click (--touchpad-tap)
 
 A touch of at most 200 ms that moves less than 1/40 of the pad and presses no physical button is a click: one finger left, two fingers right, three fingers middle (from the BTN_TOOL_* state). With the option on, BTN_TOOL_DOUBLETAP and TRIPLETAP no longer send a middle button press. Off by default. test_touchpad_tap feeds synthetic touchpad events through the pointer code.
 ---
- docs/man/kmscon.conf.5.xml.in   |  11 ++
+ docs/man/kmscon.conf.5.xml.in   |  13 ++
  scripts/etc/kmscon.conf.example |   4 +
- src/config.c                    |   4 +
+ src/config.c                    |   5 +
  src/config.h                    |   2 +
- src/input/input.c               |   7 ++
+ src/input/input.c               |   7 +
  src/input/input.h               |   1 +
- src/input/input_internal.h      |  17 +++
- src/input/input_pointer.c       | 107 +++++++++++++++++
+ src/input/input_internal.h      |  22 +++
+ src/input/input_pointer.c       | 138 +++++++++++++++++
  src/seat.c                      |   1 +
  tests/meson.build               |   9 ++
- tests/test_touchpad_tap.c       | 203 ++++++++++++++++++++++++++++++++
- 11 files changed, 366 insertions(+)
+ tests/test_touchpad_tap.c       | 255 ++++++++++++++++++++++++++++++++
+ 11 files changed, 457 insertions(+)
  create mode 100644 tests/test_touchpad_tap.c
 
 diff --git a/docs/man/kmscon.conf.5.xml.in b/docs/man/kmscon.conf.5.xml.in
-index b350a06..fb8662f 100644
+index b350a06..e20b373 100644
 --- a/docs/man/kmscon.conf.5.xml.in
 +++ b/docs/man/kmscon.conf.5.xml.in
-@@ -316,6 +316,17 @@ font-name=Ubuntu Mono
+@@ -316,6 +316,19 @@ font-name=Ubuntu Mono
          </listitem>
        </varlistentry>
  
@@ -31,7 +31,9 @@ index b350a06..fb8662f 100644
 +        <term><option>touchpad-tap</option></term>
 +        <listitem>
 +          <para>Touchpad tap-to-click. A short touch that does not move clicks: one finger is a
-+                left click, two fingers a right click and three fingers a middle click. Without
++                left click, two fingers a right click and three fingers a middle click. A
++                second touch within 300 ms of a one finger tap holds the left button: slide for a
++                drag, lift without moving for a double click. Without
 +                this option a touchpad only moves the pointer and clicks with its button.
 +                (default: off)
 +          </para>
@@ -57,20 +59,21 @@ index d04ca18..54ff432 100644
  #soft-cursor
  
 diff --git a/src/config.c b/src/config.c
-index c3e04e2..9781b32 100644
+index c3e04e2..d420ca5 100644
 --- a/src/config.c
 +++ b/src/config.c
-@@ -141,6 +141,9 @@ static void print_help()
+@@ -141,6 +141,10 @@ static void print_help()
  		"\t                                 Enable mouse support\n"
  		"\t    --natural-scrolling        [off]\n"
  		"\t                                 Invert mouse wheel direction\n"
 +		"\t    --touchpad-tap             [off]\n"
 +		"\t                                 Touchpad tap-to-click: a short touch that does not move\n"
-+		"\t                                 is a left click, two fingers a right click, three a middle click\n"
++		"\t                                 is a left click, two fingers a right click, three a middle click;\n"
++		"\t                                 tap and touch again to drag or double click\n"
  		"\t    --soft-cursor              [off]\n"
  		"\t                                 Force software cursor\n"
  		"\t    --dpms-timeout <secs>      [600]\n"
-@@ -765,6 +768,7 @@ int kmscon_conf_new(struct conf_ctx **out)
+@@ -765,6 +769,7 @@ int kmscon_conf_new(struct conf_ctx **out)
  		CONF_OPTION_UINT(0, "xkb-repeat-rate", &conf->xkb_repeat_rate, 50),
  		CONF_OPTION_BOOL(0, "mouse", &conf->mouse, true),
  		CONF_OPTION_BOOL(0, "natural-scrolling", &conf->natural_scrolling, false),
@@ -122,10 +125,10 @@ index 8ec720c..aa88347 100644
  void input_set_pointer_max(struct input *input, unsigned int max_x, unsigned int max_y);
  
 diff --git a/src/input/input_internal.h b/src/input/input_internal.h
-index 383754e..c3f652a 100644
+index 383754e..d02043f 100644
 --- a/src/input/input_internal.h
 +++ b/src/input/input_internal.h
-@@ -81,6 +81,21 @@ struct input_pointer {
+@@ -81,6 +81,26 @@ struct input_pointer {
  
  	/* Track which button is currently pressed (BUTTON_NONE=none, 0=left, 1=right, 2=middle) */
  	uint8_t pressed_button;
@@ -144,10 +147,15 @@ index 383754e..c3f652a 100644
 +	struct timespec tap_down;
 +	int32_t tap_start_x;
 +	int32_t tap_start_y;
++	/* Tap-and-drag and double click: a second touch soon after a one finger tap presses the
++	 * left button at once. Moving then drags, lifting without moving is the second click. */
++	struct timespec tap_last;   /* when that tap clicked */
++	bool tap_last_valid;        /* tap_last is a left click a second touch may follow up */
++	bool tap_dragging;          /* the left button is held for the second touch */
  };
  
  struct input_dev {
-@@ -127,6 +142,8 @@ struct input {
+@@ -127,6 +147,8 @@ struct input {
  	struct xkb_compose_table *compose_table;
  
  	bool mouse_enabled;
@@ -157,10 +165,10 @@ index 383754e..c3f652a 100644
  	int32_t pointer_max_x;
  	int32_t pointer_max_y;
 diff --git a/src/input/input_pointer.c b/src/input/input_pointer.c
-index ec55494..08bec26 100644
+index ec55494..f4f78aa 100644
 --- a/src/input/input_pointer.c
 +++ b/src/input/input_pointer.c
-@@ -1,11 +1,58 @@
+@@ -1,11 +1,61 @@
  #include <linux/input-event-codes.h>
  #include <linux/input.h>
 +#include <stdlib.h>
@@ -174,6 +182,9 @@ index ec55494..08bec26 100644
 +#define TAP_TIMEOUT_MS 200
 +/* ... and that moves less than this share of the touchpad axis range: 1 / TAP_MOVE_DIV. */
 +#define TAP_MOVE_DIV 40
++/* A second touch within this many ms of a one finger tap holds the left button: drag or double
++ * click. */
++#define TAP_DRAG_MS 300
 +
 +static uint64_t pointer_ms_since(const struct timespec *from, const struct timespec *to)
 +{
@@ -219,7 +230,7 @@ index ec55494..08bec26 100644
  static void pointer_update_inactivity_timer(struct input_dev *dev)
  {
  	struct itimerspec spec;
-@@ -101,6 +148,8 @@ static void pointer_dev_abs_x(struct input_dev *dev, int32_t value)
+@@ -101,6 +151,8 @@ static void pointer_dev_abs_x(struct input_dev *dev, int32_t value)
  {
  	switch (dev->pointer.kind) {
  	case POINTER_TOUCHPAD:
@@ -228,7 +239,7 @@ index ec55494..08bec26 100644
  		if (dev->pointer.touchpad_needs_sync_off_x) {
  			dev->pointer.off_x = dev->pointer.x - value;
  			dev->pointer.touchpad_needs_sync_off_x = false;
-@@ -133,6 +182,8 @@ static void pointer_dev_abs_y(struct input_dev *dev, int32_t value)
+@@ -133,6 +185,8 @@ static void pointer_dev_abs_y(struct input_dev *dev, int32_t value)
  {
  	switch (dev->pointer.kind) {
  	case POINTER_TOUCHPAD:
@@ -237,7 +248,7 @@ index ec55494..08bec26 100644
  		if (dev->pointer.touchpad_needs_sync_off_y) {
  			dev->pointer.off_y = dev->pointer.y - value;
  			dev->pointer.touchpad_needs_sync_off_y = false;
-@@ -173,6 +224,22 @@ void pointer_dev_abs(struct input_dev *dev, uint16_t code, int32_t value)
+@@ -173,6 +227,35 @@ void pointer_dev_abs(struct input_dev *dev, uint16_t code, int32_t value)
  	}
  }
  
@@ -255,12 +266,25 @@ index ec55494..08bec26 100644
 +	pointer_dev_button(dev, code, 1);
 +	pointer_dev_button(dev, code, 0);
 +	dev->pointer.tap_synth = false;
++
++	/* A left click may be followed by a second touch (drag or double click). */
++	dev->pointer.tap_last_valid = (code == BTN_LEFT);
++	if (code == BTN_LEFT)
++		clock_gettime(CLOCK_MONOTONIC, &dev->pointer.tap_last);
++}
++
++/* The left button of a tap-and-drag, pressed or released by us. */
++static void pointer_tap_left(struct input_dev *dev, int32_t value)
++{
++	dev->pointer.tap_synth = true;
++	pointer_dev_button(dev, BTN_LEFT, value);
++	dev->pointer.tap_synth = false;
 +}
 +
  void pointer_dev_button(struct input_dev *dev, uint16_t code, int32_t value)
  {
  	struct timespec tp;
-@@ -184,6 +251,26 @@ void pointer_dev_button(struct input_dev *dev, uint16_t code, int32_t value)
+@@ -184,6 +267,26 @@ void pointer_dev_button(struct input_dev *dev, uint16_t code, int32_t value)
  	if (value > 1)
  		return;
  
@@ -287,7 +311,7 @@ index ec55494..08bec26 100644
  	switch (code) {
  	case BTN_LEFT:
  		if (pressed) {
-@@ -214,6 +301,26 @@ void pointer_dev_button(struct input_dev *dev, uint16_t code, int32_t value)
+@@ -214,6 +317,41 @@ void pointer_dev_button(struct input_dev *dev, uint16_t code, int32_t value)
  			dev->pointer.touchpad_needs_sync_off_x = true;
  			dev->pointer.touchpad_needs_sync_off_y = true;
  		}
@@ -302,6 +326,21 @@ index ec55494..08bec26 100644
 +				dev->pointer.tap_have_y = false;
 +				dev->pointer.tap_fingers = fingers ? fingers : 1;
 +				clock_gettime(CLOCK_MONOTONIC, &dev->pointer.tap_down);
++
++				/* A second touch soon after a one finger tap: hold the left button. */
++				if (dev->pointer.tap_last_valid && fingers <= 1 &&
++				    pointer_ms_since(&dev->pointer.tap_last,
++						     &dev->pointer.tap_down) < TAP_DRAG_MS) {
++					dev->pointer.tap_dragging = true;
++					dev->pointer.tap_active = false;
++					pointer_tap_left(dev, 1);
++				}
++				dev->pointer.tap_last_valid = false;
++			} else if (dev->pointer.tap_dragging) {
++				/* The end of the drag, or the second click of a double click. */
++				dev->pointer.tap_dragging = false;
++				dev->pointer.tap_active = false;
++				pointer_tap_left(dev, 0);
 +			} else if (dev->pointer.tap_active) {
 +				dev->pointer.tap_active = false;
 +				clock_gettime(CLOCK_MONOTONIC, &tp);
@@ -345,10 +384,10 @@ index 9edcb70..5df7275 100644
 +test('test_touchpad_tap', test_touchpad_tap)
 diff --git a/tests/test_touchpad_tap.c b/tests/test_touchpad_tap.c
 new file mode 100644
-index 0000000..1a47b26
+index 0000000..726c9b3
 --- /dev/null
 +++ b/tests/test_touchpad_tap.c
-@@ -0,0 +1,203 @@
+@@ -0,0 +1,255 @@
 +/*
 + * test_touchpad_tap - touchpad tap-to-click (--touchpad-tap)
 + *
@@ -369,6 +408,7 @@ index 0000000..1a47b26
 +	int presses[3]; /* left (0), middle (1), right (2) */
 +	int releases[3];
 +	int dbl;
++	int moves_held; /* pointer moves reported while the left button is held */
 +};
 +
 +static void on_pointer(struct input *input, struct input_pointer_event *ev, void *data)
@@ -376,6 +416,8 @@ index 0000000..1a47b26
 +	struct log *l = data;
 +
 +	(void)input;
++	if (ev->event == POINTER_MOVED && ev->pressed && ev->button == 0)
++		l->moves_held++;
 +	if (ev->event != POINTER_BUTTON || ev->button > 2)
 +		return;
 +	if (ev->pressed)
@@ -525,8 +567,57 @@ index 0000000..1a47b26
 +	touch_down(1000, 500, 1);
 +	touch_up(1);
 +	touch_down(1000, 500, 1);
++	assert(lg.presses[0] == 2 && lg.releases[0] == 1); /* the second press is at touch down */
 +	touch_up(1);
-+	assert(lg.presses[0] == 2 && lg.dbl >= 1);
++	assert(lg.presses[0] == 2 && lg.releases[0] == 2 && lg.dbl >= 1);
++	teardown();
++
++	/* Tap, then touch again and slide: the left button is held, the pointer moves with it (drag),
++	 * and lifting the finger releases it. */
++	setup(true);
++	touch_down(1000, 500, 1);
++	touch_up(1);
++	touch_down(1000, 500, 1);
++	assert(lg.presses[0] == 2 && lg.releases[0] == 1);
++	pointer_dev_abs(&dev, ABS_X, 1500);
++	pointer_dev_abs(&dev, ABS_Y, 800);
++	assert(lg.moves_held >= 1);
++	assert(lg.releases[0] == 1); /* still held while the finger is down */
++	touch_up(1);
++	assert(lg.presses[0] == 2 && lg.releases[0] == 2);
++	assert(dev.pointer.pressed_button == BUTTON_NONE);
++	teardown();
++
++	/* Touching again after the drag window is a new tap, not a drag. */
++	setup(true);
++	touch_down(1000, 500, 1);
++	touch_up(1);
++	sleep_ms(450);
++	touch_down(1000, 500, 1);
++	assert(lg.presses[0] == 1); /* no button held for a late second touch */
++	touch_up(1);
++	assert(lg.presses[0] == 2 && lg.releases[0] == 2);
++	teardown();
++
++	/* A two finger tap is not followed up by a drag. */
++	setup(true);
++	touch_down(1000, 500, 2);
++	touch_up(2);
++	touch_down(1000, 500, 1);
++	assert(lg.presses[0] == 0 && lg.presses[2] == 1);
++	touch_up(1);
++	teardown();
++
++	/* A drag does not chain into another drag. */
++	setup(true);
++	touch_down(1000, 500, 1);
++	touch_up(1);
++	touch_down(1000, 500, 1);
++	touch_up(1);
++	touch_down(1000, 500, 1);
++	assert(lg.presses[0] == 2); /* the third touch is a new tap candidate */
++	touch_up(1);
++	assert(lg.presses[0] == 3);
 +	teardown();
 +
 +	/* Off (the default): no tap at all, and the two finger state keeps its old meaning, a
