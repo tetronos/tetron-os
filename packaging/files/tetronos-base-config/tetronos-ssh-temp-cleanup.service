@@ -1,0 +1,12 @@
+[Unit]
+Description=TetronOS: end a temporary ssh login left over from before this boot
+Documentation=man:sshd_config(5)
+ConditionPathExists=/var/lib/tetronos/ssh-temp/state
+Before=ssh.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/tetronos-ssh-temp cleanup
+
+[Install]
+WantedBy=multi-user.target
