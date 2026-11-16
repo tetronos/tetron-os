@@ -1,8 +1,8 @@
 #!/bin/sh
-# Folders the tetron-wm Files app expects in every new home directory.
+# Folders every new home directory gets: the ones the tetron-wm Files app expects, and code (the AI and code folder, ~/code).
 set -e
 if [ "$1" = configure ]; then
-	for d in Desktop Documents Downloads Pictures; do
+	for d in Desktop Documents Downloads Pictures code; do
 		mkdir -p "/etc/skel/$d"
 		chmod 0755 "/etc/skel/$d"
 	done

@@ -54,7 +54,7 @@ while IFS='|' read -r name version smoke; do
 		done
 	}
 	[ "$name" = tetronos-base-config ] && {
-		for d in Desktop Documents Downloads Pictures; do check "/etc/skel/$d created" test -d /etc/skel/$d; done
+		for d in Desktop Documents Downloads Pictures code; do check "/etc/skel/$d created" test -d /etc/skel/$d; done
 		check "ping sysctl drop-in installed" grep -q '^net.ipv4.ping_group_range = 0 2147483647$' /usr/lib/sysctl.d/50-tetronos-ping.conf
 	}
 	[ "$name" = tetronos-live-config ] && {

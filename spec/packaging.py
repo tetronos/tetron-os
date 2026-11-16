@@ -62,10 +62,11 @@ class TetronFirstBootOperator(Requirement):
 
 class TetronosBaseConfig(Requirement):
     """tetronos-base-config (kind local) is the config every edition shares.
-    Its postinst creates /etc/skel/Desktop, Documents, Downloads and
-    Pictures (mode 0755), so every new user, the live user tetronos
-    included, has the folders the tetron-wm Files app expects (USER
-    2026-11-03). Its postrm on remove or purge deletes those folders only
+    Its postinst creates /etc/skel/Desktop, Documents, Downloads,
+    Pictures and code (mode 0755), so every new user, the live user
+    tetronos included, has the folders the tetron-wm Files app expects
+    (USER 2026-11-03) and ~/code, the code and AI folder (USER 2026-11-15:
+    it was not created on the server ISO). Its postrm on remove or purge deletes those folders only
     when they are empty. It also ships
     /usr/lib/sysctl.d/50-tetronos-ping.conf with
     `net.ipv4.ping_group_range = 0 2147483647`, so every user can ping
