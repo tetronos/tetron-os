@@ -16,6 +16,8 @@ repo() { # repo DIR...: serve the debs in DIR... as the local apt repository
 
 echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
 cp /kmscon-backports.pref /etc/apt/preferences.d/kmscon-backports.pref
+# Our kmscon (the local repository) wins over the backports one, as in the image (kmscon-tetronos.pref.binary).
+printf 'Package: kmscon\nPin: origin ""\nPin-Priority: 700\n' > /etc/apt/preferences.d/kmscon-tetronos.pref
 sed -i 's/^Components: main$/Components: main contrib non-free-firmware/' /etc/apt/sources.list.d/debian.sources
 # Two firmware packages of tetronos-firmware ask to accept a licence; the ISO build answers them (config/common/preseed).
 printf '%s\n' 'firmware-ivtv firmware-ivtv/license/accepted boolean true' 'firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true' | debconf-set-selections

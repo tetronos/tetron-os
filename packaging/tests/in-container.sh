@@ -9,6 +9,8 @@ check() { desc="$1"; shift; if "$@" >/dev/null 2>&1; then ok "$desc"; else bad "
 # kmscon (tetronos-core) is only in trixie-backports: same source and pin as the ISO.
 echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
 cp /kmscon-backports.pref /etc/apt/preferences.d/kmscon-backports.pref
+# Our kmscon (the local repository) wins over the backports one, as in the image (kmscon-tetronos.pref.binary).
+printf 'Package: kmscon\nPin: origin ""\nPin-Priority: 700\n' > /etc/apt/preferences.d/kmscon-tetronos.pref
 # CPU microcode and firmware (tetronos-desktop, tetronos-firmware) are in non-free-firmware and contrib, like on the ISO.
 sed -i 's/^Components: main$/Components: main contrib non-free-firmware/' /etc/apt/sources.list.d/debian.sources
 # Two firmware packages of tetronos-firmware ask to accept a licence; the ISO build answers them (config/common/preseed).
