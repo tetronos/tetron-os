@@ -1,6 +1,6 @@
 #!/bin/sh
 # Runs inside a fresh debian:trixie container (packaging/build.py kind = "source"): builds kmscon
-# without its OpenGL modules (video_drm3d, renderer_gltex) from the trixie-backports source and
+# without its OpenGL modules (video_drm3d, renderer_gltex), with touchpad tap-to-click, from the trixie-backports source and
 # copies the deb to /out. The stock kmscon depends on libgbm1, which pulls mesa and LLVM (about
 # 195 MB installed); this one needs none of them. tetron-wm never uses OpenGL, kmscon only renders
 # its terminal, and kmscon uses its software renderer unless started with --hwaccel (default off,
@@ -24,8 +24,13 @@ apt-get -qq source -t trixie-backports kmscon >/dev/null
 cd kmscon-*/
 apt-get -qq build-dep -y -t trixie-backports kmscon >/dev/null
 patch -p1 < /src/nogl-rules.patch
+# Our patches to the source (packaging/kmscon/patches/, in order): touchpad tap-to-click.
+for p in /src/patches/*.patch; do patch -p1 < "$p"; done
+# TetronOS turns tapping on: the example config is what the package installs as /etc/kmscon/kmscon.conf.
+sed -i 's/^#touchpad-tap$/touchpad-tap/' scripts/etc/kmscon.conf.example
+grep -q '^touchpad-tap$' scripts/etc/kmscon.conf.example
 DEBFULLNAME=TetronOS DEBEMAIL=noreply@tetron.invalid dch -v "$VERSION" -D trixie-backports \
-	"Built without the OpenGL video and renderer modules (video_drm3d, renderer_gltex): no libgbm, mesa or LLVM dependency."
+	"Built without the OpenGL video and renderer modules (video_drm3d, renderer_gltex): no libgbm, mesa or LLVM dependency. Touchpad tap-to-click (--touchpad-tap), on by default in /etc/kmscon/kmscon.conf."
 DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc -b >/tmp/kmscon-build.log 2>&1 || { tail -30 /tmp/kmscon-build.log; exit 1; }
 cd ..
 deb=$(ls kmscon_*_amd64.deb)
