@@ -379,7 +379,8 @@ class KmsconWithoutOpenGL(Requirement):
     """kmscon is built by TetronOS (manifest kind = "source", packaging/build.py in a
     debian:trixie container with packaging/kmscon/build-in-container.sh) from the
     trixie-backports source with video_drm3d and renderer_gltex disabled, as
-    10.0.4-1~bpo13+1tetronos1, which sorts above the backports 10.0.4-1~bpo13+1. It
+    10.0.4-1~bpo13+1tetronos2 (tetronos1 was the OpenGL change alone), which sorts above
+    the backports 10.0.4-1~bpo13+1. It
     needs no libgbm, libegl, libgles, mesa or LLVM (about 195 MB installed, 56 MB of
     the compressed server ISO). tetron-wm never uses OpenGL (kmscon only renders its
     terminal; images and video go to mpv --vo=drm), and kmscon uses its software
@@ -392,3 +393,20 @@ class KmsconWithoutOpenGL(Requirement):
     kmscon started with --hwaccel does not use 3D acceleration; it falls back to the
     software backend. Tested: a server ISO built with it showed no slowdown (USER
     2026-11-15)."""
+
+
+class KmsconTouchpadTap(Requirement):
+    """The kmscon of TetronOS taps: a touchpad tap is a click (one finger left, two fingers
+    right, three fingers middle), so a laptop works without pressing the pad. It is a patch
+    to the kmscon source (packaging/kmscon/patches/0001-input-touchpad-tap-to-click.patch,
+    branch tetron-touchpad-tap of the kmscon clone), applied by build-in-container.sh,
+    with the option --touchpad-tap (off by default in the source, as libinput's default).
+    The kmscon package installs scripts/etc/kmscon.conf.example as /etc/kmscon/kmscon.conf,
+    and the build turns touchpad-tap on in it, so every tier taps (one kmscon, no server or
+    desktop split; a user's edited kmscon.conf is kept by dpkg). A touch counts as a tap when
+    it lasts less than 200 ms, moves less than 1/40 of the pad and no physical button was
+    pressed. With the option on, BTN_TOOL_DOUBLETAP and BTN_TOOL_TRIPLETAP no longer send a
+    middle button press. tests/test_touchpad_tap.c of the patch feeds synthetic touchpad events
+    through the pointer code and checks the clicks; a hardware check on the ThinkPad P1 and
+    xps-17 comes after the VM. Not sent upstream (USER 2026-11-15: PRs there are usually
+    ignored, maybe later)."""

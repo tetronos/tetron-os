@@ -168,9 +168,9 @@ def source_key(pkg: dict) -> str:
     """What a source build depends on: the build directory's files and the version."""
     d = (HERE / pkg["build"]).parent
     h = hashlib.sha256(f"{pkg['version']}-{pkg['revision']}".encode())
-    for f in sorted(d.iterdir()):
+    for f in sorted(d.rglob("*")):
         if f.is_file():
-            h.update(f.name.encode()); h.update(f.read_bytes())
+            h.update(str(f.relative_to(d)).encode()); h.update(f.read_bytes())
     return h.hexdigest()
 
 
