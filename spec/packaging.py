@@ -243,8 +243,12 @@ class TetronosCoreMeta(Requirement):
     tetron, tetron-tui, tetron-wm, tetronos-branding, tetronos-firstboot,
     tetronos-base-config, tetronos-apt-source, tetronos-nerd-font-symbols
     (the icon glyphs of tetron-wm and croft), network-manager, curl,
-    iputils-ping and kmscon (>= 10), which brings libtsm4 (>= 4.8)
-    with it. curl is the invite URL fetcher of every edition (join plan
+    iputils-ping, kmscon (>= 10), which brings libtsm4 (>= 4.8)
+    with it, and libpam-systemd and dbus-user-session: the console login
+    (agetty autologin under kmscon) gets a logind session, a systemd user
+    manager and a session bus from the first boot. Without them a later
+    apt install of PipeWire (tetronos-firmware) starts nothing until the
+    user logs in again. curl is the invite URL fetcher of every edition (join plan
     decision 19). openssh-server is not in core:
     it comes with tetronos-server. Both come from
     trixie-backports (see KmsconFromBackports). It does not pull
@@ -358,7 +362,8 @@ class TetronosFirmwareMetas(Requirement):
     wireless-regdb; tetronos-server Depends it, so every tier gets wifi and
     a laptop with only wifi can get online. tetronos-firmware: Depends
     tetronos-firmware-wifi and the rest of the hardware firmware (graphics,
-    network cards, sound, USB adapters, CPU microcode); tetronos-desktop
+    network cards, sound, USB adapters, CPU microcode) and pipewire-alsa
+    (pulls PipeWire, so the sound card plays on a Server with firmware); tetronos-desktop
     Depends it, and a Server upgrades to Server with firmware with
     apt install tetronos-firmware."""
 
