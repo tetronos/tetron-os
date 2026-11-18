@@ -95,7 +95,11 @@ class BrandedBoot(Requirement):
     the tagline and a small line with the edition, the Debian base release,
     the build date and the kernel. Menu entries read "TetronOS live"
     instead of "Live system"; the syslinux menu title is TetronOS and the
-    grub theme has no title text (the splash carries the name). Greeting
+    grub theme has no title text (the splash carries the name). The boot menu
+    starts its default entry (the live system) after 20 seconds; a key press
+    stops the countdown (grub: config/common/bootloaders/grub-pc/config.cfg set
+    timeout=20; syslinux: config/common/bootloaders/isolinux/isolinux.cfg
+    timeout 200). Greeting
     text in /etc/issue (also the kmscon login banner, agetty prints it),
     /etc/issue.net and /etc/motd comes from tetronos-branding.
     Required before the release candidate (M8)."""
