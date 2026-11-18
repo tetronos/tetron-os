@@ -19,7 +19,7 @@ esac
 
 lb config noauto \
 	--distribution trixie --architectures amd64 \
-	--archive-areas "main contrib non-free-firmware" \
+	--archive-areas "main contrib non-free non-free-firmware" \
 	--binary-images iso-hybrid --bootloaders "grub-efi,syslinux" \
 	--debian-installer none --firmware-chroot false --memtest none --backports true \
 	--debootstrap-options "--variant=minbase" \

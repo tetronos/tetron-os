@@ -354,9 +354,21 @@ class TetronosDesktopConfig(Requirement):
     Depends polkitd, openssh-server, tetron-wm-desktop, curl and python3."""
 
 
+class DebianArchiveAreas(Requirement):
+    """Every image enables the Debian archive areas main, contrib, non-free
+    and non-free-firmware (live-build --archive-areas in auto/config): the
+    image's /etc/apt/sources.list lists all four. non-free
+    only makes packages installable (nvidia-driver and CUDA for local
+    inference, unrar, intel-media-va-driver-non-free); no non-free package
+    is in an image unless a manifest package Depends on it. This departs
+    from Debian's default, which enables non-free-firmware but not non-free.
+    A system installed before this keeps its own apt sources; nothing
+    rewrites them."""
+
+
 class TetronosFirmwareMetas(Requirement):
     """Firmware comes from two metapackages (kind meta, needs the Debian
-    contrib and non-free-firmware components, which every image has in its apt sources).
+    contrib and non-free-firmware components, which every image has in its apt sources; see DebianArchiveAreas).
     tetronos-firmware-wifi: the wifi firmware (Intel, Realtek, MediaTek,
     Atheros, Broadcom, firmware-misc-nonfree) with wpasupplicant, iw and
     wireless-regdb; tetronos-server Depends it, so every tier gets wifi and
