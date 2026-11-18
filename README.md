@@ -59,6 +59,18 @@ git switch main
 git pull --ff-only
 ```
 
+Only `tetron-os` is cloned. The other components are not built here: the build downloads their released `.deb` files from GitHub, checks each against its published SHA-256, and uses it unchanged. No login is needed.
+
+| Component | Comes from |
+|---|---|
+| tetron, tetron-tui, tetron-wm (+ `-desktop`, `-essentials`, `-recommended`, `-extras`), tetron-appstore, tetron-stt, tetron-aimode, tetron-browser | release `.deb` on `github.com/tetronos/<repo>/releases` |
+| Nerd Font symbols | release zip on `github.com/ryanoasis/nerd-fonts` |
+| kmscon | Debian source package, built here in a Docker container |
+| `tetronos-*` (branding, base config, firstboot, apt source, metapackages, live config) | made here from `packaging/manifest.toml` and `packaging/files/` |
+| everything else | the Debian trixie archive |
+
+`packaging/manifest.toml` pins the exact version and URL of each one. You only clone a component repository when you change that component: build its `.deb` there, put it in a folder, and test it in the ISO with `make iso EDITION=server TAG=mytest LOCAL_DEBS=/path/to/folder`. A file in that folder replaces the download when it has the exact file name the manifest expects. This is for test builds only, never for a release.
+
 ### 4. Check the component versions (optional)
 
 `packaging/manifest.toml` is the single list of every `.deb` the ISO is made from. `main` already pins tested versions, so you can skip this step. To see whether newer component releases exist (a line starting `DIFF` means a pin is behind):
