@@ -161,6 +161,33 @@ lsblk
 sudo dd if=out/tetronos-server-$(date +%Y%m%d)-amd64.iso of=/dev/sdX bs=4M status=progress conv=fsync
 ```
 
+### 11. Clean up
+
+`make iso` and `scripts/roll-iso.sh` leave the build VM running in the background (6 CPUs and 8 GB RAM by default) so the next build starts fast. Stop it when you are done:
+
+```sh
+make vm-stop
+scripts/vm.sh status    # prints stopped
+```
+
+The VM disk stays in `build/vm/` and keeps the live-build cache of each edition, so a later build is quicker. See what the build left on disk:
+
+```sh
+du -sh build/vm out packaging/out packaging/cache 2>/dev/null
+docker image ls debian:trixie
+```
+
+Each item below deletes data; run only the ones you want:
+
+```sh
+make clean EDITION=desktop          # live-build work folder of one edition inside the VM
+make vm-destroy                     # the whole VM: build/vm/ (disk, cloud image, ssh key); make vm-create to get it back
+rm -rf packaging/out                # built and downloaded .debs, made again by the next build
+docker image rm debian:trixie       # container image used to build kmscon
+```
+
+`packaging/cache/` holds the kmscon build and other downloads (keep it to save minutes next time). `out/` holds your ISOs and logs; older same-name ISOs are in `out/archive/`. Nothing in `out/` is deleted for you. With `RUNNER=docker` nothing keeps running; the work folders are in `build/<edition>/` (a failed build can leave them owned by root, so clear one with `make clean EDITION=desktop RUNNER=docker`), and the builder image is removed with `docker image rm tetronos-builder`.
+
 ### All steps in one script
 
 `scripts/roll-iso.sh` checks that the repository is clean and in sync, checks the pins, builds and tests the packages, creates the VM if missing and builds the ISOs. It stops at the first problem and never changes a pin for you.
