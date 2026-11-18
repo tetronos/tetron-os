@@ -379,8 +379,8 @@ description = "TetronOS hardware firmware set"
 long_description = """
 The rest of the hardware firmware on top of tetronos-firmware-wifi: graphics
 (AMD, Intel, Nvidia), network cards, sound (SOF, Cirrus), USB wifi and TV
-adapters, and CPU microcode, with pipewire-alsa so the sound card plays
-through PipeWire. Install it on a Server to get the Server with
+adapters, and CPU microcode, with pipewire-alsa and wireplumber (the ISO
+installs no Recommends) so the sound card plays through PipeWire. Install it on a Server to get the Server with
 firmware tier: sudo apt install tetronos-firmware. Needs the Debian
 non-free-firmware component.
 """
@@ -391,7 +391,7 @@ depends = ["tetronos-firmware-wifi (>= 0.15.0-1)", "tetronos-firmware-wifi (<< 0
            "firmware-netronome", "firmware-netxen", "firmware-qlogic",
            "firmware-ath9k-htc", "firmware-carl9170", "firmware-libertas", "firmware-ipw2x00", "firmware-zd1211",
            "firmware-b43-installer", "firmware-b43legacy-installer", "firmware-siano", "firmware-ivtv", "firmware-ast",
-           "firmware-linux-free", "intel-microcode", "amd64-microcode", "pipewire-alsa"]
+           "firmware-linux-free", "intel-microcode", "amd64-microcode", "pipewire-alsa", "wireplumber"]
 
 [[package]]
 name = "tetronos-server"
