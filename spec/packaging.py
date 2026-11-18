@@ -364,7 +364,10 @@ class TetronosFirmwareMetas(Requirement):
     tetronos-firmware-wifi and the rest of the hardware firmware (graphics,
     network cards, sound, USB adapters, CPU microcode) and pipewire-alsa
     and wireplumber (pipewire-alsa pulls PipeWire; wireplumber is only its Recommend, and
-    the ISO installs no Recommends), so the sound card plays on a Server with firmware; tetronos-desktop
+    the ISO installs no Recommends), so the sound card plays on a Server with firmware.
+    Its postinst starts PipeWire (pipewire.socket, pipewire-pulse.socket, wireplumber.service)
+    in every running user manager: apt enables those user units but does not start them,
+    so a user logged in during the install would have no sound until the next boot; tetronos-desktop
     Depends it, and a Server upgrades to Server with firmware with
     apt install tetronos-firmware."""
 

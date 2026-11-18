@@ -1,0 +1,16 @@
+#!/bin/sh
+# Start PipeWire for the users who are logged in now. apt enables the PipeWire
+# user units but does not start them in a user manager that is already running,
+# so without this there is no sound until the next boot.
+set -e
+if [ "$1" = configure ] && [ -d /run/systemd/system ]; then
+	for unit in $(systemctl list-units --state=running --plain --no-legend 'user@*.service' | awk '{print $1}'); do
+		uid=${unit#user@}; uid=${uid%.service}
+		user=$(id -nu "$uid" 2>/dev/null) || continue
+		systemctl --user -M "$user@" daemon-reload 2>/dev/null || continue
+		for u in pipewire.socket pipewire-pulse.socket wireplumber.service; do
+			systemctl --user -M "$user@" start "$u" 2>/dev/null || true
+		done
+	done
+fi
+exit 0

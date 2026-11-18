@@ -393,6 +393,9 @@ depends = ["tetronos-firmware-wifi (>= 0.15.0-1)", "tetronos-firmware-wifi (<< 0
            "firmware-b43-installer", "firmware-b43legacy-installer", "firmware-siano", "firmware-ivtv", "firmware-ast",
            "firmware-linux-free", "intel-microcode", "amd64-microcode", "pipewire-alsa", "wireplumber"]
 
+[package.scripts]
+postinst = "files/tetronos-firmware/postinst"
+
 [[package]]
 name = "tetronos-server"
 kind = "meta"
