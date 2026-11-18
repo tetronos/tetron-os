@@ -1,7 +1,7 @@
 #!/bin/sh
 # Boot a live ISO in QEMU/KVM, wait for the serial login prompt of host tetron,
 # save a VGA screenshot and power off.
-# Usage: tests/boot-live.sh ISO [bios|uefi] [timeout-seconds]
+# Usage: [NOKEY=1] tests/boot-live.sh ISO [bios|uefi] [timeout-seconds]
 # Output: out/boot-<fw>.log (serial), out/boot-<fw>.png (VGA). Exit 0 when
 # the serial log shows the tetron login prompt.
 set -e
@@ -41,9 +41,12 @@ while True:
 ' "$QMP" "$1"
 }
 
-# The boot menu may wait for a key; Enter picks the default entry.
-sleep 8
-qmp '{"execute": "send-key", "arguments": {"keys": [{"type": "qcode", "data": "ret"}]}}' >/dev/null || true
+# Enter picks the default entry at once. NOKEY=1 presses nothing, which tests
+# that the boot menu starts the default entry by itself after its timeout.
+if [ -z "${NOKEY:-}" ]; then
+	sleep 8
+	qmp '{"execute": "send-key", "arguments": {"keys": [{"type": "qcode", "data": "ret"}]}}' >/dev/null || true
+fi
 
 t=0; ok=1
 while [ $t -lt "$TIMEOUT" ]; do
