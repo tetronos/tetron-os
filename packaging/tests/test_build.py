@@ -258,10 +258,11 @@ class ListDebs(unittest.TestCase):
                              capture_output=True, text=True, check=True).stdout.split()
         pkgs = tomllib.loads((build.HERE / "manifest.toml").read_text())["package"]
         self.assertEqual(out, [build.deb_filename(p) for p in pkgs])
-        wm = next(p["version"] for p in pkgs if p["name"] == "tetron-wm")
-        self.assertIn(f"tetron-wm_{wm}-1_amd64.deb", out)
-        self.assertIn(f"tetron-wm-essentials_{wm}-1_all.deb", out)
-        self.assertIn(f"tetron-wm-recommended_{wm}-1_all.deb", out)
+        ver = {p["name"]: p["version"] for p in pkgs}
+        # The size packages (essentials, recommended) can pin an older release than tetron-wm.
+        self.assertIn(f"tetron-wm_{ver['tetron-wm']}-1_amd64.deb", out)
+        self.assertIn(f"tetron-wm-essentials_{ver['tetron-wm-essentials']}-1_all.deb", out)
+        self.assertIn(f"tetron-wm-recommended_{ver['tetron-wm-recommended']}-1_all.deb", out)
         for name in ("tetronos-firmware-wifi", "tetronos-firmware", "tetron-stt"):
             self.assertTrue(any(f.startswith(name + "_") for f in out), name)
 
