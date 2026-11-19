@@ -8,11 +8,15 @@ release tags of their repositories, and optionally move the pins.
 Tags are read with git ls-remote (public repos, no login): vMAJOR.MINOR.PATCH,
 tags with a - suffix (pre-releases) are skipped. Only kind = "deb" packages whose
 url is a github.com release download are looked at. A package that is new in a
-release must be added to the manifest by hand.
+release must be added to the manifest by hand. A pin moves only when the latest
+release has that package's file: packages a repository no longer publishes (the
+tetron-wm size packages, built by tetron-appstore since tetron-wm 0.15.19) keep
+their pin and are listed as kept.
 """
 import re
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 MANIFEST = Path(__file__).resolve().parent.parent / "packaging" / "manifest.toml"
@@ -28,6 +32,14 @@ def latest(org: str, repo: str) -> str:
     return tags[-1] if tags else ""
 
 
+def exists(url: str) -> bool:
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=30) as r:
+            return r.status == 200
+    except OSError:
+        return False
+
+
 def blocks(text: str) -> list[str]:
     parts = re.split(r"(?m)^(?=\[\[package\]\]$)", text)
     return parts
@@ -41,6 +53,7 @@ def main() -> int:
     text = MANIFEST.read_text()
     cache: dict = {}
     pinned: dict = {}
+    kept: list = []
     out = []
     for b in blocks(text):
         m = URL.search(b)
@@ -49,11 +62,18 @@ def main() -> int:
             if (org, repo) not in cache:
                 cache[(org, repo)] = latest(org, repo)
             new = cache[(org, repo)]
+            moved = b.replace(f"/v{old}/", f"/v{new}/").replace(f"_{old}-", f"_{new}-")
+            if new and new != old and not exists(re.search(r'(?m)^url = "([^"]+)"', moved).group(1)):
+                name = re.search(r'(?m)^name = "([^"]+)"', b).group(1)
+                kept.append(f"{name} {old} (not in {repo} v{new})")
+                out.append(b)
+                continue
             pinned.setdefault(repo, set()).add(old)
             if mode == "update" and new and new != old:
-                b = b.replace(f"/v{old}/", f"/v{new}/").replace(f"_{old}-", f"_{new}-")
-                b = re.sub(r'(?m)^version = "%s"$' % re.escape(old), f'version = "{new}"', b)
+                b = re.sub(r'(?m)^version = "%s"$' % re.escape(old), f'version = "{new}"', moved)
         out.append(b)
+    for k in kept:
+        print(f"kept {k}")
     bad = 0
     for (org, repo), new in cache.items():
         old = ", ".join(sorted(pinned[repo]))
