@@ -1,0 +1,7 @@
+#!/bin/sh
+# The installer unit stays inert unless the kernel line has tetronos.install.
+set -e
+if [ "$1" = configure ]; then
+	systemctl enable tetronos-install-tui.service
+	if [ -d /run/systemd/system ]; then systemctl daemon-reload || true; fi
+fi

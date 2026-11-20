@@ -99,7 +99,10 @@ class BrandedBoot(Requirement):
     starts its default entry (the live system) after 20 seconds; a key press
     stops the countdown (grub: config/common/bootloaders/grub-pc/config.cfg set
     timeout=20; syslinux: config/common/bootloaders/isolinux/isolinux.cfg
-    timeout 200). Greeting
+    timeout 200). The second entry, "Install TetronOS" (grub hotkey i,
+    syslinux), is the live kernel line plus tetronos.install, which starts
+    tetronos-install-tui.service on tty1 (config/common/hooks/live/
+    0030-tetronos-boot-menu.hook.binary adds it). Greeting
     text in /etc/issue (also the kmscon login banner, agetty prints it),
     /etc/issue.net and /etc/motd comes from tetronos-branding.
     Required before the release candidate (M8)."""
