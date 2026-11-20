@@ -1,7 +1,7 @@
 #!/bin/sh
 # Boot a live ISO in QEMU/KVM, wait for the serial login prompt of host tetron,
 # save a VGA screenshot and power off.
-# Usage: [NOKEY=1] tests/boot-live.sh ISO [bios|uefi] [timeout-seconds]
+# Usage: [NOKEY=1] [INSTALL=1] tests/boot-live.sh ISO [bios|uefi] [timeout-seconds]
 # Output: out/boot-<fw>.log (serial), out/boot-<fw>.png (VGA). Exit 0 when
 # the serial log shows the tetron login prompt.
 set -e
@@ -43,7 +43,17 @@ while True:
 
 # Enter picks the default entry at once. NOKEY=1 presses nothing, which tests
 # that the boot menu starts the default entry by itself after its timeout.
-if [ -z "${NOKEY:-}" ]; then
+# INSTALL=1 picks the entry "Install TetronOS" (grub: hotkey i; syslinux: Down, Enter);
+# the screenshot then shows the installer TUI on tty1.
+if [ -n "${INSTALL:-}" ]; then
+	sleep 8
+	if [ "$FW" = uefi ]; then
+		qmp '{"execute": "send-key", "arguments": {"keys": [{"type": "qcode", "data": "i"}]}}' >/dev/null || true
+	else
+		qmp '{"execute": "send-key", "arguments": {"keys": [{"type": "qcode", "data": "down"}]}}' >/dev/null || true
+		qmp '{"execute": "send-key", "arguments": {"keys": [{"type": "qcode", "data": "ret"}]}}' >/dev/null || true
+	fi
+elif [ -z "${NOKEY:-}" ]; then
 	sleep 8
 	qmp '{"execute": "send-key", "arguments": {"keys": [{"type": "qcode", "data": "ret"}]}}' >/dev/null || true
 fi
