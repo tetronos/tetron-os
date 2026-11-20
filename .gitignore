@@ -27,3 +27,4 @@ __pycache__/
 /config/bootstrap
 /config/chroot
 /config/source
+packaging/files/tetronos-install/tetronos-install-tui
