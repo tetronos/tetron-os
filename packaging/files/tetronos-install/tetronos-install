@@ -1,0 +1,291 @@
+#!/bin/sh
+# tetronos-install: copy the live system to a disk or an image file.
+# Usage: tetronos-install --user NAME [options] DISK
+#        tetronos-install --user NAME [options] --target-image FILE --size 10G
+# Options: --hostname H (tetron)  --password-file F  --autologin
+#          --invite-file F  --source DIR  --yes  --no-boot (skip grub, tests)
+#          --fetch-deps (prototype: apt install grub and fsck tools in the target, needs network)
+# Spec: spec/install.py. Prototype: POSIX sh, root only, no network.
+set -eu
+
+HOSTNAME_=tetron; USER_=''; PWFILE=''; AUTOLOGIN=''; INVITE=''; SRC=''; YES=''; NOBOOT=''; FETCH=''; IMG=''; SIZE=''; DISK=''
+MNT=/run/tetronos-install-mnt
+LOOP=
+
+die() { echo "tetronos-install: $*" >&2; exit 1; }
+say() { echo "== $*"; }
+
+usage() { sed -n 2,7p "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	--user) USER_=${2:?}; shift 2 ;;
+	--hostname) HOSTNAME_=${2:?}; shift 2 ;;
+	--password-file) PWFILE=${2:?}; shift 2 ;;
+	--autologin) AUTOLOGIN=1; shift ;;
+	--invite-file) INVITE=${2:?}; shift 2 ;;
+	--source) SRC=${2:?}; shift 2 ;;
+	--target-image) IMG=${2:?}; shift 2 ;;
+	--size) SIZE=${2:?}; shift 2 ;;
+	--yes) YES=1; shift ;;
+	--no-boot) NOBOOT=1; shift ;;
+	--fetch-deps) FETCH=1; shift ;;
+	-h|--help) usage ;;
+	-*) die "unknown option $1" ;;
+	*) DISK=$1; shift ;;
+	esac
+done
+
+[ "$(id -u)" = 0 ] || die "must run as root"
+[ -n "$USER_" ] || die "--user is required"
+case "$USER_" in *[!a-z0-9_-]*|[!a-z_]*) die "bad user name: $USER_" ;; esac
+case "$HOSTNAME_" in *[!A-Za-z0-9.-]*|"") die "bad hostname" ;; esac
+[ -n "$IMG" ] || [ -n "$DISK" ] || usage
+[ -z "$IMG" ] || [ -n "$SIZE" ] || die "--target-image needs --size"
+[ -z "$INVITE" ] || [ -f "$INVITE" ] || die "invite file not found"
+[ -z "$PWFILE" ] || [ -f "$PWFILE" ] || die "password file not found"
+
+if [ -z "$SRC" ]; then
+	SRC=/run/live/rootfs/filesystem.squashfs
+	[ -d "$SRC/etc" ] || die "not a live system (no $SRC); use --source DIR"
+fi
+[ -d "$SRC/etc" ] || die "source $SRC has no /etc"
+
+# ---- password: read once, hashed, never in argv
+if [ -n "$PWFILE" ]; then
+	PW=$(sed -n 1p "$PWFILE")
+else
+	[ -t 0 ] || die "no --password-file and no terminal"
+	printf 'Password for %s: ' "$USER_"; stty -echo; read -r PW; stty echo; echo
+	printf 'Again: '; stty -echo; read -r PW2; stty echo; echo
+	[ "$PW" = "$PW2" ] || die "passwords differ"
+fi
+[ -n "$PW" ] || die "empty password refused"
+PWHASH=$(printf '%s' "$PW" | openssl passwd -6 -stdin) || die "openssl passwd failed"
+PW=
+
+cleanup() {
+	set +e
+	for m in run sys proc dev/pts dev; do umount "$MNT/$m" 2>/dev/null; done
+	umount "$MNT/boot/efi" 2>/dev/null; umount "$MNT/boot" 2>/dev/null; umount "$MNT" 2>/dev/null
+	[ -z "$LOOP" ] || losetup -d "$LOOP" 2>/dev/null
+}
+trap cleanup EXIT
+
+# ---- 1. target
+step_target() {
+	if [ -n "$IMG" ]; then
+		[ ! -e "$IMG" ] || die "$IMG exists; refusing to overwrite"
+		truncate -s "$SIZE" "$IMG"
+		LOOP=$(losetup -f --show -P "$IMG")
+		DISK=$LOOP
+	fi
+	[ -b "$DISK" ] || die "$DISK is not a block device"
+	bytes=$(blockdev --getsize64 "$DISK")
+	[ "$bytes" -ge 8589934592 ] || die "$DISK is smaller than 8 GiB"
+	if [ -z "$IMG" ]; then
+		grep -q "^$DISK" /proc/mounts && die "$DISK is mounted"
+		if [ -d /run/live/medium ]; then
+			med=$(findmnt -n -o SOURCE /run/live/medium 2>/dev/null || true)
+			case "$med" in "$DISK"*) die "$DISK holds the live medium" ;; esac
+		fi
+		lsblk -n -o MOUNTPOINTS "$DISK" | grep -q . && die "$DISK has mounted partitions"
+		if [ -z "$YES" ]; then
+			lsblk -o NAME,SIZE,MODEL,FSTYPE,LABEL "$DISK"
+			printf 'ERASE %s and install? Type yes: ' "$DISK"; read -r a
+			[ "$a" = yes ] || die "aborted"
+		fi
+	fi
+}
+
+# ---- 2. partition
+part() { case "$DISK" in *[0-9]) echo "${DISK}p$1" ;; *) echo "$DISK$1" ;; esac; }
+step_partition() {
+	say "partition $DISK"
+	wipefs -a "$DISK" >/dev/null
+	sfdisk -q "$DISK" <<EOF
+label: gpt
+size=1MiB, type=21686148-6449-6E6F-744E-656564454649, name=bios_boot
+size=512MiB, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=ESP
+size=1GiB, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name=boot
+type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name=root
+EOF
+	partprobe "$DISK" 2>/dev/null || true
+	udevadm settle 2>/dev/null || true
+	i=0; while [ ! -b "$(part 4)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i+1)); done
+	[ -b "$(part 4)" ] || die "partitions did not appear"
+}
+
+# ---- 3. format
+step_format() {
+	say "format"
+	mkfs.vfat -F 32 -n ESP "$(part 2)" >/dev/null
+	mkfs.ext4 -q -F -L boot "$(part 3)"
+	mkfs.ext4 -q -F -L tetronos "$(part 4)"
+}
+
+# ---- 4. mount
+step_mount() {
+	mkdir -p "$MNT"
+	mount "$(part 4)" "$MNT"
+	mkdir -p "$MNT/boot"; mount "$(part 3)" "$MNT/boot"
+	mkdir -p "$MNT/boot/efi"; mount "$(part 2)" "$MNT/boot/efi"
+}
+
+# ---- 5. copy
+step_copy() {
+	say "copy system from $SRC"
+	rsync -aHAXx --numeric-ids --exclude=/boot/efi/ "$SRC"/ "$MNT"/
+	for d in dev proc sys run tmp; do mkdir -p "$MNT/$d"; done
+	chmod 1777 "$MNT/tmp"
+}
+
+# ---- 6. configure
+uuid() { blkid -s UUID -o value "$1"; }
+step_configure() {
+	say "configure"
+	cat > "$MNT/etc/fstab" <<EOF
+UUID=$(uuid "$(part 4)") / ext4 errors=remount-ro 0 1
+UUID=$(uuid "$(part 3)") /boot ext4 defaults 0 2
+UUID=$(uuid "$(part 2)") /boot/efi vfat umask=0077 0 2
+EOF
+	echo "$HOSTNAME_" > "$MNT/etc/hostname"
+	cat > "$MNT/etc/hosts" <<EOF
+127.0.0.1 localhost
+127.0.1.1 $HOSTNAME_
+::1 localhost ip6-localhost ip6-loopback
+EOF
+	: > "$MNT/etc/machine-id"
+	rm -f "$MNT/var/lib/dbus/machine-id"
+	rm -f "$MNT"/etc/ssh/ssh_host_* "$MNT/etc/tetron/secret_key"
+	for m in dev dev/pts proc sys run; do mount --bind "/$m" "$MNT/$m"; done
+}
+
+chr() { chroot "$MNT" "$@"; }
+
+step_user() {
+	say "user $USER_"
+	groups=$(chr id -nG "$LIVEUSER" 2>/dev/null | tr ' ' ',' || true)
+	# the live user does not exist in the squashfs: take groups from the live system
+	[ -n "$groups" ] || groups=$(id -nG "$LIVEUSER" 2>/dev/null | tr ' ' ',' || true)
+	# keep only groups that exist on the target
+	keep=
+	for g in $(echo "$groups" | tr ',' ' '); do
+		[ "$g" = "$LIVEUSER" ] && continue
+		grep -q "^$g:" "$MNT/etc/group" && keep="$keep${keep:+,}$g"
+	done
+	chr useradd -m -s /bin/bash ${keep:+-G "$keep"} "$USER_"
+	printf '%s:%s\n' "$USER_" "$PWHASH" | chr chpasswd -e
+	PWHASH=
+	chr passwd -l root >/dev/null
+}
+
+step_live_leftovers() {
+	say "remove live packages"
+	pk=
+	for p in tetronos-live-config live-config-systemd live-config live-boot-initramfs-tools live-boot; do
+		chr dpkg -s "$p" >/dev/null 2>&1 && pk="$pk $p"
+	done
+	# shellcheck disable=SC2086
+	[ -z "$pk" ] || chr env DEBIAN_FRONTEND=noninteractive apt-get -y -q purge $pk || die "purge of live packages failed"
+	rm -rf "$MNT/etc/live" "$MNT/etc/ssh/sshd_config.d/40-tetronos-live-password.conf"
+	rm -rf "$MNT/usr/lib/systemd/system/kmsconvt@tty1.service.d/tetronos-autologin.conf"
+	[ -z "$AUTOLOGIN" ] || {
+		d="$MNT/etc/systemd/system/kmsconvt@tty1.service.d"; mkdir -p "$d"
+		cat > "$d/autologin.conf" <<EOF
+[Service]
+ExecStart=
+ExecStart=/usr/bin/kmscon "--vt=%I" --no-switchvt --mouse --xkb-layout=us "--font-name=DejaVu Sans Mono" --font-size=14 --login -- /sbin/agetty --autologin $USER_ --noclear - xterm-256color
+EOF
+	}
+	# enable-links of the purged live units would dangle
+	chr find /etc/systemd/system -xtype l -delete
+	say "initramfs"
+	chr update-initramfs -u -k all
+}
+
+step_identity_and_services() {
+	if [ -x "$MNT/usr/sbin/sshd" ]; then chr ssh-keygen -A >/dev/null; fi
+	if [ -e "$MNT/usr/lib/systemd/system/tetronos-firstboot.service" ]; then
+		chr systemctl enable tetronos-firstboot.service >/dev/null 2>&1 || true
+	fi
+	if [ -n "$INVITE" ]; then
+		mkdir -p "$MNT/etc/tetron"
+		install -m 0600 -o root -g root "$INVITE" "$MNT/etc/tetron/pending-invite"
+	fi
+}
+
+step_fetch() {
+	[ -n "$FETCH" ] || return 0
+	say "fetch deps into target (prototype)"
+	cp "$MNT/etc/resolv.conf" "$MNT/etc/resolv.conf.ti" 2>/dev/null || true
+	rm -f "$MNT/etc/resolv.conf"; cp /etc/resolv.conf "$MNT/etc/resolv.conf" 2>/dev/null || cp /run/systemd/resolve/resolv.conf "$MNT/etc/resolv.conf"
+	chr env DEBIAN_FRONTEND=noninteractive apt-get -q update >/dev/null
+	chr env DEBIAN_FRONTEND=noninteractive apt-get -y -q --no-install-recommends install grub-pc-bin grub-efi-amd64-bin grub2-common grub-common e2fsprogs dosfstools zstd >/dev/null
+	rm -f "$MNT/etc/resolv.conf"; mv "$MNT/etc/resolv.conf.ti" "$MNT/etc/resolv.conf" 2>/dev/null || true
+}
+
+# ---- 7. bootloader
+step_boot() {
+	[ -z "$NOBOOT" ] || { say "bootloader skipped (--no-boot)"; return; }
+	say "grub"
+	cmd="quiet console=tty0 console=ttyS0,115200n8"
+	# in the target chroot when it has grub (installed image); else the host tools
+	# (prototype test against an ISO squashfs that has no grub yet)
+	if chr sh -c "command -v grub-install" >/dev/null 2>&1; then
+		chr grub-install --target=i386-pc --recheck "$DISK" >/tmp/.ti-grub.log 2>&1 || { cat /tmp/.ti-grub.log; die "grub-install bios failed"; }
+		chr grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --no-nvram >>/tmp/.ti-grub.log 2>&1 || { cat /tmp/.ti-grub.log; die "grub-install uefi failed"; }
+	else
+		die "target has no grub-install (the image must ship tetronos-install deps; prototype: --fetch-deps)"
+	fi
+	rm -f /tmp/.ti-grub.log
+	if chr sh -c "command -v grub-mkconfig" >/dev/null 2>&1; then
+		# the installer owns /etc/default/grub (no grub-pc/grub-efi postinst creates it)
+		cat > "$MNT/etc/default/grub" <<EOF
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=3
+GRUB_DISTRIBUTOR=TetronOS
+GRUB_CMDLINE_LINUX_DEFAULT="$cmd"
+GRUB_CMDLINE_LINUX=""
+GRUB_DISABLE_OS_PROBER=true
+GRUB_TERMINAL="console serial"
+GRUB_SERIAL_COMMAND="serial --speed=115200"
+EOF
+		chr update-grub 2>&1 | sed 's/^/  /'
+	else
+		static_grub_cfg "$cmd"
+	fi
+}
+
+static_grub_cfg() {
+	rootuuid=$(uuid "$(part 4)")
+	mkdir -p "$MNT/boot/grub"
+	{
+		echo "set timeout=3"; echo "set default=0"
+		for k in "$MNT"/boot/vmlinuz-*; do
+			v=${k##*/vmlinuz-}
+			[ -f "$MNT/boot/initrd.img-$v" ] || continue
+			echo "menuentry \"TetronOS $v\" {"
+			echo "	search --no-floppy --fs-uuid --set=root $(uuid "$(part 3)")"
+			echo "	linux /vmlinuz-$v root=UUID=$rootuuid ro $1"
+			echo "	initrd /initrd.img-$v"
+			echo "}"
+		done
+	} > "$MNT/boot/grub/grub.cfg"
+}
+
+# ---- main
+LIVEUSER=$(awk -F: '$3 >= 1000 && $3 < 60000 {print $1; exit}' /etc/passwd || true)
+step_target
+step_partition
+step_format
+step_mount
+step_copy
+step_configure
+step_user
+step_fetch
+step_live_leftovers
+step_identity_and_services
+step_boot
+sync
+say "done: $USER_@$HOSTNAME_ installed on ${IMG:-$DISK}"

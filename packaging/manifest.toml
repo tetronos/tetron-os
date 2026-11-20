@@ -301,6 +301,28 @@ dst = "usr/libexec/tetronos/firstboot"
 mode = "0755"
 
 [[package]]
+name = "tetronos-install"
+kind = "local"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "admin"
+description = "TetronOS installer: copies the live system to a disk"
+long_description = """
+Installs the running live system to a disk or an image file: GPT with
+bios_boot, ESP, /boot and root (ext4), the user, GRUB for BIOS and UEFI.
+Needs no network. Stopgap copy of ~/code/tetronos-install scripts/tetronos-install
+until that repository publishes release debs (then a kind = "deb" entry).
+"""
+depends = ["grub2-common", "grub-pc-bin", "grub-efi-amd64-bin", "e2fsprogs", "dosfstools",
+           "rsync", "zstd", "util-linux", "openssl", "initramfs-tools"]
+
+[[package.files]]
+src = "files/tetronos-install/tetronos-install"
+dst = "usr/sbin/tetronos-install"
+mode = "0755"
+
+[[package]]
 name = "tetronos-apt-source"
 kind = "local"
 version = "0.15.0"
@@ -331,7 +353,7 @@ mode = "0644"
 name = "tetronos-core"
 kind = "meta"
 version = "0.15.0"
-revision = "8"
+revision = "9"
 arch = "all"
 section = "metapackages"
 description = "TetronOS base package set of every edition"
@@ -348,7 +370,8 @@ depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-branding (>= 0.15.0-1)", "tetronos-branding (<< 0.16)", "tetronos-firstboot (>= 0.15.0-2)", "tetronos-firstboot (<< 0.16)",
            "tetronos-base-config (>= 0.15.0-4)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
            "tetronos-nerd-font-symbols (>= 0.15.0-1)", "tetronos-nerd-font-symbols (<< 0.16)", "network-manager", "curl", "iputils-ping",
-           "kmscon (>= 10)", "libpam-systemd", "dbus-user-session"]
+           "kmscon (>= 10)", "libpam-systemd", "dbus-user-session",
+           "tetronos-install (>= 0.15.0-1)", "tetronos-install (<< 0.16)"]
 
 [[package]]
 name = "tetronos-firmware-wifi"
