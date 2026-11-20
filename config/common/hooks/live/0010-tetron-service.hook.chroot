@@ -6,3 +6,5 @@
 # tetronos-live-ssh-password.path re-checks ssh password login on passwd.
 set -e
 systemctl enable tetron.service tetronos-firstboot.service tetronos-live-leave.service tetronos-live-ssh-password.path
+# tetronos-install-tui.service runs only with tetronos.install on the kernel line (boot menu Install entry)
+systemctl enable tetronos-install-tui.service
