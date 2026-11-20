@@ -443,4 +443,7 @@ class TetronosInstallPackage(Requirement):
     (grub2-common, grub-pc-bin, grub-efi-amd64-bin, e2fsprogs, dosfstools,
     rsync, zstd, util-linux, openssl, initramfs-tools), and tetronos-core
     Depends on it, so every edition image has the installer and an
-    installed system keeps grub and fsck for kernel updates."""
+    installed system keeps grub and fsck for kernel updates.
+    The deb also ships tetronos-install-tui.service (enabled by its
+    postinst), which runs the TUI on tty1 only when the kernel line has
+    tetronos.install, so it is inert on an installed system."""

@@ -6,3 +6,36 @@ for f in boot/grub/grub.cfg isolinux/live.cfg isolinux/menu.cfg; do
 	[ -f "$f" ] || continue
 	sed -i -e 's/Live system/TetronOS live/g' -e 's/^menu title Boot menu/menu title TetronOS/' "$f"
 done
+
+# Entry "Install TetronOS" right after the live entry (the default stays live): the same
+# kernel line plus tetronos.install, which starts tetronos-install-tui.service on tty1.
+if [ -f boot/grub/grub.cfg ]; then
+	awk '
+		/^menuentry "TetronOS live \(amd64\)"/ { cp = 1 }
+		cp { buf = buf $0 "\n" }
+		{ print }
+		cp && /^}/ {
+			cp = 0
+			gsub(/TetronOS live \(amd64\)/, "Install TetronOS", buf)
+			sub(/--hotkey=l/, "--hotkey=i", buf)
+			sub(/findiso=\$\{iso_path\}/, "& tetronos.install", buf)
+			printf "%s", buf
+			buf = ""
+		}' boot/grub/grub.cfg >boot/grub/grub.cfg.new
+	mv boot/grub/grub.cfg.new boot/grub/grub.cfg
+fi
+if [ -f isolinux/live.cfg ]; then
+	awk '
+		/^label live-amd64$/ { cp = 1 }
+		cp && /^$/ {
+			cp = 0
+			sub(/label live-amd64/, "label install-amd64", buf)
+			sub(/TetronOS live \(amd64\)/, "Install TetronOS", buf)
+			sub(/\tmenu default\n/, "", buf)
+			sub(/\n$/, " tetronos.install\n", buf)
+			print ""; printf "%s", buf
+		}
+		cp { buf = buf $0 "\n" }
+		{ print }' isolinux/live.cfg >isolinux/live.cfg.new
+	mv isolinux/live.cfg.new isolinux/live.cfg
+fi
