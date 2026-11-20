@@ -333,9 +333,6 @@ src = "files/tetronos-install/tetronos-install-tui.service"
 dst = "usr/lib/systemd/system/tetronos-install-tui.service"
 mode = "0644"
 
-[package.scripts]
-postinst = "files/tetronos-install/postinst"
-
 [[package]]
 name = "tetronos-apt-source"
 kind = "local"
