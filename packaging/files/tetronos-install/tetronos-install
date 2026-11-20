@@ -119,7 +119,7 @@ size=512MiB, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=ESP
 size=1GiB, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name=boot
 type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name=root
 EOF
-	partprobe "$DISK" 2>/dev/null || true
+	blockdev --rereadpt "$DISK" 2>/dev/null || true
 	udevadm settle 2>/dev/null || true
 	i=0; while [ ! -b "$(part 4)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i+1)); done
 	[ -b "$(part 4)" ] || die "partitions did not appear"

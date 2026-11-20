@@ -441,7 +441,7 @@ class TetronosInstallPackage(Requirement):
     make install-tui, arch amd64) until that
     repository publishes release debs. It Depends on the tools it runs
     (grub2-common, grub-pc-bin, grub-efi-amd64-bin, e2fsprogs, dosfstools,
-    rsync, zstd, util-linux, openssl, initramfs-tools), and tetronos-core
+    rsync, zstd, util-linux, fdisk (sfdisk), openssl, initramfs-tools), and tetronos-core
     Depends on it, so every edition image has the installer and an
     installed system keeps grub and fsck for kernel updates.
     The deb also ships tetronos-install-tui.service (enabled by the
