@@ -432,3 +432,13 @@ class KmsconTouchpadTap(Requirement):
     through the pointer code and checks the clicks; a hardware check on the ThinkPad P1 and
     xps-17 comes after the VM. Not sent upstream (USER 2026-11-15: PRs there are usually
     ignored, maybe later)."""
+
+
+class TetronosInstallPackage(Requirement):
+    """The installer ships as the local deb tetronos-install
+    (/usr/sbin/tetronos-install, from ~/code/tetronos-install) until that
+    repository publishes release debs. It Depends on the tools it runs
+    (grub2-common, grub-pc-bin, grub-efi-amd64-bin, e2fsprogs, dosfstools,
+    rsync, zstd, util-linux, openssl, initramfs-tools), and tetronos-core
+    Depends on it, so every edition image has the installer and an
+    installed system keeps grub and fsck for kernel updates."""
