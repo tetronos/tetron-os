@@ -57,10 +57,17 @@ endif
 distclean:
 	rm -rf out
 
-.PHONY: debs test-debs
+.PHONY: debs test-debs install-tui
 # LOCAL_DEBS=DIR: test builds only, kind = deb packages are taken from DIR
 # when it has their file name (build.py --local-debs); never for a release.
-debs:
+# Stopgap: the engine script and the static TUI come from the sibling repo.
+INSTALL_REPO ?= $(HOME)/code/tetronos-install
+install-tui:
+	cd $(INSTALL_REPO) && cargo build --release --target x86_64-unknown-linux-musl
+	install -m 0755 $(INSTALL_REPO)/target/x86_64-unknown-linux-musl/release/tetronos-install-tui packaging/files/tetronos-install/
+	install -m 0755 $(INSTALL_REPO)/scripts/tetronos-install packaging/files/tetronos-install/
+
+debs: install-tui
 	python3 packaging/build.py $(if $(LOCAL_DEBS),--local-debs $(LOCAL_DEBS))
 
 test-debs: debs

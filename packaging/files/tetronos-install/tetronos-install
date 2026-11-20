@@ -84,12 +84,21 @@ step_target() {
 	bytes=$(blockdev --getsize64 "$DISK")
 	[ "$bytes" -ge 8589934592 ] || die "$DISK is smaller than 8 GiB"
 	if [ -z "$IMG" ]; then
-		grep -q "^$DISK" /proc/mounts && die "$DISK is mounted"
-		if [ -d /run/live/medium ]; then
-			med=$(findmnt -n -o SOURCE /run/live/medium 2>/dev/null || true)
-			case "$med" in "$DISK"*) die "$DISK holds the live medium" ;; esac
-		fi
-		lsblk -n -o MOUNTPOINTS "$DISK" | grep -q . && die "$DISK has mounted partitions"
+		# any disk except the one holding the live medium or the running root
+		for part in $(lsblk -n -l -o PATH "$DISK"); do
+			for mp in $(findmnt -n -o TARGET -S "$part" 2>/dev/null); do
+				case "$mp" in
+					/|/run/live*|/usr/lib/live/*|/lib/live/*) die "$DISK holds the live medium or the running system ($mp)" ;;
+				esac
+			done
+		done
+		for part in $(lsblk -n -l -o PATH "$DISK" | sort -r); do
+			swapoff "$part" 2>/dev/null || true
+			while mp=$(findmnt -n -o TARGET -S "$part" 2>/dev/null | tail -n 1) && [ -n "$mp" ]; do
+				umount "$mp" || die "cannot unmount $mp"
+			done
+		done
+		lsblk -n -o MOUNTPOINTS "$DISK" | grep -q . && die "$DISK still has mounted partitions"
 		if [ -z "$YES" ]; then
 			lsblk -o NAME,SIZE,MODEL,FSTYPE,LABEL "$DISK"
 			printf 'ERASE %s and install? Type yes: ' "$DISK"; read -r a
