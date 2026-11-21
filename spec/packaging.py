@@ -446,4 +446,8 @@ class TetronosInstallPackage(Requirement):
     installed system keeps grub and fsck for kernel updates.
     The deb also ships tetronos-install-tui.service (enabled by the
     image live hook, not by the package), which runs the TUI on tty1 only when the kernel line has
-    tetronos.install, so it is inert on an installed system."""
+    tetronos.install, so it is inert on an installed system. It has no
+    Conflicts= (systemd applies that before the condition is checked and
+    removed the tty1 login of every normal boot, seen on the P1 2026-11-20):
+    it creates /run/tetronos-install-active while it runs, and drop-ins for
+    kmsconvt@.service and getty@.service skip on that file."""

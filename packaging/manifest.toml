@@ -304,7 +304,7 @@ mode = "0755"
 name = "tetronos-install"
 kind = "local"
 version = "0.15.0"
-revision = "4"
+revision = "5"
 arch = "amd64"
 section = "admin"
 description = "TetronOS installer: copies the live system to a disk"
@@ -331,6 +331,16 @@ mode = "0755"
 [[package.files]]
 src = "files/tetronos-install/tetronos-install-tui.service"
 dst = "usr/lib/systemd/system/tetronos-install-tui.service"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-install/tetronos-install-login-skip.conf"
+dst = "usr/lib/systemd/system/kmsconvt@.service.d/tetronos-install-skip.conf"
+mode = "0644"
+
+[[package.files]]
+src = "files/tetronos-install/tetronos-install-login-skip.conf"
+dst = "usr/lib/systemd/system/getty@.service.d/tetronos-install-skip.conf"
 mode = "0644"
 
 [[package]]
@@ -382,7 +392,7 @@ depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-base-config (>= 0.15.0-4)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
            "tetronos-nerd-font-symbols (>= 0.15.0-1)", "tetronos-nerd-font-symbols (<< 0.16)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)", "libpam-systemd", "dbus-user-session",
-           "tetronos-install (>= 0.15.0-4)", "tetronos-install (<< 0.16)"]
+           "tetronos-install (>= 0.15.0-5)", "tetronos-install (<< 0.16)"]
 
 [[package]]
 name = "tetronos-firmware-wifi"
