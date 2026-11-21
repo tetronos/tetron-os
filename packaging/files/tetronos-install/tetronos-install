@@ -249,6 +249,18 @@ step_boot() {
 	fi
 	rm -f /tmp/.ti-grub.log
 	if chr sh -c "command -v grub-mkconfig" >/dev/null 2>&1; then
+		# the live boot menu theme (logo splash) when the live medium has it; else the plain menu
+		med=${TETRONOS_MEDIUM:-/run/live/medium}
+		term='GRUB_TERMINAL="console serial"'; theme=''
+		if [ -f "$med/boot/grub/live-theme/theme.txt" ] && [ -f "$med/boot/grub/splash.png" ]; then
+			td="$MNT/boot/grub/themes/tetronos"; mkdir -p "$td"
+			sed 's|\.\./splash\.png|splash.png|' "$med/boot/grub/live-theme/theme.txt" > "$td/theme.txt"
+			cp "$med/boot/grub/splash.png" "$td/splash.png"
+			theme='GRUB_THEME=/boot/grub/themes/tetronos/theme.txt
+GRUB_GFXMODE=auto'
+			term='GRUB_TERMINAL_OUTPUT="gfxterm serial"
+GRUB_TERMINAL_INPUT="console serial"'
+		fi
 		# the installer owns /etc/default/grub (no grub-pc/grub-efi postinst creates it)
 		cat > "$MNT/etc/default/grub" <<EOF
 GRUB_DEFAULT=0
@@ -257,7 +269,8 @@ GRUB_DISTRIBUTOR=TetronOS
 GRUB_CMDLINE_LINUX_DEFAULT="$cmd"
 GRUB_CMDLINE_LINUX=""
 GRUB_DISABLE_OS_PROBER=true
-GRUB_TERMINAL="console serial"
+$term
+$theme
 GRUB_SERIAL_COMMAND="serial --speed=115200"
 EOF
 		chr update-grub 2>&1 | sed 's/^/  /'
