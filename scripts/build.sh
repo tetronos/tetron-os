@@ -88,4 +88,7 @@ cp "$ISO" "$OUT"
 cp binary/live/filesystem.packages "${OUT%.iso}.packages"
 ls -l "$OUT"
 sh "$SRC/scripts/out-report.sh" "$OUTDIR"
-chown -R "${HOST_UID:-0}:${HOST_GID:-0}" "$OUTDIR" "$WORK"
+chown -R "${HOST_UID:-0}:${HOST_GID:-0}" "$OUTDIR"
+# Not the live-build cache: its bootstrap tree seeds the next chroot, so a chown there put uid 1000 on
+# / /etc /var /home and 4600 more files of every later ISO (found on the P1, 2026-11-20).
+find "$WORK" -path "$WORK/cache" -prune -o -exec chown -h "${HOST_UID:-0}:${HOST_GID:-0}" {} +

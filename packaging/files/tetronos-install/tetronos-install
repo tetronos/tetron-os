@@ -238,7 +238,7 @@ step_fetch() {
 step_boot() {
 	[ -z "$NOBOOT" ] || { say "bootloader skipped (--no-boot)"; return; }
 	say "grub"
-	cmd="quiet console=tty0 console=ttyS0,115200n8"
+	cmd="console=tty0 console=ttyS0,115200n8"
 	# in the target chroot when it has grub (installed image); else the host tools
 	# (prototype test against an ISO squashfs that has no grub yet)
 	if chr sh -c "command -v grub-install" >/dev/null 2>&1; then
