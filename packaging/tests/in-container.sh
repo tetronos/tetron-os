@@ -61,6 +61,7 @@ while IFS='|' read -r name version smoke; do
 		check "ping sysctl drop-in installed" grep -q '^net.ipv4.ping_group_range = 0 2147483647$' /usr/lib/sysctl.d/50-tetronos-ping.conf
 		check "tetronos-ssh-temp installed and says off" sh -c 'tetronos-ssh-temp status | grep -qx off && tetronos-ssh-temp status --json | grep -q "\"on\":false"'
 		check "ssh-temp cleanup unit enabled" test -e /etc/systemd/system/multi-user.target.wants/tetronos-ssh-temp-cleanup.service
+		check "default target is multi-user" sh -c '[ "$(readlink /etc/systemd/system/default.target)" = /usr/lib/systemd/system/multi-user.target ]'
 		check "ssh-temp usage on a bad command" sh -c 'tetronos-ssh-temp bogus 2>&1 | grep -q usage'
 	}
 	[ "$name" = tetronos-live-config ] && {
@@ -101,6 +102,7 @@ for name in $(for n in $installed; do echo $n; done | tac); do
 	}
 	[ "$name" = tetronos-base-config ] && {
 		check "empty /etc/skel folders removed" sh -c '! test -e /etc/skel/Desktop'
+		check "default target link removed" sh -c '! test -e /etc/systemd/system/default.target'
 	}
 	[ "$name" = tetronos-apt-source ] && {
 		check "sources file gone after purge" sh -c '! test -e /etc/apt/sources.list.d/tetronos.sources'
