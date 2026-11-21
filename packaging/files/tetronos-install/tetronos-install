@@ -267,7 +267,8 @@ step_boot() {
 			sed 's|\.\./splash\.png|splash.png|' "$med/boot/grub/live-theme/theme.txt" > "$td/theme.txt"
 			cp "$med/boot/grub/splash.png" "$td/splash.png"
 			theme='GRUB_THEME=/boot/grub/themes/tetronos/theme.txt
-GRUB_GFXMODE=auto'
+GRUB_GFXMODE=800x600
+GRUB_GFXPAYLOAD_LINUX=keep'
 			term='GRUB_TERMINAL_OUTPUT="gfxterm serial"
 GRUB_TERMINAL_INPUT="console serial"'
 		fi

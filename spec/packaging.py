@@ -72,8 +72,12 @@ class TetronosBaseConfig(Requirement):
     `net.ipv4.ping_group_range = 0 2147483647`, so every user can ping
     through ICMP datagram sockets: the image loses ping's cap_net_raw file
     capability, and the kernel default range "1 0" allows nobody (VM test
-    2026-11-05). This is the systemd upstream default. tetronos-core
-    Depends on it."""
+    2026-11-05). This is the systemd upstream default. Its postinst makes
+    multi-user.target the default boot target (symlink
+    /etc/systemd/system/default.target): there is no display manager, the
+    desktop starts after the kmscon login on tty1 (USER 2026-11-21); its
+    postrm removes the symlink again when it still points there.
+    tetronos-core Depends on it."""
 
 
 class TetronosLiveSshPassword(Requirement):

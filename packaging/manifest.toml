@@ -238,7 +238,7 @@ postrm = "files/tetronos-branding/postrm"
 name = "tetronos-base-config"
 kind = "local"
 version = "0.15.0"
-revision = "4"
+revision = "5"
 arch = "all"
 section = "admin"
 description = "TetronOS config shared by every edition"
@@ -250,7 +250,8 @@ user ping (ICMP datagram sockets, net.ipv4.ping_group_range). Removing the
 package deletes those folders from /etc/skel when they are empty.
 tetronos-ssh-temp gives temporary ssh access with a username and a password
 you enter, until the next reboot (the Settings row in tetron-wm runs it); a
-systemd unit ends a leftover one at boot.
+systemd unit ends a leftover one at boot. The default boot target is
+multi-user.target (no display manager; the desktop starts after the login).
 """
 
 [[package.files]]
@@ -304,7 +305,7 @@ mode = "0755"
 name = "tetronos-install"
 kind = "local"
 version = "0.15.0"
-revision = "7"
+revision = "8"
 arch = "amd64"
 section = "admin"
 description = "TetronOS installer: copies the live system to a disk"
@@ -409,7 +410,7 @@ postrm = "files/tetronos-console/postrm"
 name = "tetronos-core"
 kind = "meta"
 version = "0.15.0"
-revision = "10"
+revision = "11"
 arch = "all"
 section = "metapackages"
 description = "TetronOS base package set of every edition"
@@ -424,10 +425,10 @@ tetronos-server, hardware and sound with tetronos-desktop.
 """
 depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-branding (>= 0.15.0-1)", "tetronos-branding (<< 0.16)", "tetronos-firstboot (>= 0.15.0-2)", "tetronos-firstboot (<< 0.16)",
-           "tetronos-base-config (>= 0.15.0-4)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
+           "tetronos-base-config (>= 0.15.0-5)", "tetronos-base-config (<< 0.16)", "tetronos-apt-source (>= 0.15.0-2)", "tetronos-apt-source (<< 0.16)",
            "tetronos-nerd-font-symbols (>= 0.15.0-1)", "tetronos-nerd-font-symbols (<< 0.16)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)", "libpam-systemd", "dbus-user-session",
-           "tetronos-install (>= 0.15.0-7)", "tetronos-install (<< 0.16)",
+           "tetronos-install (>= 0.15.0-8)", "tetronos-install (<< 0.16)",
            "tetronos-console (>= 0.15.0-1)", "tetronos-console (<< 0.16)", "fonts-dejavu-core"]
 
 [[package]]

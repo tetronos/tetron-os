@@ -8,4 +8,6 @@ if [ "$1" = configure ]; then
 	done
 	# Ends a temporary ssh login (tetronos-ssh-temp) that a reboot or a crash left behind.
 	systemctl enable tetronos-ssh-temp-cleanup.service >/dev/null 2>&1 || true
+	# No display manager: the desktop starts after the kmscon login, so the system boots to multi-user.target (USER 2026-11-21).
+	ln -sf /usr/lib/systemd/system/multi-user.target /etc/systemd/system/default.target
 fi
