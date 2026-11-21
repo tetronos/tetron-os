@@ -9,7 +9,7 @@ EDITION="${EDITION:-server}"
 APPEND="boot=live components username=tetronos hostname=tetron locales=en_US.UTF-8 keyboard-layouts=us"
 case "$EDITION" in
 	server)  APPEND="$APPEND console=tty0 console=ttyS0,115200n8" ;;
-	desktop) APPEND="$APPEND quiet console=ttyS0,115200n8 console=tty0" ;;
+	desktop) APPEND="$APPEND console=ttyS0,115200n8 console=tty0" ;;
 	*) echo "unknown EDITION: $EDITION" >&2; exit 1 ;;
 esac
 case "$FIRMWARE" in
