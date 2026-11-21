@@ -75,12 +75,12 @@ class MetaBuild(unittest.TestCase):
             self.assertEqual(da, db)
 
 
-LOCAL = {"name": "tetronos-live-config", "kind": "local", "version": "0.15.0", "revision": "1",
+LOCAL = {"name": "tetronos-console", "kind": "local", "version": "0.15.0", "revision": "1",
          "arch": "all", "description": "TetronOS live", "depends": ["tetronos-core (>= 0.15.0-1)", "tetronos-core (<< 0.16)"],
-         "files": [{"src": "files/tetronos-live-config/tetron-session", "dst": "usr/bin/tetron-session", "mode": "0755"},
-                   {"src": "files/tetronos-live-config/tetronos-session.sh",
+         "files": [{"src": "files/tetronos-console/tetron-session", "dst": "usr/bin/tetron-session", "mode": "0755"},
+                   {"src": "files/tetronos-console/tetronos-session.sh",
                     "dst": "etc/profile.d/tetronos-session.sh", "mode": "0644"}],
-         "scripts": {"postinst": "files/tetronos-live-config/postinst"}}
+         "scripts": {"postinst": "files/tetronos-console/postinst"}}
 
 
 class LocalBuild(unittest.TestCase):

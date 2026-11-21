@@ -79,12 +79,12 @@ while IFS='|' read -r name version smoke; do
 		check "apt update verifies the tetronos repo" sh -c 'apt-get update 2>&1 | tee /tmp/aptu | grep -q "tetronos.github.io/apt stable InRelease" && ! grep -E "^(W|E):.*tetronos" /tmp/aptu'
 		check "tetron available from the tetronos repo" sh -c 'apt-cache policy tetron | grep -q "tetronos.github.io/apt stable/main"'
 	}
-	[ "$name" = tetronos-live-config ] && {
+	[ "$name" = tetronos-console ] && {
 		check "kmsconvt@tty1 enabled" systemctl is-enabled kmsconvt@tty1.service
 		check "getty@tty1 disabled" sh -c '! systemctl is-enabled getty@tty1.service'
 		check "kmscon drop-in parses" systemd-analyze verify --man=no kmsconvt@tty1.service
 		check "profile.d hook parses" sh -n /etc/profile.d/tetronos-session.sh
-		check "profile.d hook is a conffile" sh -c "dpkg-query -W -f '\${Conffiles}' tetronos-live-config | grep -q tetronos-session.sh"
+		check "profile.d hook is a conffile" sh -c "dpkg-query -W -f '\${Conffiles}' tetronos-console | grep -q tetronos-session.sh"
 	}
 done < /debs/tests.list
 
@@ -106,7 +106,7 @@ for name in $(for n in $installed; do echo $n; done | tac); do
 		check "sources file gone after purge" sh -c '! test -e /etc/apt/sources.list.d/tetronos.sources'
 		check "keyring gone after purge" sh -c '! test -e /usr/share/keyrings/tetronos-archive-keyring.gpg'
 	}
-	[ "$name" = tetronos-live-config ] && {
+	[ "$name" = tetronos-console ] && {
 		check "getty@tty1 enabled again" systemctl is-enabled getty@tty1.service
 		check "kmsconvt@tty1 not enabled" sh -c '! systemctl is-enabled kmsconvt@tty1.service'
 	}

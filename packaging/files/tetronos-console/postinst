@@ -1,5 +1,5 @@
 #!/bin/sh
-# kmscon replaces the kernel getty on tty1. getty@tty1 stays installed: it
+# kmscon replaces the kernel getty on tty1, live medium and installed system alike. getty@tty1 stays installed: it
 # is kmsconvt's OnFailure fallback.
 set -e
 if [ "$1" = configure ]; then
