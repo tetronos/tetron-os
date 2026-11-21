@@ -143,12 +143,16 @@ cmd_off_inner() {
 	# shellcheck disable=SC1090
 	. "$STATE"
 	rm -f "$DROPIN"
-	if [ "$was_active" = 1 ]; then systemctl reload ssh.service 2>/dev/null || true
+	# At boot (CLEANUP=1) this runs Before=ssh.service: ssh has not started and nobody is logged in, so no systemctl or
+	# loginctl call is made. A systemctl stop or reload of ssh.service here waits for ssh.service's own start job, which
+	# waits for this unit: a deadlock that kept the boot from ever finishing (stick-diag 2026-11-21).
+	if [ "${CLEANUP:-0}" = 1 ]; then :
+	elif [ "$was_active" = 1 ]; then systemctl reload ssh.service 2>/dev/null || true
 	else systemctl stop ssh.service 2>/dev/null || true; fi
 	if [ -n "$user" ]; then
 		if [ "$created" = 1 ]; then
 			# Our own throwaway account: end everything it runs, then remove it.
-			loginctl terminate-user "$user" 2>/dev/null || true
+			[ "${CLEANUP:-0}" = 1 ] || loginctl terminate-user "$user" 2>/dev/null || true
 			pkill -KILL -u "$user" 2>/dev/null || true
 			userdel -f "$user" 2>/dev/null && say "The account $user is removed; its home folder /home/$user is kept."
 		else
@@ -174,6 +178,6 @@ case "${1:-}" in
 	on) shift; cmd_on "$@" ;;
 	off) shift; cmd_off "$@" ;;
 	status) shift; cmd_status "$@" ;;
-	cleanup) need_root cleanup; QUIET=1 cmd_off_inner ;;
+	cleanup) need_root cleanup; CLEANUP=1 QUIET=1 cmd_off_inner ;;
 	*) echo "usage: tetronos-ssh-temp on|off|status [--json]|cleanup" >&2; exit 2 ;;
 esac
