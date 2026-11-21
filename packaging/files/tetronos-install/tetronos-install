@@ -13,7 +13,7 @@ MNT=/run/tetronos-install-mnt
 LOOP=
 
 die() { echo "tetronos-install: $*" >&2; exit 1; }
-say() { echo "== $*"; }
+say() { echo "== $(date +%H:%M:%S) $*"; }
 
 usage() { sed -n 2,7p "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
@@ -224,6 +224,16 @@ step_identity_and_services() {
 	fi
 }
 
+# The work systemd runs on the first boot after /usr changed (ConditionNeedsUpdate=/etc): done here once,
+# then stamped, so the first boot of the installed system does not spend minutes on it (126 s ldconfig and
+# 32 s journal catalog on a slow disk, P1 2026-11-20).
+step_first_boot_updates() {
+	say "first boot updates"
+	chr ldconfig
+	chr journalctl --update-catalog >/dev/null 2>&1 || true
+	if [ -x "$MNT/usr/lib/systemd/systemd-update-done" ]; then chr /usr/lib/systemd/systemd-update-done || true; fi
+}
+
 step_fetch() {
 	[ -n "$FETCH" ] || return 0
 	say "fetch deps into target (prototype)"
@@ -308,6 +318,7 @@ step_user
 step_fetch
 step_live_leftovers
 step_identity_and_services
+step_first_boot_updates
 step_boot
 sync
 say "done: $USER_@$HOSTNAME_ installed on ${IMG:-$DISK}"

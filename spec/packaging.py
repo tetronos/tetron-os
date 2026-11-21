@@ -293,26 +293,40 @@ class LocalPackagesBuiltHere(Requirement):
     here. Its copyright file states that it is TetronOS configuration."""
 
 
+class TetronosConsole(Requirement):
+    """tetronos-console puts the kmscon console on tty1 and starts tetron-wm
+    at login. It is part of every edition, live medium and installed system
+    alike: tetronos-core Depends on it (with fonts-dejavu-core), and it
+    Depends on kmscon (>= 10), fonts-dejavu-core and tetron-wm. It ships a
+    kmsconvt@.service drop-in (10-tetronos-console.conf) that runs kmscon on
+    the console with DejaVu Sans Mono 14, us keyboard, mouse on (the mouse
+    tetron-wm uses comes from kmscon; a plain tty has none) and agetty with
+    TERM xterm-256color; /usr/bin/tetron-session, which attaches to a running
+    tetron-wm session (tetron-wm attach -d) or starts one, and falls back to a
+    login shell when tetron-wm is missing; /etc/profile.d/tetronos-session.sh,
+    which runs tetron-session only in a login shell under kmscon or on tty1,
+    never over ssh, never inside tetron-wm. Its postinst enables
+    kmsconvt@tty1 and disables getty@tty1; removing the package reverts both.
+    The installer keeps this package, so the first login of an installed
+    system lands in the desktop (found on the P1 2026-11-20: the console and
+    session script were in tetronos-live-config, which the installer purges,
+    so the installed system had a plain getty and no desktop or mouse)."""
+
+
 class TetronosLiveConfig(Requirement):
     """tetronos-live-config turns the live medium into a console that boots
     to tetron-wm. It is installed only in the ISO, never by tetronos-core
-    or tetronos-suite. It Depends on tetronos-core, live-boot, live-config,
-    live-config-systemd, user-setup (live-config creates the live user only
-    with it, and the image installs no Recommends), sudo and
-    fonts-dejavu-core, and ships:
-    a kmsconvt@tty1 drop-in in /usr/lib/systemd/system that runs kmscon
-    on tty1 with DejaVu Sans Mono 14, us keyboard, mouse on, and agetty
-    autologin of the live user tetronos with TERM xterm-256color; /usr/bin/tetron-session,
-    which attaches to a running tetron-wm session (tetron-wm attach -d) or
-    starts one, and falls back to a login shell when tetron-wm is missing;
-    /etc/profile.d/tetronos-session.sh, which runs tetron-session only in a
-    login shell under kmscon or on tty1, never over ssh, never inside
-    tetron-wm. Its postinst enables kmsconvt@tty1 and disables getty@tty1;
-    removing the package reverts both. The live user tetronos and its
-    passwordless sudo come from live-config (username=tetronos on the
-    kernel command line). The user is not named tetron: that name is the
-    tetron daemon's system group, and adduser can not create a user whose
-    own group already exists. The serial console shows a login prompt (no autologin)."""
+    or tetronos-suite. It Depends on tetronos-core, tetronos-console,
+    live-boot, live-config, live-config-systemd, user-setup (live-config
+    creates the live user only with it, and the image installs no
+    Recommends) and sudo, and ships the kmsconvt@tty1 drop-in in
+    /usr/lib/systemd/system that adds agetty autologin of the live user
+    tetronos on top of the console of tetronos-console, tetronos-live-leave and
+    the live ssh password units. The live user tetronos and its passwordless
+    sudo come from live-config (username=tetronos on the kernel command
+    line). The user is not named tetron: that name is the tetron daemon's
+    system group, and adduser can not create a user whose own group already
+    exists. The serial console shows a login prompt (no autologin)."""
 
 
 class TetronosServerMeta(Requirement):

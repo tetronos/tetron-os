@@ -1,5 +1,5 @@
 #!/bin/sh
-# Give tty1 back to the kernel getty.
+# Give tty1 back to the kernel getty when the console package is removed.
 set -e
 if [ "$1" = remove ] || [ "$1" = purge ]; then
 	systemctl disable kmsconvt@tty1.service 2>/dev/null || true
