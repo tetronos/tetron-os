@@ -1,17 +1,20 @@
 [Unit]
 Description=TetronOS installer (full screen) on tty1
-Documentation=man:tetronos-install(8)
 # Only when the boot menu entry "Install TetronOS" added tetronos.install to the kernel line.
 ConditionKernelCommandLine=tetronos.install
 After=systemd-user-sessions.service
-Conflicts=kmsconvt@tty1.service getty@tty1.service
+# No Conflicts= here: systemd applies it while building the transaction, before the condition above
+# is checked, so it removed the tty1 login of every normal boot. The login units skip themselves
+# while /run/tetronos-install-active exists (drop-ins below); Before= makes this unit run first.
 Before=kmsconvt@tty1.service getty@tty1.service
 
 [Service]
 Type=idle
 Environment=TERM=linux
+ExecStartPre=/bin/touch /run/tetronos-install-active
 ExecStart=/usr/sbin/tetronos-install-tui
 # q on the Done screen leaves a login console
+ExecStopPost=-/bin/rm -f /run/tetronos-install-active
 ExecStopPost=-/usr/bin/systemctl --no-block start kmsconvt@tty1.service
 StandardInput=tty-force
 StandardOutput=tty
