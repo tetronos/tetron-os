@@ -7,6 +7,7 @@ Before=ssh.service
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/tetronos-ssh-temp cleanup
+TimeoutStartSec=30
 
 [Install]
 WantedBy=multi-user.target

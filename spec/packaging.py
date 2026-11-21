@@ -77,6 +77,12 @@ class TetronosBaseConfig(Requirement):
     /etc/systemd/system/default.target): there is no display manager, the
     desktop starts after the kmscon login on tty1 (USER 2026-11-21); its
     postrm removes the symlink again when it still points there.
+    tetronos-ssh-temp cleanup (run at boot by
+    tetronos-ssh-temp-cleanup.service, Before=ssh.service) makes no systemctl
+    or loginctl call: stopping or reloading ssh.service there waits for
+    ssh.service's own start job, which waits for the cleanup, and the boot
+    never finished (deadlock found 2026-11-21). The unit also has
+    TimeoutStartSec=30.
     tetronos-core Depends on it."""
 
 
