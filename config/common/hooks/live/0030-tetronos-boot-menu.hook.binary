@@ -39,3 +39,37 @@ if [ -f isolinux/live.cfg ]; then
 		{ print }' isolinux/live.cfg >isolinux/live.cfg.new
 	mv isolinux/live.cfg.new isolinux/live.cfg
 fi
+
+# Entry "TetronOS live (persistence)" right after the live entry: the same kernel line plus persistence, so live-boot
+# keeps changes on a partition labelled persistence (persistence.conf with "/ union"), for a live USB stick that
+# remembers (USER 2026-11-21).
+if [ -f boot/grub/grub.cfg ]; then
+	awk '
+		/^menuentry "TetronOS live \(amd64\)"/ { cp = 1 }
+		cp { buf = buf $0 "\n" }
+		{ print }
+		cp && /^}/ {
+			cp = 0
+			gsub(/TetronOS live \(amd64\)/, "TetronOS live (persistence)", buf)
+			sub(/--hotkey=l/, "--hotkey=p", buf)
+			sub(/findiso=\$\{iso_path\}/, "& persistence", buf)
+			printf "%s", buf
+			buf = ""
+		}' boot/grub/grub.cfg >boot/grub/grub.cfg.new
+	mv boot/grub/grub.cfg.new boot/grub/grub.cfg
+fi
+if [ -f isolinux/live.cfg ]; then
+	awk '
+		/^label live-amd64$/ { cp = 1 }
+		cp && /^$/ {
+			cp = 0
+			sub(/label live-amd64/, "label live-persistence-amd64", buf)
+			sub(/TetronOS live \(amd64\)/, "TetronOS live (persistence)", buf)
+			sub(/\tmenu default\n/, "", buf)
+			sub(/\n$/, " persistence\n", buf)
+			print ""; printf "%s", buf
+		}
+		cp { buf = buf $0 "\n" }
+		{ print }' isolinux/live.cfg >isolinux/live.cfg.new
+	mv isolinux/live.cfg.new isolinux/live.cfg
+fi
