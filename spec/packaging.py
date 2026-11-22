@@ -83,6 +83,11 @@ class TetronosBaseConfig(Requirement):
     ssh.service's own start job, which waits for the cleanup, and the boot
     never finished (deadlock found 2026-11-21). The unit also has
     TimeoutStartSec=30.
+    It ships /etc/apt/apt.conf.d/90tetronos-lean: Dir::Cache::pkgcache and
+    srcpkgcache empty (no 49 MB cache file rewritten after every apt update)
+    and Acquire::Languages none (no 35 MB translation index), because a
+    USB stick writes 0.4 MB/s and apt install sat minutes in the cache
+    rebuild (P1, 2026-11-21).
     tetronos-core Depends on it."""
 
 

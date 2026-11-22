@@ -64,6 +64,7 @@ while IFS='|' read -r name version smoke; do
 		check "default target is multi-user" sh -c '[ "$(readlink /etc/systemd/system/default.target)" = /usr/lib/systemd/system/multi-user.target ]'
 		check "ssh-temp cleanup at boot calls no systemctl and clears the state" sh -c 'd=$(mktemp -d); printf "#!/bin/sh\necho \"\$@\" >> $d/calls\n" > $d/systemctl; cp $d/systemctl $d/loginctl; chmod +x $d/systemctl $d/loginctl; mkdir -p /var/lib/tetronos/ssh-temp; printf "user=nosuchtest\ncreated=0\noldhash=\nwas_active=1\nwas_enabled=1\n" > /var/lib/tetronos/ssh-temp/state; PATH=$d:$PATH tetronos-ssh-temp cleanup; [ ! -e $d/calls ] && [ ! -e /var/lib/tetronos/ssh-temp/state ]'
 		check "ssh-temp cleanup unit has a start timeout" grep -q '^TimeoutStartSec=30' /usr/lib/systemd/system/tetronos-ssh-temp-cleanup.service
+		check "apt lean config installed" sh -c 'grep -q "^Dir::Cache::pkgcache \"\";" /etc/apt/apt.conf.d/90tetronos-lean && grep -q "^Acquire::Languages \"none\";" /etc/apt/apt.conf.d/90tetronos-lean'
 		check "ssh-temp usage on a bad command" sh -c 'tetronos-ssh-temp bogus 2>&1 | grep -q usage'
 	}
 	[ "$name" = tetronos-live-config ] && {
