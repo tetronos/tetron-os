@@ -1,0 +1,6 @@
+// TetronOS: fewer bytes written by apt (slow flash media: 0.4 MB/s measured on a USB stick, 2026-11-21).
+// No cache files: apt builds its package cache in memory (a second) instead of rewriting a 49 MB pkgcache.bin after every update.
+Dir::Cache::pkgcache "";
+Dir::Cache::srcpkgcache "";
+// No translation indexes: the English descriptions are in the Packages files (saves a 35 MB download and write).
+Acquire::Languages "none";
