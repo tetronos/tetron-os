@@ -387,7 +387,10 @@ class DebianArchiveAreas(Requirement):
     is in an image unless a manifest package Depends on it. This departs
     from Debian's default, which enables non-free-firmware but not non-free.
     A system installed before this keeps its own apt sources; nothing
-    rewrites them."""
+    rewrites them. The image has no deb-src lines (live-build
+    --apt-source-archives false in auto/config; scripts/build.sh fails the
+    build if one is there): apt update fetched 100 MB of Sources indexes and
+    built a 49 MB source cache, minutes on a slow USB stick (P1, 2026-11-21)."""
 
 
 class TetronosFirmwareMetas(Requirement):
