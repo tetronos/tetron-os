@@ -23,7 +23,7 @@ lb config noauto \
 	--binary-images iso-hybrid --bootloaders "grub-efi,syslinux" \
 	--debian-installer none --firmware-chroot false --memtest none --backports true \
 	--debootstrap-options "--variant=minbase" \
-	--apt-indices false --apt-recommends false \
+	--apt-indices false --apt-recommends false --apt-source-archives false \
 	--iso-application TetronOS --iso-volume "TETRONOS" --iso-publisher TetronOS \
 	--bootappend-live "$APPEND" \
 	--chroot-squashfs-compression-type xz \

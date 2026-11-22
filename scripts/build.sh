@@ -70,6 +70,9 @@ export EDITION FIRMWARE
 lb clean
 lb config
 lb build
+# No deb-src lines in the image (live-build adds them by default): apt update would fetch 100 MB of Sources indexes and
+# build a 49 MB source cache on every machine, and a slow stick makes that minutes (found on the P1, 2026-11-21).
+! grep -q '^deb-src' chroot/etc/apt/sources.list || { echo "deb-src lines in the image sources.list" >&2; exit 1; }
 kill $HTTP_PID 2>/dev/null || true
 python3 "$SRC/scripts/no_gui_check.py" binary/live/filesystem.packages "$SRC/config/gui-allowlist.txt"
 mkdir -p "$OUTDIR"
