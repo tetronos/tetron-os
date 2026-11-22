@@ -5,6 +5,11 @@
 command -v tetron-wm >/dev/null 2>&1 || exec "${SHELL:-/bin/sh}" -l
 export TETRON_WM_ACTIVE=1
 if tetron-wm ls 2>/dev/null | grep -qE ' (attached|detached) '; then
-	exec tetron-wm attach -d
+	tetron-wm attach -d
+else
+	tetron-wm
 fi
-exec tetron-wm
+# Quit (or a crash) leaves the desktop for a login shell on the console, so ~/.bashrc and the rest can be edited and a
+# crashing desktop is not a login loop (USER 2026-11-21: "can not change the .bashrc even with a Quit"). TETRON_WM_ACTIVE
+# stays set, so the login shell does not start the desktop again. Exiting that shell logs out; the next login starts the desktop.
+exec "${SHELL:-/bin/sh}" -l

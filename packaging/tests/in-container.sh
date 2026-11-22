@@ -88,6 +88,7 @@ while IFS='|' read -r name version smoke; do
 		check "getty@tty1 disabled" sh -c '! systemctl is-enabled getty@tty1.service'
 		check "kmscon drop-in parses" systemd-analyze verify --man=no kmsconvt@tty1.service
 		check "profile.d hook parses" sh -n /etc/profile.d/tetronos-session.sh
+		check "tetron-session falls back to a shell when tetron-wm ends" sh -c 'd=$(mktemp -d); printf "#!/bin/sh\nexit 0\n" > $d/tetron-wm; printf "#!/bin/sh\necho SHELLRAN\n" > $d/fakesh; chmod +x $d/tetron-wm $d/fakesh; PATH=$d:$PATH SHELL=$d/fakesh /usr/bin/tetron-session | grep -q SHELLRAN'
 		check "profile.d hook is a conffile" sh -c "dpkg-query -W -f '\${Conffiles}' tetronos-console | grep -q tetronos-session.sh"
 	}
 done < /debs/tests.list
