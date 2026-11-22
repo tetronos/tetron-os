@@ -380,7 +380,7 @@ mode = "0644"
 name = "tetronos-console"
 kind = "local"
 version = "0.15.0"
-revision = "1"
+revision = "2"
 arch = "all"
 section = "admin"
 description = "TetronOS console: kmscon on tty1 that starts tetron-wm at login"
@@ -415,7 +415,7 @@ postrm = "files/tetronos-console/postrm"
 name = "tetronos-core"
 kind = "meta"
 version = "0.15.0"
-revision = "14"
+revision = "15"
 arch = "all"
 section = "metapackages"
 description = "TetronOS base package set of every edition"
@@ -434,7 +434,7 @@ depends = ["tetron (>= 0.15.3)", "tetron-tui (>= 0.15)", "tetron-wm (>= 0.15)",
            "tetronos-nerd-font-symbols (>= 0.15.0-1)", "tetronos-nerd-font-symbols (<< 0.16)", "network-manager", "curl", "iputils-ping",
            "kmscon (>= 10)", "libpam-systemd", "dbus-user-session",
            "tetronos-install (>= 0.15.0-9)", "tetronos-install (<< 0.16)",
-           "tetronos-console (>= 0.15.0-1)", "tetronos-console (<< 0.16)", "fonts-dejavu-core"]
+           "tetronos-console (>= 0.15.0-2)", "tetronos-console (<< 0.16)", "fonts-dejavu-core"]
 
 [[package]]
 name = "tetronos-firmware-wifi"

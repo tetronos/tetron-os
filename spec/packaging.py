@@ -318,7 +318,9 @@ class TetronosConsole(Requirement):
     tetron-wm uses comes from kmscon; a plain tty has none) and agetty with
     TERM xterm-256color; /usr/bin/tetron-session, which attaches to a running
     tetron-wm session (tetron-wm attach -d) or starts one, and falls back to a
-    login shell when tetron-wm is missing; /etc/profile.d/tetronos-session.sh,
+    login shell when tetron-wm is missing or when tetron-wm ends (Quit or a
+    crash: a shell on the console to edit ~/.bashrc, no login loop; exiting
+    it logs out, USER 2026-11-21); /etc/profile.d/tetronos-session.sh,
     which runs tetron-session only in a login shell under kmscon or on tty1,
     never over ssh, never inside tetron-wm. Its postinst enables
     kmsconvt@tty1 and disables getty@tty1; removing the package reverts both.
