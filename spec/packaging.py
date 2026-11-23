@@ -484,4 +484,10 @@ class TetronosInstallPackage(Requirement):
     Conflicts= (systemd applies that before the condition is checked and
     removed the tty1 login of every normal boot, seen on the P1 2026-11-20):
     it creates /run/tetronos-install-active while it runs, and drop-ins for
-    kmsconvt@.service and getty@.service skip on that file."""
+    kmsconvt@.service and getty@.service skip on that file.
+    The installed grub menu is white on black (USER 2026-11-22: the blue is
+    terrible): the installer writes /etc/grub.d/06_tetronos_colors (color_normal,
+    color_highlight, menu_color_normal and menu_color_highlight, white/black and
+    black/white), so the plain menu never shows grub's or Debian's blue when the
+    logo theme is absent or does not draw; the installed theme.txt also sets
+    desktop-color #000000. The static grub.cfg fallback sets the same colors."""

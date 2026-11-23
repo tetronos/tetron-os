@@ -56,6 +56,10 @@ while IFS='|' read -r name version smoke; do
 			check "/etc/$f.debian kept" test -e /etc/$f.debian
 		done
 	}
+	[ "$name" = tetronos-install ] && {
+		check "installer grub menu is white on black, not blue" sh -c 'grep -q "menu_color_normal=white/black" /usr/sbin/tetronos-install && grep -q "menu_color_highlight=black/white" /usr/sbin/tetronos-install && ! grep -qi "blue" /usr/sbin/tetronos-install'
+		check "installer logo theme has a black desktop colour" grep -q 'desktop-color: "#000000"' /usr/sbin/tetronos-install
+	}
 	[ "$name" = tetronos-base-config ] && {
 		for d in Desktop Documents Downloads Pictures code; do check "/etc/skel/$d created" test -d /etc/skel/$d; done
 		check "ping sysctl drop-in installed" grep -q '^net.ipv4.ping_group_range = 0 2147483647$' /usr/lib/sysctl.d/50-tetronos-ping.conf
