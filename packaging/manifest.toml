@@ -308,46 +308,15 @@ mode = "0755"
 
 [[package]]
 name = "tetronos-install"
-kind = "local"
-version = "0.15.0"
-revision = "10"
+kind = "deb"
+version = "0.15.1"
+revision = "1"
 arch = "amd64"
-section = "admin"
-description = "TetronOS installer: copies the live system to a disk"
-long_description = """
-Installs the running live system to a disk or an image file: GPT with
-bios_boot, ESP, /boot and root (ext4), the user, GRUB for BIOS and UEFI.
-Needs no network. Includes the full screen front end (tetronos-install-tui, static musl).
-Stopgap copies from ~/code/tetronos-install (make install-tui) until that repository
-publishes release debs (then a kind = "deb" entry).
-"""
-depends = ["grub2-common", "grub-pc-bin", "grub-efi-amd64-bin", "e2fsprogs", "dosfstools",
-           "rsync", "zstd", "util-linux", "fdisk", "openssl", "initramfs-tools"]
+smoke = "tetronos-install-tui --version"
 
-[[package.files]]
-src = "files/tetronos-install/tetronos-install"
-dst = "usr/sbin/tetronos-install"
-mode = "0755"
-
-[[package.files]]
-src = "files/tetronos-install/tetronos-install-tui"
-dst = "usr/sbin/tetronos-install-tui"
-mode = "0755"
-
-[[package.files]]
-src = "files/tetronos-install/tetronos-install-tui.service"
-dst = "usr/lib/systemd/system/tetronos-install-tui.service"
-mode = "0644"
-
-[[package.files]]
-src = "files/tetronos-install/tetronos-install-login-skip.conf"
-dst = "usr/lib/systemd/system/kmsconvt@.service.d/tetronos-install-skip.conf"
-mode = "0644"
-
-[[package.files]]
-src = "files/tetronos-install/tetronos-install-login-skip.conf"
-dst = "usr/lib/systemd/system/getty@.service.d/tetronos-install-skip.conf"
-mode = "0644"
+[package.source]
+url = "https://github.com/tetronos/tetronos-install/releases/download/v0.15.1/tetronos-install_0.15.1-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetronos-install/releases/download/v0.15.1/tetronos-install_0.15.1-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetronos-apt-source"
