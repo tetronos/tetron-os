@@ -76,6 +76,8 @@ def main() -> int:
         print(f"kept {k}")
     bad = 0
     for (org, repo), new in cache.items():
+        if repo not in pinned:
+            continue  # every package of it was kept (listed above)
         old = ", ".join(sorted(pinned[repo]))
         mark = "ok  " if old == new else "DIFF"
         bad += old != new
