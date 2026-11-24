@@ -40,20 +40,21 @@ if [ -f isolinux/live.cfg ]; then
 	mv isolinux/live.cfg.new isolinux/live.cfg
 fi
 
-# Entry "TetronOS live (persistence)" right after the live entry: the same kernel line plus persistence, so live-boot
-# keeps changes on a partition labelled persistence (persistence.conf with "/ union"), for a live USB stick that
-# remembers (USER 2026-11-21).
+# Entry "TetronOS live (persistence)" BEFORE the live entry and the default: the same kernel line plus persistence, so
+# live-boot keeps changes on a partition labelled persistence (persistence.conf with "/ union"). A user who just lets
+# the menu time out gets persistence (USER 2026-11-24); plain live stays one entry down (grub hotkey l, syslinux).
 if [ -f boot/grub/grub.cfg ]; then
 	awk '
 		/^menuentry "TetronOS live \(amd64\)"/ { cp = 1 }
 		cp { buf = buf $0 "\n" }
-		{ print }
+		!cp { print }
 		cp && /^}/ {
 			cp = 0
+			orig = buf
 			gsub(/TetronOS live \(amd64\)/, "TetronOS live (persistence)", buf)
 			sub(/--hotkey=l/, "--hotkey=p", buf)
 			sub(/findiso=\$\{iso_path\}/, "& persistence", buf)
-			printf "%s", buf
+			printf "%s%s", buf, orig
 			buf = ""
 		}' boot/grub/grub.cfg >boot/grub/grub.cfg.new
 	mv boot/grub/grub.cfg.new boot/grub/grub.cfg
@@ -63,13 +64,15 @@ if [ -f isolinux/live.cfg ]; then
 		/^label live-amd64$/ { cp = 1 }
 		cp && /^$/ {
 			cp = 0
-			sub(/label live-amd64/, "label live-persistence-amd64", buf)
-			sub(/TetronOS live \(amd64\)/, "TetronOS live (persistence)", buf)
+			pers = buf
+			sub(/label live-amd64/, "label live-persistence-amd64", pers)
+			sub(/TetronOS live \(amd64\)/, "TetronOS live (persistence)", pers)
+			sub(/\n$/, " persistence\n", pers)
 			sub(/\tmenu default\n/, "", buf)
-			sub(/\n$/, " persistence\n", buf)
-			print ""; printf "%s", buf
+			printf "%s\n%s", pers, buf
+			buf = ""
 		}
 		cp { buf = buf $0 "\n" }
-		{ print }' isolinux/live.cfg >isolinux/live.cfg.new
+		!cp { print }' isolinux/live.cfg >isolinux/live.cfg.new
 	mv isolinux/live.cfg.new isolinux/live.cfg
 fi

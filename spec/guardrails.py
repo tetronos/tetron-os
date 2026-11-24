@@ -106,7 +106,9 @@ class BrandedBoot(Requirement):
     (persistence)" (grub hotkey p, syslinux) is the live kernel line plus
     persistence: live-boot keeps changes on a partition labelled persistence
     that holds a persistence.conf with "/ union" (USER 2026-11-21, a live USB
-    stick that remembers; the same hook adds it). Greeting
+    stick that remembers; the same hook adds it). It is the first entry and
+    the default, above plain TetronOS live, so a user who lets the menu time
+    out gets persistence (USER 2026-11-24). Greeting
     text in /etc/issue (also the kmscon login banner, agetty prints it),
     /etc/issue.net and /etc/motd comes from tetronos-branding.
     Required before the release candidate (M8)."""
