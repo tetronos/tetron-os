@@ -24,49 +24,49 @@ maintainer = "TetronOS <noreply@tetron.invalid>"
 [[package]]
 name = "tetron"
 kind = "deb"
-version = "0.15.4"
+version = "0.15.7"
 revision = "1"
 arch = "amd64"
 smoke = "tetron --version"
 
 [package.source]
-url = "https://github.com/tetronos/tetron/releases/download/v0.15.4/tetron_0.15.4-1_amd64.deb"
-sha256_url = "https://github.com/tetronos/tetron/releases/download/v0.15.4/tetron_0.15.4-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron/releases/download/v0.15.7/tetron_0.15.7-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron/releases/download/v0.15.7/tetron_0.15.7-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-tui"
 kind = "deb"
-version = "0.15.2"
+version = "0.15.3"
 revision = "1"
 arch = "amd64"
 smoke = "tetron-tui --version"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-tui/releases/download/v0.15.2/tetron-tui_0.15.2-1_amd64.deb"
-sha256_url = "https://github.com/tetronos/tetron-tui/releases/download/v0.15.2/tetron-tui_0.15.2-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-tui/releases/download/v0.15.3/tetron-tui_0.15.3-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-tui/releases/download/v0.15.3/tetron-tui_0.15.3-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-wm"
 kind = "deb"
-version = "0.15.20"
+version = "0.15.24"
 revision = "1"
 arch = "amd64"
 smoke = "tetron-wm --version"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.20/tetron-wm_0.15.20-1_amd64.deb"
-sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.20/tetron-wm_0.15.20-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.24/tetron-wm_0.15.24-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.24/tetron-wm_0.15.24-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-wm-desktop"
 kind = "deb"
-version = "0.15.20"
+version = "0.15.24"
 revision = "1"
 arch = "all"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.20/tetron-wm-desktop_0.15.20-1_all.deb"
-sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.20/tetron-wm-desktop_0.15.20-1_all.deb.sha256"
+url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.24/tetron-wm-desktop_0.15.24-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-wm/releases/download/v0.15.24/tetron-wm-desktop_0.15.24-1_all.deb.sha256"
 
 [[package]]
 name = "tetron-wm-essentials"
@@ -116,25 +116,25 @@ sha256_url = "https://github.com/tetronos/tetron-appstore/releases/download/v0.1
 [[package]]
 name = "tetron-catalog-data"
 kind = "deb"
-version = "2026.11.19.1"
+version = "2026.11.24.1"
 revision = "1"
 arch = "all"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-appstore/releases/download/catalog-2026.11.19.1/tetron-catalog-data_2026.11.19.1-1_all.deb"
-sha256_url = "https://github.com/tetronos/tetron-appstore/releases/download/catalog-2026.11.19.1/tetron-catalog-data_2026.11.19.1-1_all.deb.sha256"
+url = "https://github.com/tetronos/tetron-appstore/releases/download/catalog-2026.11.24.1/tetron-catalog-data_2026.11.24.1-1_all.deb"
+sha256_url = "https://github.com/tetronos/tetron-appstore/releases/download/catalog-2026.11.24.1/tetron-catalog-data_2026.11.24.1-1_all.deb.sha256"
 
 [[package]]
 name = "tetron-stt"
 kind = "deb"
-version = "0.15.1"
+version = "0.15.2"
 revision = "1"
 arch = "amd64"
 smoke = "tetron-stt --version"
 
 [package.source]
-url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.1/tetron-stt_0.15.1-1_amd64.deb"
-sha256_url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.1/tetron-stt_0.15.1-1_amd64.deb.sha256"
+url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.2/tetron-stt_0.15.2-1_amd64.deb"
+sha256_url = "https://github.com/tetronos/tetron-stt/releases/download/v0.15.2/tetron-stt_0.15.2-1_amd64.deb.sha256"
 
 [[package]]
 name = "tetron-aimode"
