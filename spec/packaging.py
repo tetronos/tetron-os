@@ -469,11 +469,12 @@ class KmsconTouchpadTap(Requirement):
 
 
 class TetronosInstallPackage(Requirement):
-    """The installer ships as the local deb tetronos-install
-    (/usr/sbin/tetronos-install and the static musl full screen front end
-    /usr/sbin/tetronos-install-tui, built from ~/code/tetronos-install by
-    make install-tui, arch amd64) until that
-    repository publishes release debs. It Depends on the tools it runs
+    """The installer ships as the deb tetronos-install, a release asset of
+    tetronos/tetronos-install pinned in the manifest (kind deb, arch amd64):
+    /usr/sbin/tetronos-install and the static musl full screen front end
+    /usr/sbin/tetronos-install-tui. Since v0.15.7 tetron-os builds nothing of it
+    (the release CI has no sibling checkout; an edit made only in a synced copy
+    here was lost, 2026-11-24). It Depends on the tools it runs
     (grub2-common, grub-pc-bin, grub-efi-amd64-bin, e2fsprogs, dosfstools,
     rsync, zstd, util-linux, fdisk (sfdisk), openssl, initramfs-tools), and tetronos-core
     Depends on it, so every edition image has the installer and an
