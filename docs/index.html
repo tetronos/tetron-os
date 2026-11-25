@@ -132,25 +132,29 @@
   <p class="eyebrow">Debian or NixOS. No X11. No Wayland.</p>
   <h1>A whole computer, drawn in <em>text</em>.</h1>
   <p class="lede">TetronOS boots straight into a truecolor console with a mouse and a real desktop: windows, a taskbar, an app store, a web browser and a private mesh network to reach your other machines. Two flavors, one desktop: Debian 13 made of ordinary signed packages, or NixOS declared in one flake. Small enough for old hardware and servers.</p>
-  <div class="warnbox" style="border-color:var(--accent)"><b style="color:var(--accent)">Desktop beta out.</b> The TetronOS Desktop ISO (Debian flavor) is available as a beta: a live system you boot from USB or in a VM. The <a href="#flavors">NixOS flavor</a> has a live ISO and installer you build yourself. Or install the parts on your own Debian, Ubuntu or Nix system: see <a href="#get">get it</a>.</div>
+  <div class="warnbox" style="border-color:var(--accent)"><b style="color:var(--accent)">v0.15.8 beta out.</b> TetronOS Server (the main edition) and Desktop ISOs, Debian flavor: boot them from USB or in a VM and install to disk from the boot menu. The <a href="#flavors">NixOS flavor</a> has its own ISO. Or install the parts on your own Debian, Ubuntu or Nix system: see <a href="#get">get it</a>.</div>
   <div class="pills"><span class="pill">Debian 13 trixie</span><span class="pill">NixOS 26.05</span><span class="pill">kmscon console</span><span class="pill">tetron-wm desktop</span><span class="pill">tetron mesh VPN</span><span class="pill">tetron-browser</span><span class="pill">signed apt repo</span><span class="pill">amd64</span></div>
   <figure class="shot"><img src="images/desktop.png" alt="The tetron-wm desktop of TetronOS: floating windows, a taskbar and a status tray drawn as text" loading="eager"><figcaption>the TetronOS desktop: tetron-wm on the kmscon console</figcaption></figure>
 </div></header>
 
 <section id="download"><div class="wrap">
   <p class="eyebrow">Download</p>
-  <h2>Debian flavor: Desktop beta, v0.15.2.</h2>
-  <p class="lede">A live system: it boots into the desktop from a USB stick or in a VM. Changes stay in RAM and are gone at reboot; an installer to disk comes later. Tested booting on BIOS and UEFI.</p>
-  <a class="btn" href="https://github.com/tetronos/tetron-os/releases/download/v0.15.2/tetronos-desktop-fw-20261113-amd64.iso">Download the Desktop ISO (1.6 GB)</a><a class="btn ghost" href="https://github.com/tetronos/tetron-os/releases/tag/v0.15.2">Release notes</a>
+  <h2>Debian flavor: Server and Desktop beta, v0.15.8.</h2>
+  <p class="lede">Server is the main edition: the console desktop, the tetron mesh, the app store and drive mounting, small enough for any machine; add apps from the store. Desktop is Server plus all firmware, sound, Bluetooth, the browser and the app collections, for a laptop that should just work. Both boot a live system from a USB stick or in a VM, and the boot menu entry "Install TetronOS" installs to a disk. Tested on BIOS and UEFI.</p>
+  <a class="btn" href="https://github.com/tetronos/tetron-os/releases/download/v0.15.8/tetronos-server-v0.15.8-amd64.iso">Download Server (490 MB)</a><a class="btn ghost" href="https://github.com/tetronos/tetron-os/releases/download/v0.15.8/tetronos-desktop-v0.15.8-amd64.iso">Desktop (1.6 GB)</a><a class="btn ghost" href="https://github.com/tetronos/tetron-os/releases/tag/v0.15.8">Release notes</a>
   <div class="two">
-    <div><h3>Check it</h3><pre>sha256sum tetronos-desktop-fw-20261113-amd64.iso
-79faa9dafa4c2e4cc755610f09030d3e
-0ce9faaa773b8a1a789876b8df76f321</pre></div>
+    <div><h3>Check it</h3><pre>sha256sum tetronos-server-v0.15.8-amd64.iso
+09d467373205b73928af389a862721dd
+e8418174771cce008a56ee2f2d915022
+
+sha256sum tetronos-desktop-v0.15.8-amd64.iso
+f396d999c5a35137ec38743c2495ab0d
+5c9904824c404c4def00be5912af5de9</pre></div>
     <div><h3>Write it to USB</h3><pre>lsblk        # find the stick, e.g. /dev/sdX
-sudo dd if=tetronos-desktop-fw-20261113-amd64.iso \
+sudo dd if=tetronos-server-v0.15.8-amd64.iso \
   of=/dev/sdX bs=4M status=progress conv=fsync</pre></div>
   </div>
-  <p class="sub">Everything on the USB stick is erased. Ventoy works too. amd64 only. The live user is <code>tetronos</code>; tetron-wm starts on tty1.</p>
+  <p class="sub">Everything on the USB stick is erased. Ventoy works too. amd64 only. The live user is <code>tetronos</code>, password <code>live</code>; tetron-wm starts on tty1. The NixOS flavor: <a href="https://github.com/tetronos/tetron-nixos/releases/tag/v0.15.8">tetron-nixos v0.15.8</a>.</p>
   <figure class="shot"><img src="images/tetronos-desktop.png" alt="The TetronOS desktop: the tetron-wm menu open, and the Tetron window listing the peers of a mesh network with how each one connects" width="1787" height="1122" loading="lazy"><figcaption>the TetronOS desktop: the menu and the Tetron window</figcaption></figure>
 </div></section>
 
@@ -191,8 +195,8 @@ sudo dd if=tetronos-desktop-fw-20261113-amd64.iso \
   <h2>Debian or NixOS. Same desktop, same mesh.</h2>
   <p class="lede">Pick the base you prefer. The console, tetron-wm, tetron, tetron-browser and the apps are the same on both; the packaging and upgrades differ.</p>
   <div class="grid">
-    <div class="win"><div class="bar"><i></i><i></i><i></i>debian</div><div class="body"><h3>Debian flavor</h3><p>Debian 13 made of signed <code>.deb</code> packages you can read, rebuild and replace. Upgraded by <code>apt upgrade</code>. Desktop beta ISO below; Server and Desktop editions.</p><p><a class="btn" href="#download">Download the Debian ISO</a></p></div></div>
-    <div class="win"><div class="bar"><i></i><i></i><i></i>nixos</div><div class="body"><h3>NixOS flavor</h3><p>NixOS 26.05 built from one flake: the whole system is a file, and every change is a generation you can roll back. Live ISO and installer work; no published release yet, build it with <code>nix build github:tetronos/tetron-nixos#iso</code>.</p><p><a class="btn" href="https://tetronos.github.io/tetron-nixos/">tetron-nixos</a><a class="btn ghost" href="https://tetronos.github.io/tetron-nixos/install.html">Install guide</a></p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>debian</div><div class="body"><h3>Debian flavor</h3><p>Debian 13 made of signed <code>.deb</code> packages you can read, rebuild and replace. Upgraded by <code>apt upgrade</code>. Server and Desktop beta ISOs below.</p><p><a class="btn" href="#download">Download the Debian ISO</a></p></div></div>
+    <div class="win"><div class="bar"><i></i><i></i><i></i>nixos</div><div class="body"><h3>NixOS flavor</h3><p>NixOS 26.05 built from one flake: the whole system is a file, and every change is a generation you can roll back. Live ISO with the installer, <a href="https://github.com/tetronos/tetron-nixos/releases/tag/v0.15.8">v0.15.8</a> (778 MB), or build it with <code>nix build github:tetronos/tetron-nixos#iso</code>.</p><p><a class="btn" href="https://github.com/tetronos/tetron-nixos/releases/download/v0.15.8/tetronos-nixos-0.15.8-x86_64-linux.iso">Download the NixOS ISO</a><a class="btn ghost" href="https://tetronos.github.io/tetron-nixos/install.html">Install guide</a></p></div></div>
   </div>
   <p class="sub">Every part of the suite also installs on any Linux with Nix (<code>nix profile install github:tetronos/tetron-nixos#tetron-tui</code>) or on NixOS through modules: see the <a href="https://tetronos.github.io/tetron-nixos/install.html">NixOS install guide</a>.</p>
 </div></section>
@@ -239,8 +243,8 @@ sudo dd if=tetronos-desktop-fw-20261113-amd64.iso \
   <p class="eyebrow">Status</p>
   <h2>Where it stands.</h2>
   <ul class="limits">
-    <li><b>Done:</b> the Debian Desktop live ISO as a public beta (v0.15.2); the NixOS flavor live ISO and installer (not yet released); Server and Desktop ISOs built from the packages, booting on BIOS and UEFI in test VMs; the signed apt repository; the suite on Debian, Ubuntu, Fedora, Arch and macOS.</li>
-    <li><b>Next:</b> an installer to disk, a signed checksum file, and a published Server ISO. The live ISO runs from USB until then.</li>
+    <li><b>Done:</b> Server and Desktop ISOs as a public beta (v0.15.8) with an installer to disk and drive mounting without sudo; the NixOS flavor ISO (v0.15.8); the signed apt repository; the suite on Debian, Ubuntu, Fedora, Arch and macOS.</li>
+    <li><b>Next:</b> a signed checksum file, dual boot in the installer, and the Files app as its own app.</li>
     <li><b>Versions:</b> the whole suite moves in step on 0.15.x; the first published ISO release brings everything to 1.0.</li>
   </ul>
 </div></section>
