@@ -351,7 +351,22 @@ class TetronosServerMeta(Requirement):
     tetronos-core (same version), openssh-server, python3 and python3-apt.
     The Server ISO keeps sshd enabled. python3 is there because users
     expect Ansible to manage a server, and Ansible needs python3 on the
-    managed node; python3-apt is what Ansible's apt module uses."""
+    managed node; python3-apt is what Ansible's apt module uses. It also
+    Depends tetronos-storage, so every edition mounts drives without sudo
+    (USER 2026-11-24: the server is the main edition, mounting belongs there)."""
+
+
+class TetronosStorage(Requirement):
+    """tetronos-storage (kind local) Depends udisks2, polkitd, exfatprogs,
+    dosfstools, ntfs-3g and e2fsprogs, and ships a polkit rule in
+    /usr/share/polkit-1/rules.d/ that lets members of users mount (also
+    system drives), unlock LUKS, eject and power off drives through udisks2,
+    on kmscon (a pts, not an active seat session) and over ssh:
+    udisksctl mount -b /dev/sdb1 works without sudo and mounts under
+    /media/<user>. Not granted: formatting and partitioning (modify-device),
+    unmounting other users or system mounts, crypttab unlock. Nothing is
+    mounted automatically (USER 2026-11-24: drive discovery with mount and
+    unmount inside the Files app, no automount)."""
 
 
 class TetronosDesktopMeta(Requirement):

@@ -1,0 +1,12 @@
+// TetronOS: members of users mount, unlock, eject and power off
+// drives through udisks2 (udisksctl, the Files app) without sudo, also on
+// kmscon (a pts, not an active seat session) and over ssh, where polkit's
+// allow_active defaults never apply. Formatting and partitioning
+// (modify-device) and unmounting other users or system mounts are not granted;
+// unmounting your own mount needs no rule.
+polkit.addRule(function (action, subject) {
+	if (/^org\.freedesktop\.udisks2\.(filesystem-mount|filesystem-mount-system|filesystem-mount-other-seat|encrypted-unlock|encrypted-unlock-system|encrypted-unlock-other-seat|eject-media|eject-media-system|eject-media-other-seat|power-off-drive|power-off-drive-system|power-off-drive-other-seat)$/.test(action.id) &&
+	    subject.isInGroup("users")) {
+		return polkit.Result.YES;
+	}
+});
