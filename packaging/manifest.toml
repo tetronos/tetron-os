@@ -452,19 +452,47 @@ depends = ["tetronos-firmware-wifi (>= 0.15.0-1)", "tetronos-firmware-wifi (<< 0
 postinst = "files/tetronos-firmware/postinst"
 
 [[package]]
+name = "tetronos-storage"
+kind = "local"
+version = "0.15.0"
+revision = "1"
+arch = "all"
+section = "admin"
+description = "TetronOS drive mounting: udisks2, filesystem tools and a polkit rule"
+long_description = """
+Installs udisks2 and the tools for the common filesystems (exFAT, FAT,
+NTFS, ext4), and a polkit rule that lets members of users mount, unmount,
+unlock, eject and power off drives without sudo, on the console (kmscon)
+and over ssh: udisksctl mount -b /dev/sdb1 mounts under /media/<user>.
+Nothing is mounted automatically. Formatting and partitioning still ask
+for an administrator.
+"""
+depends = ["udisks2", "polkitd", "exfatprogs", "dosfstools", "ntfs-3g", "e2fsprogs"]
+
+[[package.files]]
+src = "files/tetronos-storage/50-tetronos-storage.rules"
+dst = "usr/share/polkit-1/rules.d/50-tetronos-storage.rules"
+mode = "0644"
+
+[package.scripts]
+postinst = "files/tetronos-storage/postinst"
+
+[[package]]
 name = "tetronos-server"
 kind = "meta"
 version = "0.15.0"
-revision = "7"
+revision = "8"
 arch = "all"
 section = "metapackages"
 description = "TetronOS Server edition package set"
 long_description = """
 Installs tetronos-core, an SSH server, python3 with python3-apt so
 Ansible can manage the machine, and the wifi firmware and wifi stack
-(tetronos-firmware-wifi), so a laptop with only wifi can get online.
+(tetronos-firmware-wifi), so a laptop with only wifi can get online,
+and drive mounting without sudo (tetronos-storage: udisks2, udisksctl).
 """
 depends = ["tetronos-core (>= 0.15.0-6)", "tetronos-core (<< 0.16)", "tetronos-firmware-wifi (>= 0.15.0-1)", "tetronos-firmware-wifi (<< 0.16)",
+           "tetronos-storage (>= 0.15.0-1)", "tetronos-storage (<< 0.16)",
            "openssh-server", "python3", "python3-apt"]
 
 [[package]]
